@@ -17,12 +17,6 @@ module.exports = (grunt) ->
         dest: 'build/'
         options:
           basePath: 'src/'
-      taskmanager_dist:  # Distribution version for use with node/grunt
-        src: ['src/taskmanager/taskmanager.ts']
-        dest: 'distr/'
-        options:
-          basePath: 'src/taskmanager/'
-          module: 'commonjs'
     jasmine:
       taskmanager:
         src: ['build/taskmanager/taskmanager.js']
@@ -43,7 +37,6 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', [
     'typescript:taskmanager'
     'typescript:taskmanager_spec'
-    'typescript:taskmanager_dist'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
