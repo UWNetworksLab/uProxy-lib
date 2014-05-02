@@ -17,6 +17,18 @@ module.exports = (grunt) ->
         dest: 'build/'
         options:
           basePath: 'src/'
+      util:  # source code
+        src: ['src/util/arraybuffers.ts']
+        dest: 'build/'
+        options:
+          basePath: 'src/'
+          ignoreError: false
+      util_spec:  # spec test files
+        src: ['src/util/arraybuffers.spec.ts']
+        dest: 'build/'
+        options:
+          basePath: 'src/'
+          ignoreError: false
     jasmine:
       taskmanager:
         src: ['build/taskmanager/taskmanager.js']
@@ -24,6 +36,10 @@ module.exports = (grunt) ->
           specs: 'build/taskmanager/taskmanager.spec.js'
           outfile: 'build/_SpecRunner.html'
           keepRunner: true
+      util:
+        src: ['build/util/**/*.js']
+        options:
+          specs: 'build/util/**/*.spec.js'
     clean: ['build/**']
   }  # grunt.initConfig
 
@@ -37,6 +53,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'build', [
     'typescript:taskmanager'
     'typescript:taskmanager_spec'
+    'typescript:util'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
@@ -44,6 +61,7 @@ module.exports = (grunt) ->
   grunt.registerTask 'test', [
     'build'
     'jasmine:taskmanager'
+    'jasmine:util'
   ]
 
   grunt.registerTask 'default', [
