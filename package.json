@@ -1,7 +1,7 @@
 {
   "name": "uproxy-build-tools",
   "description": "Build tools initially designed for uProxy projects",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/build-tools"
