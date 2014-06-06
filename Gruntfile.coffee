@@ -54,6 +54,7 @@ module.exports = (grunt) ->
     'typescript:taskmanager'
     'typescript:taskmanager_spec'
     'typescript:util'
+    'typescript:util_spec'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
