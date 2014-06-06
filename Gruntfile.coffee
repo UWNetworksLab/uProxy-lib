@@ -12,25 +12,35 @@ module.exports = (grunt) ->
         dest: 'build/'
         options:
           basePath: 'src/'
+          ignoreError: false
+          noImplicitAny: true
+          sourceMap: true
       taskmanager_spec:  # spec test files
         src: ['src/taskmanager/taskmanager.spec.ts']
         dest: 'build/'
         options:
           basePath: 'src/'
+          ignoreError: false
+          noImplicitAny: true
+          sourceMap: true
       arraybuffers:  # source code
-        src: ['src/arraybuffers/**.ts',
-              '!src/arraybuffers/**.spec.ts',
-              '!src/arraybuffers/**.d.ts']
+        src: ['src/arraybuffers/**/*.ts',
+              '!src/arraybuffers/**/*.spec.ts',
+              '!src/arraybuffers/**/*.d.ts']
         dest: 'build/'
         options:
           basePath: 'src/'
           ignoreError: false
+          noImplicitAny: true
+          sourceMap: true
       arraybuffers_spec:  # spec test files
         src: ['src/arraybuffers/arraybuffers.spec.ts']
         dest: 'build/'
         options:
           basePath: 'src/'
           ignoreError: false
+          noImplicitAny: true
+          sourceMap: true
     jasmine:
       taskmanager:
         src: ['build/taskmanager/taskmanager.js']
