@@ -2,45 +2,59 @@ module.exports = (grunt) ->
 
   path = require 'path';
 
+  # Functions to make typescript rules based on directory layout.
+  typeScriptSrcRule = (name) ->
+    src: ['build/typescript-src/' + name + '/**/*.ts',
+          '!build/typescript-src/' + name + '/**/*.spec.ts',
+          '!build/typescript-src/' + name + '/**/*.d.ts']
+    dest: 'build/'
+    options:
+      basePath: 'build/typescript-src/'
+      ignoreError: false
+      noImplicitAny: true
+      sourceMap: true
+  typeScriptSpecRule = (name) ->
+    src: ['build/typescript-src/' + name + '/**/*.spec.ts']
+    dest: 'build/'
+    options:
+      basePath: 'build/typescript-src/'
+      ignoreError: false
+      noImplicitAny: true
+      sourceMap: true
+
   #-------------------------------------------------------------------------
   grunt.initConfig {
     pkg: grunt.file.readJSON 'package.json'
 
+    copy:
+      thirdPartyTypeScript: { files: [
+        {
+          expand: true
+          src: ['third_party/**/*.ts']
+          dest: 'build/typescript-src/'
+        }
+        {
+          expand: true, cwd: 'node_modules'
+          src: ['freedom-typescript-api/interfaces/**/*.ts']
+          dest: 'build/typescript-src'
+        }
+        ]}
+      typeScriptSrc: { files: [ {
+        expand: true, cwd: 'src/'
+        src: ['**/*.ts']
+        dest: 'build/typescript-src/' } ] }
+
+    # TODO: Write code to standardize the copy rules and the typescript
+    # compilation rules for a project based on this style of directory layout.
+    # Including watch rules. Including spec rules. Including ignoring of .d in
+    # compilation.
     typescript:
-      taskmanager:  # source code
-        src: ['src/taskmanager/taskmanager.ts']
-        dest: 'build/'
-        options:
-          basePath: 'src/'
-          ignoreError: false
-          noImplicitAny: true
-          sourceMap: true
-      taskmanager_spec:  # spec test files
-        src: ['src/taskmanager/taskmanager.spec.ts']
-        dest: 'build/'
-        options:
-          basePath: 'src/'
-          ignoreError: false
-          noImplicitAny: true
-          sourceMap: true
-      arraybuffers:  # source code
-        src: ['src/arraybuffers/**/*.ts',
-              '!src/arraybuffers/**/*.spec.ts',
-              '!src/arraybuffers/**/*.d.ts']
-        dest: 'build/'
-        options:
-          basePath: 'src/'
-          ignoreError: false
-          noImplicitAny: true
-          sourceMap: true
-      arraybuffers_spec:  # spec test files
-        src: ['src/arraybuffers/arraybuffers.spec.ts']
-        dest: 'build/'
-        options:
-          basePath: 'src/'
-          ignoreError: false
-          noImplicitAny: true
-          sourceMap: true
+      taskmanager: typeScriptSrcRule 'taskmanager'
+      taskmanager_spec: typeScriptSpecRule 'taskmanager'
+      arraybuffers: typeScriptSrcRule 'arraybuffers'
+      arraybuffers_spec: typeScriptSrcRule 'arraybuffers'
+      handler: typeScriptSrcRule 'handler'
+
     jasmine:
       taskmanager:
         src: ['build/taskmanager/taskmanager.js']
@@ -63,10 +77,13 @@ module.exports = (grunt) ->
 
   #-------------------------------------------------------------------------
   grunt.registerTask 'build', [
+    'copy:thirdPartyTypeScript'
+    'copy:typeScriptSrc'
     'typescript:taskmanager'
     'typescript:taskmanager_spec'
     'typescript:arraybuffers'
     'typescript:arraybuffers_spec'
+    'typescript:handler'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
