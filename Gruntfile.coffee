@@ -2,6 +2,14 @@ TaskManager = require './taskmanager'
 
 module.exports = (grunt) ->
 
+  FILES =
+    jasmine_helpers: [
+      # Help Jasmine's PhantomJS understand promises.
+      'node_modules/es6-promise/dist/promise-*.js'
+      '!node_modules/es6-promise/dist/promise-*amd.js'
+      '!node_modules/es6-promise/dist/promise-*.min.js'
+    ]
+
   path = require 'path';
 
   #-------------------------------------------------------------------------
@@ -17,7 +25,10 @@ module.exports = (grunt) ->
       sourceMap: true
   # Function to make jasmine spec assuming expected dir layout.
   jasmineSpec = (name) ->
-    src: ['build/' + name + '/**/*.js', '!build/' + name + '/**/*.spec.js']
+    src: FILES.jasmine_helpers.concat([
+      'build/' + name + '/**/*.js',
+      '!build/' + name + '/**/*.spec.js'
+    ])
     options:
       specs: 'build/' + name + '/**/*.spec.js'
       outfile: 'build/' + name + '/_SpecRunner.html'
@@ -55,6 +66,7 @@ module.exports = (grunt) ->
       handler: typeScriptSrcRule 'handler'
 
     jasmine:
+      handler: jasmineSpec 'handler'
       taskmanager: jasmineSpec 'taskmanager'
       arraybuffers: jasmineSpec 'arraybuffers'
 
@@ -102,6 +114,7 @@ module.exports = (grunt) ->
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
     'build'
+    'jasmine:handler'
     'jasmine:taskmanager'
     'jasmine:arraybuffers'
   ]
