@@ -1,3 +1,5 @@
+TaskManager = require './taskmanager'
+
 module.exports = (grunt) ->
 
   path = require 'path';
@@ -24,6 +26,8 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     copy:
+      # Copt all third party typescript, including node_modules,
+      # into build/typescript-src
       thirdPartyTypeScript: { files: [
         {
           expand: true
@@ -36,15 +40,18 @@ module.exports = (grunt) ->
           dest: 'build/typescript-src'
         }
         ]}
+      # Copy all typescript into the 'build/typescript-src/' dir.
       typeScriptSrc: { files: [ {
         expand: true, cwd: 'src/'
         src: ['**/*.ts']
         dest: 'build/typescript-src/' } ] }
 
-    # TODO: Write code to standardize the copy rules and the typescript
-    # compilation rules for a project based on this style of directory layout.
-    # Including watch rules. Including spec rules. Including ignoring of .d in
-    # compilation.
+      # This rule is used to
+      localTaskmanager: { files: [ {
+        expand: true, cwd: 'build/taskmanager/'
+        src: ['taskmanager.js']
+        dest: '.' } ] }
+
     typescript:
       taskmanager: typeScriptSrcRule 'taskmanager'
       arraybuffers: typeScriptSrcRule 'arraybuffers'
@@ -64,22 +71,52 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-typescript'
 
   #-------------------------------------------------------------------------
-  grunt.registerTask 'build', [
+  # Define the tasks
+  taskManager = new TaskManager.Manager();
+
+  taskManager.add 'typeScriptBase', [
     'copy:thirdPartyTypeScript'
     'copy:typeScriptSrc'
+  ]
+
+  taskManager.add 'taskmanager', [
+    'typeScriptBase'
     'typescript:taskmanager'
+  ]
+
+  taskManager.add 'arraybuffers', [
+    'typeScriptBase'
     'typescript:arraybuffers'
+  ]
+
+  taskManager.add 'handler', [
+    'typeScriptBase'
     'typescript:handler'
+  ]
+
+  taskManager.add 'build', [
+    'typeScriptBase'
+    'taskmanager'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
-  grunt.registerTask 'test', [
+  taskManager.add 'test', [
     'build'
     'jasmine:taskmanager'
     'jasmine:arraybuffers'
   ]
 
-  grunt.registerTask 'default', [
-    'test'
+  taskManager.add 'default', [
+    'build', 'test'
   ]
+
+  taskManager.add 'distr', [
+    'build', 'test', 'copy:localTaskmanager'
+  ]
+
+  #-------------------------------------------------------------------------
+  # Register the tasks
+  taskManager.list().forEach((taskName) =>
+    grunt.registerTask taskName, (taskManager.get taskName)
+  );
