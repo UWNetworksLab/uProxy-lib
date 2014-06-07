@@ -36,12 +36,7 @@ module.exports = (grunt) ->
           src: ['third_party/**/*.ts']
           dest: 'build/typescript-src/'
         }
-        {
-          expand: true, cwd: 'node_modules'
-          src: ['freedom-typescript-api/interfaces/**/*.ts']
-          dest: 'build/typescript-src'
-        }
-        ]}
+      ]}
       # Copy all typescript into the 'build/typescript-src/' dir.
       typeScriptSrc: { files: [ {
         expand: true, cwd: 'src/'
@@ -98,7 +93,9 @@ module.exports = (grunt) ->
 
   taskManager.add 'build', [
     'typeScriptBase'
+    'arraybuffers'
     'taskmanager'
+    'handler'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
