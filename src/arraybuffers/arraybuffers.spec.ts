@@ -1,5 +1,5 @@
+/// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
 /// <reference path='arraybuffers.ts' />
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
 
 module ArrayBuffers {
 

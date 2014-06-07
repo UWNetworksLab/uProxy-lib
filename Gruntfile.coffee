@@ -5,7 +5,6 @@ module.exports = (grunt) ->
   # Functions to make typescript rules based on directory layout.
   typeScriptSrcRule = (name) ->
     src: ['build/typescript-src/' + name + '/**/*.ts',
-          '!build/typescript-src/' + name + '/**/*.spec.ts',
           '!build/typescript-src/' + name + '/**/*.d.ts']
     dest: 'build/'
     options:
@@ -13,14 +12,12 @@ module.exports = (grunt) ->
       ignoreError: false
       noImplicitAny: true
       sourceMap: true
-  typeScriptSpecRule = (name) ->
-    src: ['build/typescript-src/' + name + '/**/*.spec.ts']
-    dest: 'build/'
+  jasmineSpec = (name) ->
+    src: ['build/' + name + '/**/*.js', '!build/' + name + '/**/*.spec.js']
     options:
-      basePath: 'build/typescript-src/'
-      ignoreError: false
-      noImplicitAny: true
-      sourceMap: true
+      specs: 'build/' + name + '/**/*.spec.js'
+      outfile: 'build/' + name + '/_SpecRunner.html'
+      keepRunner: true
 
   #-------------------------------------------------------------------------
   grunt.initConfig {
@@ -50,22 +47,13 @@ module.exports = (grunt) ->
     # compilation.
     typescript:
       taskmanager: typeScriptSrcRule 'taskmanager'
-      taskmanager_spec: typeScriptSpecRule 'taskmanager'
       arraybuffers: typeScriptSrcRule 'arraybuffers'
-      arraybuffers_spec: typeScriptSrcRule 'arraybuffers'
       handler: typeScriptSrcRule 'handler'
 
     jasmine:
-      taskmanager:
-        src: ['build/taskmanager/taskmanager.js']
-        options:
-          specs: 'build/taskmanager/taskmanager.spec.js'
-          outfile: 'build/_SpecRunner.html'
-          keepRunner: true
-      arraybuffers:
-        src: ['build/arraybuffers/**/*.js', '!build/arraybuffers/**/*.spec.js']
-        options:
-          specs: 'build/arraybuffers/**/*.spec.js'
+      taskmanager: jasmineSpec 'taskmanager'
+      arraybuffers: jasmineSpec 'arraybuffers'
+
     clean: ['build/**']
   }  # grunt.initConfig
 
@@ -80,9 +68,7 @@ module.exports = (grunt) ->
     'copy:thirdPartyTypeScript'
     'copy:typeScriptSrc'
     'typescript:taskmanager'
-    'typescript:taskmanager_spec'
     'typescript:arraybuffers'
-    'typescript:arraybuffers_spec'
     'typescript:handler'
   ]
 
