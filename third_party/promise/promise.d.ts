@@ -1,6 +1,9 @@
 // Based on http://www.html5rocks.com/en/tutorials/es6/promises/#toc-api
 // Promise Spec: http://promises-aplus.github.io/promises-spec/
 
+// This file is part of the uProxy project, it's in this directory for ease of
+// reference and because we plan to move it to DefinitelyTyped.
+
 /**
  * Generic Errors that may have a stack attribute (as they do in JS).
  **/
