@@ -1,20 +1,17 @@
 TaskManager = require './taskmanager'
 
-module.exports = (grunt) ->
+FILES =
+  jasmine_helpers: [
+    # Help Jasmine's PhantomJS understand promises.
+    'node_modules/es6-promise/dist/promise-*.js'
+    '!node_modules/es6-promise/dist/promise-*amd.js'
+    '!node_modules/es6-promise/dist/promise-*.min.js'
+  ]
 
-  FILES =
-    jasmine_helpers: [
-      # Help Jasmine's PhantomJS understand promises.
-      'node_modules/es6-promise/dist/promise-*.js'
-      '!node_modules/es6-promise/dist/promise-*amd.js'
-      '!node_modules/es6-promise/dist/promise-*.min.js'
-    ]
-
-  path = require 'path';
-
+Rule =
   #-------------------------------------------------------------------------
   # Function to make a typescript rule based on expected directory layout.
-  typeScriptSrcRule = (name) ->
+  typeScriptSrc: (name) ->
     src: ['build/typescript-src/' + name + '/**/*.ts',
           '!build/typescript-src/' + name + '/**/*.d.ts']
     dest: 'build/'
@@ -24,7 +21,7 @@ module.exports = (grunt) ->
       noImplicitAny: true
       sourceMap: true
   # Function to make jasmine spec assuming expected dir layout.
-  jasmineSpec = (name) ->
+  jasmineSpec: (name) ->
     src: FILES.jasmine_helpers.concat([
       'build/' + name + '/**/*.js',
       '!build/' + name + '/**/*.spec.js'
@@ -33,6 +30,10 @@ module.exports = (grunt) ->
       specs: 'build/' + name + '/**/*.spec.js'
       outfile: 'build/' + name + '/_SpecRunner.html'
       keepRunner: true
+
+module.exports = (grunt) ->
+
+  path = require 'path';
 
   #-------------------------------------------------------------------------
   grunt.initConfig {
@@ -61,14 +62,14 @@ module.exports = (grunt) ->
         dest: '.' } ] }
 
     typescript:
-      taskmanager: typeScriptSrcRule 'taskmanager'
-      arraybuffers: typeScriptSrcRule 'arraybuffers'
-      handler: typeScriptSrcRule 'handler'
+      taskmanager: Rule.typeScriptSrc 'taskmanager'
+      arraybuffers: Rule.typeScriptSrc 'arraybuffers'
+      handler: Rule.typeScriptSrc 'handler'
 
     jasmine:
-      handler: jasmineSpec 'handler'
-      taskmanager: jasmineSpec 'taskmanager'
-      arraybuffers: jasmineSpec 'arraybuffers'
+      handler: Rule.jasmineSpec 'handler'
+      taskmanager: Rule.jasmineSpec 'taskmanager'
+      arraybuffers: Rule.jasmineSpec 'arraybuffers'
 
     clean: ['build/**']
   }  # grunt.initConfig
@@ -132,3 +133,6 @@ module.exports = (grunt) ->
   taskManager.list().forEach((taskName) =>
     grunt.registerTask taskName, (taskManager.get taskName)
   );
+
+module.exports.FILES = FILES;
+module.exports.Rule = Rule;
