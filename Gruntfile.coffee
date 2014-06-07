@@ -4,7 +4,8 @@ module.exports = (grunt) ->
 
   path = require 'path';
 
-  # Functions to make typescript rules based on directory layout.
+  #-------------------------------------------------------------------------
+  # Function to make a typescript rule based on expected directory layout.
   typeScriptSrcRule = (name) ->
     src: ['build/typescript-src/' + name + '/**/*.ts',
           '!build/typescript-src/' + name + '/**/*.d.ts']
@@ -14,6 +15,7 @@ module.exports = (grunt) ->
       ignoreError: false
       noImplicitAny: true
       sourceMap: true
+  # Function to make jasmine spec assuming expected dir layout.
   jasmineSpec = (name) ->
     src: ['build/' + name + '/**/*.js', '!build/' + name + '/**/*.spec.js']
     options:
