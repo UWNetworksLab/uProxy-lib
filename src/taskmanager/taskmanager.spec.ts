@@ -1,10 +1,10 @@
-/// <reference path='../../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
-/// <reference path='taskmanager.d.ts' />
+/// <reference path='../third_party/DefinitelyTyped/jasmine/jasmine.d.ts' />
+/// <reference path='taskmanager.ts' />
 
 module TaskManager {
 
   describe("TaskManager", function() {
-    var taskManager;
+    var taskManager :Manager;
 
     it("New task manager has no tasks", function() {
       taskManager = new Manager();
