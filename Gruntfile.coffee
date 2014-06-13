@@ -65,12 +65,13 @@ module.exports = (grunt) ->
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
       handler: Rule.typeScriptSrc 'handler'
+      logger: Rule.typeScriptSrc 'logger'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-
+      logger: Rule.jasmineSpec 'logger'
     clean: ['build/**']
   }  # grunt.initConfig
 
@@ -104,11 +105,17 @@ module.exports = (grunt) ->
     'typescript:handler'
   ]
 
+  taskManager.add 'logger', [
+    'typeScriptBase'
+    'typescript:logger'
+  ]
+
   taskManager.add 'build', [
     'typeScriptBase'
     'arraybuffers'
     'taskmanager'
     'handler'
+    'logger'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
@@ -118,6 +125,7 @@ module.exports = (grunt) ->
     'jasmine:handler'
     'jasmine:taskmanager'
     'jasmine:arraybuffers'
+    'jasmine:logger'
   ]
 
   taskManager.add 'default', [
