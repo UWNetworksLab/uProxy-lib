@@ -55,6 +55,11 @@ module.exports = (grunt) ->
         src: ['**/*.ts']
         dest: 'build/typescript-src/' } ] }
 
+      freedomTypeScriptApi: { files: [ {
+        expand: true, cwd: 'node_modules/freedom-typescript-api'
+        src: ['interfaces/**/*.ts']
+        dest: 'build/typescript-src/freedom-typescript-api/' } ] }
+
       # This rule is used to
       localTaskmanager: { files: [ {
         expand: true, cwd: 'build/taskmanager/'
@@ -65,6 +70,7 @@ module.exports = (grunt) ->
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
       handler: Rule.typeScriptSrc 'handler'
+      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api-test'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -85,8 +91,10 @@ module.exports = (grunt) ->
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'typeScriptBase', [
+    'copy:freedomTypeScriptApi'
     'copy:thirdPartyTypeScript'
     'copy:typeScriptSrc'
+    'typescript:freedomTypescriptApiTest'
   ]
 
   taskManager.add 'taskmanager', [
