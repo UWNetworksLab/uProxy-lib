@@ -8,7 +8,7 @@
  * Generic Errors that may have a stack attribute (as they do in JS).
  **/
 interface Error {
-  stack?:any;  // TODO: fix `any` and
+  stack?:any;  // TODO: fix `any`.
 }
 
 /**
@@ -16,8 +16,10 @@ interface Error {
  * `rejected`.
  **/
 interface Thenable<T> {
-  then:(fulfill:(t?:T) => void,
-        reject?:(e:Error) => void) => Thenable<T>;
+  then<T2>(fulfill:(t?:T) => Thenable<T2>, reject?:(e:Error) => Thenable<T2>)
+           : Thenable<T2>;
+  then<T2>(fulfill:(t?:T) => T2, reject?:(e:Error) => T2) : Thenable<T2>;
+  then(fulfill:(t?:T) => void, reject?:(e:Error) => void) : Thenable<void>;
 }
 
 /**
@@ -48,6 +50,6 @@ declare class Promise<T> {
   // Allow casting of Promise.reject to Promise<void>.
   static reject() : Promise<void>;
 
-  static all<T>(promiseArray:Thenable<T>[]) : Promise<T>;
+  static all<T>(promiseArray:Thenable<T>[]) : Promise<T[]>;
   static race<T>(...args:Thenable<T>[]) : Promise<T>;
 }
