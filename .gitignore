@@ -4,6 +4,7 @@ node_modules/*
 *.swm
 *.swn
 *.bak
+.DS_Store
 .grunt
 tmp/*
 build/*
