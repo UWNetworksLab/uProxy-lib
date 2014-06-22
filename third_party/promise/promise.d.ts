@@ -3,6 +3,9 @@
 
 // This file is part of the uProxy project, it's in this directory for ease of
 // reference and because we plan to move it to DefinitelyTyped.
+//
+// We may want to move to using:
+// https://github.com/borisyankov/DefinitelyTyped/blob/master/es6-promises/es6-promises.d.ts
 
 /**
  * Generic Errors that may have a stack attribute (as they do in JS).
