@@ -19,7 +19,7 @@ interface Error {
 
 // Generic Thenable objects have a `then` type that can be `fulfilled` by an
 // object of type T or `rejected` with an error of type E.
-declare class Thenable<T> {
+interface Thenable<T> {
   then<T2>(fulfill:(t?:T) => Thenable<T2>,
            reject?:(e:Error) => Thenable<T2>) : Thenable<T2>;
   then<T2>(fulfill:(t?:T) => T2,
@@ -30,21 +30,30 @@ declare class Thenable<T> {
 
 // Generic typing for built-in JS Promises. T is the `fullfillment object type`
 // type and E is the error type.
-declare class Promise<T> extends Thenable<T> {
+declare class Promise<T> implements Thenable<T> {
   constructor(resolverFunction:(fulfill:(t?:T) => void,
                                 reject:(e:Error) => void) => void);
+
+  then<T2>(fulfill:(t?:T) => Promise<T2>,
+           reject?:(e:Error) => Thenable<T2>) : Promise<T2>;
+  then<T2>(fulfill:(t?:T) => T2,
+           reject?:(e:Error) => T2) : Promise<T2>;
+  then(fulfill:(t?:T) => void,
+       reject?:(e:Error) => void) : Promise<void>;
 
   catch(catchFn:(e:Error) => Promise<T>) : Promise<T>;
   catch(catchFn:(e:Error) => T) : Promise<T>;
   catch(catchFn:(e:Error) => void) : Promise<void>;
 
-  static resolve<T>(thenable:Thenable<T>) : Promise<T>;
+  static resolve<T>(p:Thenable<T>) : Promise<T>;
   static resolve<T>(t:T) : Promise<T>;
   static resolve() : Promise<void>;
 
   static reject<T>(e:Error) : Promise<T>;
   static reject() : Promise<void>;
 
-  static all<T>(promiseArray:Thenable<T>[]) : Promise<T[]>;
-  static race<T>(...args:Thenable<T>[]) : Promise<T>;
+  static all<T>(ps:Thenable<T>[]) : Promise<T[]>;
+  static all(ps:Thenable<void>[]) : Promise<void[]>;
+  static race<T>(ps:Thenable<T>[]) : Promise<T>;
+  static race(ps:Thenable<void>[]) : Promise<void>;
 }
