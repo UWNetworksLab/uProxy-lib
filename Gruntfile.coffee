@@ -61,6 +61,11 @@ module.exports = (grunt) ->
         src: ['taskmanager.js']
         dest: '.' } ] }
 
+      logger: { files: [ {
+        expand: true, cwd: 'src/logger'
+        src: ['*.json']
+        dest: 'build/logger/' } ] }
+
     typescript:
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
@@ -106,6 +111,7 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'logger', [
+    'copy:logger'
     'typeScriptBase'
     'typescript:logger'
   ]

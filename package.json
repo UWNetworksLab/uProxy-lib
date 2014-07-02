@@ -15,7 +15,8 @@
     "grunt-contrib-copy": "^0.5.0",
     "grunt-typescript": "^0.3.5",
     "freedom-typescript-api": "~0.1.9",
-    "freedom": "^0.5.0"
+    "freedom": "0.5.0",
+    "freedom-for-chrome": "0.2.0"
   },
   "scripts": {
     "test": "grunt --verbose"
