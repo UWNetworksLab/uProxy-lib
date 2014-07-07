@@ -4,10 +4,6 @@ node_modules/*
 *.swm
 *.swn
 *.bak
-*.vpj
-*.vpw
-*.vpwhistu
-*.vtg
 .grunt
 tmp/*
 build/*
