@@ -1,9 +1,8 @@
-# uProxy Build Tools
+# uproxy-lib
 
-[![Build Status](https://travis-ci.org/uProxy/build-tools.svg?branch=master)](https://travis-ci.org/uProxy/build-tools) [![devDependency Status](https://david-dm.org/uProxy/build-tools/dev-status.svg)](https://david-dm.org/uProxy/build-tools#info=devDependencies)
+[![Build Status](https://travis-ci.org/uProxy/uproxy-lib.svg?branch=master)](https://travis-ci.org/uProxy/uproxy-lib) [![devDependency Status](https://david-dm.org/uProxy/uproxy-lib/dev-status.svg)](https://david-dm.org/uProxy/uproxy-lib#info=devDependencies)
 
-
-Distributed on NPM as [uproxy-build-tools](https://www.npmjs.org/package/uproxy-build-tools).
+Distributed on NPM as [uproxy-uproxy-lib](https://www.npmjs.org/package/uproxy-uproxy-lib).
 
 This currently consists of:
 
