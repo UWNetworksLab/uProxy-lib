@@ -20,6 +20,15 @@ Rule =
       ignoreError: false
       noImplicitAny: true
       sourceMap: true
+  typeScriptSpecDecl: (name) ->
+    src: ['build/typescript-src/' + name + '/**/*.spec.ts',
+          'build/typescript-src/' + name + '/**/*.d.ts']
+    dest: 'build/'
+    options:
+      basePath: 'build/typescript-src/'
+      ignoreError: false
+      noImplicitAny: true
+      sourceMap: true
   # Function to make jasmine spec assuming expected dir layout.
   jasmineSpec: (name) ->
     src: FILES.jasmine_helpers.concat([
@@ -73,10 +82,13 @@ module.exports = (grunt) ->
 
     typescript:
       taskmanager: Rule.typeScriptSrc 'taskmanager'
+      taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
+      arraybuffersSpecDecl: Rule.typeScriptSpecDecl 'arraybuffers'
       handler: Rule.typeScriptSrc 'handler'
+      handlerSpecDecl: Rule.typeScriptSpecDecl 'handler'
+      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api_d_test'
       logger: Rule.typeScriptSrc 'logger'
-      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api-test'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -105,16 +117,19 @@ module.exports = (grunt) ->
 
   taskManager.add 'taskmanager', [
     'typeScriptBase'
+    'typescript:taskmanagerSpecDecl'
     'typescript:taskmanager'
   ]
 
   taskManager.add 'arraybuffers', [
     'typeScriptBase'
+    'typescript:arraybuffersSpecDecl'
     'typescript:arraybuffers'
   ]
 
   taskManager.add 'handler', [
     'typeScriptBase'
+    'typescript:handlerSpecDecl'
     'typescript:handler'
   ]
 
