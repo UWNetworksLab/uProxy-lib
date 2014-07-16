@@ -10,6 +10,15 @@
     },
     "jasmine/jasmine.d.ts": {
       "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+    },
+    "webcrypto/WebCrypto.d.ts": {
+      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+    },
+    "webrtc/MediaStream.d.ts": {
+      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+    },
+    "webrtc/RTCPeerConnection.d.ts": {
+      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
     }
   }
 }
