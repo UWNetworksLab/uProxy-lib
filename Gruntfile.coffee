@@ -80,6 +80,31 @@ module.exports = (grunt) ->
         src: ['*.json']
         dest: 'build/logger/' } ] }
 
+      peerconnection: { files: [ {
+        expand: true, cwd: 'src/peerconnection'
+        src: ['*.json']
+        dest: 'build/peerconnection/' } ] }
+
+      chat: {
+        files: [ {
+          expand: true, cwd: 'src/samples/chat/'
+          src: ['*.html']
+          dest: 'build/samples/chat/'
+        }, {
+          expand: true, cwd: 'build/peerconnection/'
+          src: ['**/*']
+          dest: 'build/samples/chat/peerconnection/'
+        }, {
+          expand: true, cwd: 'build/handler/'
+          src: ['**/*']
+          dest: 'build/samples/chat/handler/'
+        }, {
+          expand: true, cwd: 'third_party/webrtc-adapter/'
+          src: ['**/*']
+          dest: 'build/samples/chat/webrtc-adapter/'
+        } ]
+      }
+
     typescript:
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
@@ -89,6 +114,8 @@ module.exports = (grunt) ->
       handlerSpecDecl: Rule.typeScriptSpecDecl 'handler'
       freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api_d_test'
       logger: Rule.typeScriptSrc 'logger'
+      peerconnection: Rule.typeScriptSrc 'peerconnection'
+      chat: Rule.typeScriptSrc 'samples/chat'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -139,12 +166,26 @@ module.exports = (grunt) ->
     'typescript:logger'
   ]
 
+  taskManager.add 'peerconnection', [
+    'copy:peerconnection'
+    'typeScriptBase'
+    'typescript:peerconnection'
+  ]
+
+  taskManager.add 'chat', [
+    'copy:chat'
+    'typeScriptBase'
+    'typescript:chat'
+  ]
+
   taskManager.add 'build', [
     'typeScriptBase'
     'arraybuffers'
     'taskmanager'
     'handler'
     'logger'
+    'peerconnection',
+    'chat'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
