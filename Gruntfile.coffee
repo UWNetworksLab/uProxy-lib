@@ -105,6 +105,30 @@ module.exports = (grunt) ->
         } ]
       }
 
+      chat2: {
+        files: [ {
+          expand: true, cwd: 'src/samples/chat2/'
+          src: ['*.html']
+          dest: 'build/samples/chat2/'
+        }, {
+          expand: true, cwd: 'build/peerconnection/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/peerconnection/'
+        }, {
+          expand: true, cwd: 'build/handler/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/handler/'
+        }, {
+          expand: true, cwd: 'third_party/angular/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/angular/'
+        }, {
+          expand: true, cwd: 'third_party/webrtc-adapter/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/webrtc-adapter/'
+        } ]
+      }
+
     typescript:
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
@@ -116,6 +140,7 @@ module.exports = (grunt) ->
       logger: Rule.typeScriptSrc 'logger'
       peerconnection: Rule.typeScriptSrc 'peerconnection'
       chat: Rule.typeScriptSrc 'samples/chat'
+      chat2: Rule.typeScriptSrc 'samples/chat2'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -178,14 +203,21 @@ module.exports = (grunt) ->
     'typescript:chat'
   ]
 
+  taskManager.add 'chat2', [
+    'copy:chat2'
+    'typeScriptBase'
+    'typescript:chat2'
+  ]
+
   taskManager.add 'build', [
     'typeScriptBase'
     'arraybuffers'
     'taskmanager'
     'handler'
     'logger'
-    'peerconnection',
+    'peerconnection'
     'chat'
+    'chat2'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
