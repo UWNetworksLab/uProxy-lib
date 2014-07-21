@@ -45,6 +45,25 @@ module.exports = (grunt) ->
   path = require 'path';
 
   #-------------------------------------------------------------------------
+  # By and large, we build freedom the same way freedom-for-chrome
+  # and freedom-for-firefox do. The exception is that we don't include
+  # FILES.lib -- since that's currently just es6-promises and because
+  # that really doesn't need to be re-included, that's okay.
+  #
+  # require.resolve returns the path to Freedom's Gruntfile.
+  # We want to get the dirName, i.e. convert
+  #   /SOME/ABSOLUTE/PATH/uproxy-lib/node_modules/freedom/Gruntfile.js
+  # to
+  #   /SOME/ABSOLUTE/PATH/uproxy-lib/node_modules/freedom/
+  freedomPrefix = require.resolve('freedom').substr(0,
+    require.resolve('freedom').lastIndexOf('/') + 1)
+  freedom = require 'freedom'
+  freedomSrc = [].concat(
+    freedom.FILES.srcCore
+    freedom.FILES.srcPlatform
+  ).map (path) -> if grunt.file.isPathAbsolute(path) then path else freedomPrefix + path
+
+  #-------------------------------------------------------------------------
   grunt.initConfig {
     pkg: grunt.file.readJSON 'package.json'
 
@@ -105,6 +124,19 @@ module.exports = (grunt) ->
         } ]
       }
 
+      # Throwaway app to verify freedom-for-uproxy works.
+      scratch: {
+        files: [ {
+          expand: true, cwd: 'src/samples/scratch/'
+          src: ['**/*']
+          dest: 'build/samples/scratch/'
+        }, {
+          expand: true, cwd: 'build/'
+          src: ['freedom-for-uproxy.js']
+          dest: 'build/samples/scratch/chrome/lib/'
+        } ]
+      }
+
     typescript:
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
@@ -116,6 +148,8 @@ module.exports = (grunt) ->
       logger: Rule.typeScriptSrc 'logger'
       peerconnection: Rule.typeScriptSrc 'peerconnection'
       chat: Rule.typeScriptSrc 'samples/chat'
+      coreproviders: Rule.typeScriptSrc 'coreproviders'
+      scratch: Rule.typeScriptSrc 'samples/scratch'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -123,6 +157,26 @@ module.exports = (grunt) ->
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       logger: Rule.jasmineSpec 'logger'
     clean: ['build/**']
+
+    uglify:
+      freedom:
+        options:
+          sourceMap: true
+          # sourceMapName must be the same as that defined in the final comment
+          # of freedom/src/util/postamble.js.
+          sourceMapName: 'build/freedom.js.map'
+          sourceMapIncludeSources: true
+          mangle: false
+          # compress: false, wrap: false, // uncomment to get a clean out file.
+          beautify: true
+          preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
+          banner: require('fs').readFileSync(freedomPrefix + 'src/util/preamble.js', 'utf8')
+          footer: require('fs').readFileSync(freedomPrefix + 'src/util/postamble.js', 'utf8')
+        files:
+          'build/freedom-for-uproxy.js': freedomSrc.concat(
+            'build/coreproviders/interfaces/*.js'
+            'build/coreproviders/providers/*.js')
+
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -130,6 +184,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-typescript'
+  grunt.loadNpmTasks 'grunt-contrib-uglify'
 
   #-------------------------------------------------------------------------
   # Define the tasks
@@ -178,14 +233,32 @@ module.exports = (grunt) ->
     'typescript:chat'
   ]
 
+  taskManager.add 'coreproviders', [
+    'typeScriptBase'
+    'typescript:coreproviders'
+  ]
+
+  taskManager.add 'freedomforuproxy', [
+    'coreproviders'
+    'uglify'
+  ]
+
+  taskManager.add 'scratch', [
+    'freedomforuproxy'
+    'typeScriptBase'
+    'typescript:scratch'
+    'copy:scratch'
+  ]
+
   taskManager.add 'build', [
     'typeScriptBase'
     'arraybuffers'
     'taskmanager'
     'handler'
     'logger'
-    'peerconnection',
+    'peerconnection'
     'chat'
+    'scratch'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
