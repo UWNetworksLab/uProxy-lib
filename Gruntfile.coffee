@@ -124,6 +124,30 @@ module.exports = (grunt) ->
         } ]
       }
 
+      chat2: {
+        files: [ {
+          expand: true, cwd: 'src/samples/chat2/'
+          src: ['*.html']
+          dest: 'build/samples/chat2/'
+        }, {
+          expand: true, cwd: 'build/peerconnection/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/peerconnection/'
+        }, {
+          expand: true, cwd: 'build/handler/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/handler/'
+        }, {
+          expand: true, cwd: 'third_party/angular/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/angular/'
+        }, {
+          expand: true, cwd: 'third_party/webrtc-adapter/'
+          src: ['**/*']
+          dest: 'build/samples/chat2/webrtc-adapter/'
+        } ]
+      }
+
       # Throwaway app to verify freedom-for-uproxy works.
       scratch: {
         files: [ {
@@ -148,6 +172,7 @@ module.exports = (grunt) ->
       logger: Rule.typeScriptSrc 'logger'
       peerconnection: Rule.typeScriptSrc 'peerconnection'
       chat: Rule.typeScriptSrc 'samples/chat'
+      chat2: Rule.typeScriptSrc 'samples/chat2'
       coreproviders: Rule.typeScriptSrc 'coreproviders'
       scratch: Rule.typeScriptSrc 'samples/scratch'
 
@@ -233,6 +258,12 @@ module.exports = (grunt) ->
     'typescript:chat'
   ]
 
+  taskManager.add 'chat2', [
+    'copy:chat2'
+    'typeScriptBase'
+    'typescript:chat2'
+  ]
+
   taskManager.add 'coreproviders', [
     'typeScriptBase'
     'typescript:coreproviders'
@@ -258,6 +289,7 @@ module.exports = (grunt) ->
     'logger'
     'peerconnection'
     'chat'
+    'chat2'
     'scratch'
   ]
 
