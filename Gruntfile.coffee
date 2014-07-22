@@ -149,15 +149,19 @@ module.exports = (grunt) ->
       }
 
       # Throwaway app to verify freedom-for-uproxy works.
-      scratch: {
+      freedomchat: {
         files: [ {
-          expand: true, cwd: 'src/samples/scratch/'
+          expand: true, cwd: 'src/samples/freedomchat/'
           src: ['**/*']
-          dest: 'build/samples/scratch/'
+          dest: 'build/samples/freedomchat/'
         }, {
           expand: true, cwd: 'build/'
           src: ['freedom-for-uproxy.js']
-          dest: 'build/samples/scratch/chrome/lib/'
+          dest: 'build/samples/freedomchat/chrome/lib/'
+        }, {
+          expand: true, cwd: 'third_party/webrtc-adapter/'
+          src: ['**/*']
+          dest: 'build/samples/freedomchat/chrome/webrtc-adapter/'
         } ]
       }
 
@@ -174,7 +178,7 @@ module.exports = (grunt) ->
       chat: Rule.typeScriptSrc 'samples/chat'
       chat2: Rule.typeScriptSrc 'samples/chat2'
       coreproviders: Rule.typeScriptSrc 'coreproviders'
-      scratch: Rule.typeScriptSrc 'samples/scratch'
+      freedomchat: Rule.typeScriptSrc 'samples/freedomchat'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -199,6 +203,9 @@ module.exports = (grunt) ->
           footer: require('fs').readFileSync(freedomPrefix + 'src/util/postamble.js', 'utf8')
         files:
           'build/freedom-for-uproxy.js': freedomSrc.concat(
+            'build/arraybuffers/arraybuffers.js'
+            'build/handler/queue.js'
+            'build/peerconnection/*.js'
             'build/coreproviders/interfaces/*.js'
             'build/coreproviders/providers/*.js')
 
@@ -265,6 +272,7 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'coreproviders', [
+    'peerconnection'
     'typeScriptBase'
     'typescript:coreproviders'
   ]
@@ -274,11 +282,11 @@ module.exports = (grunt) ->
     'uglify'
   ]
 
-  taskManager.add 'scratch', [
+  taskManager.add 'freedomchat', [
     'freedomforuproxy'
     'typeScriptBase'
-    'typescript:scratch'
-    'copy:scratch'
+    'typescript:freedomchat'
+    'copy:freedomchat'
   ]
 
   taskManager.add 'build', [
@@ -290,7 +298,7 @@ module.exports = (grunt) ->
     'peerconnection'
     'chat'
     'chat2'
-    'scratch'
+    'freedomchat'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
