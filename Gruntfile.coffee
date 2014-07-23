@@ -193,19 +193,19 @@ module.exports = (grunt) ->
 
   taskManager.add 'peerconnection', [
     'copy:peerconnection'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:peerconnection'
   ]
 
   taskManager.add 'chat', [
     'copy:chat'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:chat'
   ]
 
   taskManager.add 'chat2', [
     'copy:chat2'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:chat2'
   ]
 
