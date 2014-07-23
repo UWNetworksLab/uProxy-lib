@@ -20,6 +20,9 @@ Rule =
       ignoreError: false
       noImplicitAny: true
       sourceMap: true
+  # This is a typescript compilation rule that makes sure unit tests can
+  # typecheck with the declaration files only. This is a quick way to check
+  # declaration files are approximately valid/match the implementation file.
   typeScriptSpecDecl: (name) ->
     src: ['build/typescript-src/' + name + '/**/*.spec.ts',
           'build/typescript-src/' + name + '/**/*.d.ts']
@@ -63,11 +66,6 @@ module.exports = (grunt) ->
         expand: true, cwd: 'src/'
         src: ['**/*.ts']
         dest: 'build/typescript-src/' } ] }
-
-      freedomTypeScriptApi: { files: [ {
-        expand: true, cwd: 'node_modules/freedom-typescript-api'
-        src: ['interfaces/**/*.ts']
-        dest: 'build/typescript-src/freedom-typescript-api/' } ] }
 
       # This rule is used to
       localTaskmanager: { files: [ {
@@ -130,14 +128,19 @@ module.exports = (grunt) ->
       }
 
     typescript:
+      # For bootstrapping of this Gruntfile
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
+      # Freedom interfaces (no real spec, only for typescript checking)
+      freedomInterfaces: Rule.typeScriptSrc 'freedom-interfaces'
+      freedomInterfacesDecl: Rule.typeScriptSpecDecl 'freedom-interfaces'
+      # The uProxy modules library
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typeScriptSpecDecl 'arraybuffers'
       handler: Rule.typeScriptSrc 'handler'
       handlerSpecDecl: Rule.typeScriptSpecDecl 'handler'
-      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api_d_test'
       logger: Rule.typeScriptSrc 'logger'
+      loggerDecl: Rule.typeScriptSpecDecl 'logger'
       peerconnection: Rule.typeScriptSrc 'peerconnection'
       chat: Rule.typeScriptSrc 'samples/chat'
       chat2: Rule.typeScriptSrc 'samples/chat2'
@@ -160,57 +163,54 @@ module.exports = (grunt) ->
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
-  taskManager.add 'typeScriptBase', [
-    'copy:freedomTypeScriptApi'
+  taskManager.add 'copyTypeScriptBase', [
     'copy:thirdPartyTypeScript'
     'copy:typeScriptSrc'
-    'typescript:freedomTypescriptApiTest'
   ]
 
   taskManager.add 'taskmanager', [
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:taskmanagerSpecDecl'
     'typescript:taskmanager'
   ]
 
   taskManager.add 'arraybuffers', [
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:arraybuffersSpecDecl'
     'typescript:arraybuffers'
   ]
 
   taskManager.add 'handler', [
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:handlerSpecDecl'
     'typescript:handler'
   ]
 
   taskManager.add 'logger', [
-    'copy:logger'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:logger'
   ]
 
   taskManager.add 'peerconnection', [
     'copy:peerconnection'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:peerconnection'
   ]
 
   taskManager.add 'chat', [
     'copy:chat'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:chat'
   ]
 
   taskManager.add 'chat2', [
     'copy:chat2'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:chat2'
   ]
 
   taskManager.add 'build', [
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'arraybuffers'
     'taskmanager'
     'handler'
@@ -223,6 +223,9 @@ module.exports = (grunt) ->
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
+    'copyTypeScriptBase'
+    'typescript:freedomInterfaces'
+    'typescript:freedomInterfacesDecl'
     'build'
     'jasmine:handler'
     'jasmine:taskmanager'
