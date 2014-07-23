@@ -136,7 +136,7 @@ module.exports = (grunt) ->
       arraybuffersSpecDecl: Rule.typeScriptSpecDecl 'arraybuffers'
       handler: Rule.typeScriptSrc 'handler'
       handlerSpecDecl: Rule.typeScriptSpecDecl 'handler'
-      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript-api_d_test'
+      freedomTypescriptApiTest: Rule.typeScriptSrc 'freedom-typescript_d_test'
       logger: Rule.typeScriptSrc 'logger'
       peerconnection: Rule.typeScriptSrc 'peerconnection'
       chat: Rule.typeScriptSrc 'samples/chat'
