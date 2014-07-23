@@ -273,7 +273,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'coreproviders', [
     'peerconnection'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:coreproviders'
   ]
 
@@ -284,7 +284,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'freedomchat', [
     'freedomforuproxy'
-    'typeScriptBase'
+    'copyTypeScriptBase'
     'typescript:freedomchat'
     'copy:freedomchat'
   ]
