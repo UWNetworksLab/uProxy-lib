@@ -1,4 +1,7 @@
 TaskManager = require './taskmanager'
+path = require 'path'
+freedom = require 'freedom'
+freedomForChrome = require 'freedom-for-chrome/Gruntfile'
 
 FILES =
   jasmine_helpers: [
@@ -7,6 +10,32 @@ FILES =
     '!node_modules/es6-promise/dist/promise-*amd.js'
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ]
+
+# Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
+dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
+
+# Compute absolute paths to the files comprising "core Freedom".
+freedomPrefix = dirname(require.resolve('freedom'))
+freedomSrc = [].concat(
+  freedom.FILES.srcCore
+  freedom.FILES.srcPlatform
+).map (fileName) -> path.join(freedomPrefix, fileName)
+
+# Compute absolute paths to the Chrome app-specific Freedom providers.
+freedomForChromePrefix = dirname(require.resolve('freedom-for-chrome/Gruntfile'))
+freedomForChromeSrc = [].concat(
+  freedomForChrome.FILES.platform
+).map (fileName) -> path.join(freedomForChromePrefix, fileName)
+
+# Our custom core providers, plus dependencies.
+# These files are included with our custom builds of Freedom.
+customFreedomCoreProviders = [
+  'build/arraybuffers/arraybuffers.js'
+  'build/handler/queue.js'
+  'build/peerconnection/*.js'
+  'build/coreproviders/interfaces/*.js'
+  'build/coreproviders/providers/*.js'
+]
 
 Rule =
   #-------------------------------------------------------------------------
@@ -42,29 +71,27 @@ Rule =
       specs: 'build/' + name + '/**/*.spec.js'
       outfile: 'build/' + name + '/_SpecRunner.html'
       keepRunner: true
-
-module.exports = (grunt) ->
-
-  path = require 'path';
-
-  #-------------------------------------------------------------------------
-  # By and large, we build freedom the same way freedom-for-chrome
+  # By and large, we build Freedom the same way freedom-for-chrome
   # and freedom-for-firefox do. The exception is that we don't include
   # FILES.lib -- since that's currently just es6-promises and because
   # that really doesn't need to be re-included, that's okay.
-  #
-  # require.resolve returns the path to Freedom's Gruntfile.
-  # We want to get the dirName, i.e. convert
-  #   /SOME/ABSOLUTE/PATH/uproxy-lib/node_modules/freedom/Gruntfile.js
-  # to
-  #   /SOME/ABSOLUTE/PATH/uproxy-lib/node_modules/freedom/
-  freedomPrefix = require.resolve('freedom').substr(0,
-    require.resolve('freedom').lastIndexOf('/') + 1)
-  freedom = require 'freedom'
-  freedomSrc = [].concat(
-    freedom.FILES.srcCore
-    freedom.FILES.srcPlatform
-  ).map (path) -> if grunt.file.isPathAbsolute(path) then path else freedomPrefix + path
+  freedomForUproxy: (name, files) ->
+    options:
+      sourceMap: true
+      # TODO: This should match the final comment in postamble.js.
+      sourceMapName: 'build/freedom.js.map'
+      sourceMapIncludeSources: true
+      mangle: false
+      beautify: true
+      preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
+      banner: require('fs').readFileSync(path.join(freedomPrefix, 'src/util/preamble.js'), 'utf8')
+      footer: require('fs').readFileSync(path.join(freedomPrefix, 'src/util/postamble.js'), 'utf8')
+    files: [{
+      src: freedomSrc.concat(customFreedomCoreProviders, files)
+      dest: path.join('build', [name, 'for-uproxy.js'].join('-'))
+    }]
+
+module.exports = (grunt) ->
 
   #-------------------------------------------------------------------------
   grunt.initConfig {
@@ -154,7 +181,7 @@ module.exports = (grunt) ->
           dest: 'build/samples/freedomchat/'
         }, {
           expand: true, cwd: 'build/'
-          src: ['freedom-for-uproxy.js']
+          src: ['freedom-for-chrome-for-uproxy.js']
           dest: 'build/samples/freedomchat/chrome/lib/'
         }, {
           expand: true, cwd: 'third_party/webrtc-adapter/'
@@ -191,26 +218,8 @@ module.exports = (grunt) ->
     clean: ['build/**']
 
     uglify:
-      freedom:
-        options:
-          sourceMap: true
-          # sourceMapName must be the same as that defined in the final comment
-          # of freedom/src/util/postamble.js.
-          sourceMapName: 'build/freedom.js.map'
-          sourceMapIncludeSources: true
-          mangle: false
-          # compress: false, wrap: false, // uncomment to get a clean out file.
-          beautify: true
-          preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
-          banner: require('fs').readFileSync(freedomPrefix + 'src/util/preamble.js', 'utf8')
-          footer: require('fs').readFileSync(freedomPrefix + 'src/util/postamble.js', 'utf8')
-        files:
-          'build/freedom-for-uproxy.js': freedomSrc.concat(
-            'build/arraybuffers/arraybuffers.js'
-            'build/handler/queue.js'
-            'build/peerconnection/*.js'
-            'build/coreproviders/interfaces/*.js'
-            'build/coreproviders/providers/*.js')
+      freedomForUproxy: Rule.freedomForUproxy('freedom', [])
+      freedomForChromeForUproxy: Rule.freedomForUproxy('freedom-for-chrome', freedomForChromeSrc)
 
   }  # grunt.initConfig
 
@@ -277,13 +286,18 @@ module.exports = (grunt) ->
     'typescript:coreproviders'
   ]
 
-  taskManager.add 'freedomforuproxy', [
+  taskManager.add 'freedomForUproxy', [
     'coreproviders'
-    'uglify'
+    'uglify:freedomForUproxy'
+  ]
+
+  taskManager.add 'freedomForChromeForUproxy', [
+    'coreproviders'
+    'uglify:freedomForChromeForUproxy'
   ]
 
   taskManager.add 'freedomchat', [
-    'freedomforuproxy'
+    'freedomForChromeForUproxy'
     'copyTypeScriptBase'
     'typescript:freedomchat'
     'copy:freedomchat'
