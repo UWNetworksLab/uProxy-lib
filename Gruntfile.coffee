@@ -11,28 +11,31 @@ FILES =
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ]
 
-freedom = require './node_modules/freedom/Gruntfile'
-freedomForChrome = require './node_modules/freedom-for-chrome/Gruntfile'
-freedomForFirefox = require './node_modules/freedom-for-firefox/Gruntfile'
+freedom = require 'freedom/Gruntfile'
+freedomForChrome = require 'freedom-for-chrome/Gruntfile'
+freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
 
 # Files comprising "core Freedom".
-# TODO: Figure out why these get the full paths while freedom-for-chrome
-#       and freedom-for-firefox files don't.
 freedomSrc = [].concat(
   freedom.FILES.srcCore
   freedom.FILES.srcPlatform
 )
 
+# Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
+dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
+
 # Chrome app-specific Freedom providers.
+# TODO: Figure out why this doesn't contain the full path.
 freedomForChromeSrc = [].concat(
   freedomForChrome.FILES.platform
-).map (fileName) -> path.join('node_modules/freedom-for-chrome', fileName)
+).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
 
 # Firefox addon-specific files and Freedom providers.
+# TODO: Figure out why this doesn't contain the full path.
 freedomForFirefoxSrc = [].concat(
   'src/backgroundframe-link.js'
   'providers/*.js'
-).map (fileName) -> path.join('node_modules/freedom-for-firefox', fileName)
+).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
 
 # Our custom core providers, plus dependencies.
 # These files are included with our custom builds of Freedom.
