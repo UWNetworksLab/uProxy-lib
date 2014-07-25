@@ -1,7 +1,7 @@
 TaskManager = require './taskmanager'
+
+fs = require 'fs'
 path = require 'path'
-freedom = require 'freedom'
-freedomForChrome = require 'freedom-for-chrome/Gruntfile'
 
 FILES =
   jasmine_helpers: [
@@ -11,21 +11,31 @@ FILES =
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ]
 
-# Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
-dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
+freedom = require 'freedom/Gruntfile'
+freedomForChrome = require 'freedom-for-chrome/Gruntfile'
+freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
 
-# Compute absolute paths to the files comprising "core Freedom".
-freedomPrefix = dirname(require.resolve('freedom'))
+# Files comprising "core Freedom".
 freedomSrc = [].concat(
   freedom.FILES.srcCore
   freedom.FILES.srcPlatform
-).map (fileName) -> path.join(freedomPrefix, fileName)
+)
 
-# Compute absolute paths to the Chrome app-specific Freedom providers.
-freedomForChromePrefix = dirname(require.resolve('freedom-for-chrome/Gruntfile'))
+# Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
+dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
+
+# Chrome app-specific Freedom providers.
+# TODO: Figure out why this doesn't contain the full path.
 freedomForChromeSrc = [].concat(
   freedomForChrome.FILES.platform
-).map (fileName) -> path.join(freedomForChromePrefix, fileName)
+).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
+
+# Firefox addon-specific files and Freedom providers.
+# TODO: Figure out why this doesn't contain the full path.
+freedomForFirefoxSrc = [].concat(
+  'src/backgroundframe-link.js'
+  'providers/*.js'
+).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
 
 # Our custom core providers, plus dependencies.
 # These files are included with our custom builds of Freedom.
@@ -75,20 +85,19 @@ Rule =
   # and freedom-for-firefox do. The exception is that we don't include
   # FILES.lib -- since that's currently just es6-promises and because
   # that really doesn't need to be re-included, that's okay.
-  freedomForUproxy: (name, files) ->
+  freedomForUproxy: (name, files, banners, footers) ->
     options:
       sourceMap: true
-      # TODO: This should match the final comment in postamble.js.
       sourceMapName: 'build/freedom.js.map'
       sourceMapIncludeSources: true
       mangle: false
       beautify: true
       preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
-      banner: require('fs').readFileSync(path.join(freedomPrefix, 'src/util/preamble.js'), 'utf8')
-      footer: require('fs').readFileSync(path.join(freedomPrefix, 'src/util/postamble.js'), 'utf8')
+      banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
     files: [{
       src: freedomSrc.concat(customFreedomCoreProviders, files)
-      dest: path.join('build', [name, 'for-uproxy.js'].join('-'))
+      dest: path.join('build', name)
     }]
 
 module.exports = (grunt) ->
@@ -218,9 +227,21 @@ module.exports = (grunt) ->
     clean: ['build/**']
 
     uglify:
-      freedomForUproxy: Rule.freedomForUproxy('freedom', [])
-      freedomForChromeForUproxy: Rule.freedomForUproxy('freedom-for-chrome', freedomForChromeSrc)
-
+      freedomForUproxy: Rule.freedomForUproxy(
+        'freedom-for-uproxy.js'
+        []
+        ['./node_modules/freedom/src/util/preamble.js']
+        ['./node_modules/freedom/src/util/postamble.js'])
+      freedomForChromeForUproxy: Rule.freedomForUproxy(
+        'freedom-for-chrome-for-uproxy.js'
+        freedomForChromeSrc
+        ['./node_modules/freedom/src/util/preamble.js']
+        ['./node_modules/freedom/src/util/postamble.js'])
+      freedomForFirefoxForUproxy: Rule.freedomForUproxy(
+        'freedom-for-firefox-for-uproxy.jsm'
+        freedomForFirefoxSrc
+        ['./node_modules/freedom-for-firefox/src/firefox-preamble.js', './node_modules/freedom/src/util/preamble.js']
+        ['./node_modules/freedom-for-firefox/src/firefox-postamble.js'])
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -296,6 +317,11 @@ module.exports = (grunt) ->
     'uglify:freedomForChromeForUproxy'
   ]
 
+  taskManager.add 'freedomForFirefoxForUproxy', [
+    'coreproviders'
+    'uglify:freedomForFirefoxForUproxy'
+  ]
+
   taskManager.add 'freedomchat', [
     'freedomForChromeForUproxy'
     'copyTypeScriptBase'
@@ -313,6 +339,9 @@ module.exports = (grunt) ->
     'chat'
     'chat2'
     'freedomchat'
+    'freedomForUproxy'
+    'freedomForChromeForUproxy'
+    'freedomForFirefoxForUproxy'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
