@@ -193,6 +193,10 @@ module.exports = (grunt) ->
           src: ['freedom-for-chrome-for-uproxy.js']
           dest: 'build/samples/freedomchat/chrome/lib/'
         }, {
+          expand: true, cwd: 'build/'
+          src: ['coreproviders/**']
+          dest: 'build/samples/freedomchat/chrome/lib/'
+        }, {
           expand: true, cwd: 'third_party/webrtc-adapter/'
           src: ['**/*']
           dest: 'build/samples/freedomchat/chrome/webrtc-adapter/'
@@ -204,8 +208,8 @@ module.exports = (grunt) ->
       taskmanager: Rule.typeScriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typeScriptSpecDecl 'taskmanager'
       # Freedom interfaces (no real spec, only for typescript checking)
-      freedomInterfaces: Rule.typeScriptSrc 'freedom-interfaces'
-      freedomInterfacesDecl: Rule.typeScriptSpecDecl 'freedom-interfaces'
+      freedomDeclarations: Rule.typeScriptSrc 'freedom-declarations'
+      freedomDeclarationsSpecDecl: Rule.typeScriptSpecDecl 'freedom-declarations'
       # The uProxy modules library
       arraybuffers: Rule.typeScriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typeScriptSpecDecl 'arraybuffers'
@@ -348,8 +352,8 @@ module.exports = (grunt) ->
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
     'copyTypeScriptBase'
-    'typescript:freedomInterfaces'
-    'typescript:freedomInterfacesDecl'
+    'typescript:freedomDeclarations'
+    'typescript:freedomDeclarationsSpecDecl'
     'build'
     'jasmine:handler'
     'jasmine:taskmanager'
