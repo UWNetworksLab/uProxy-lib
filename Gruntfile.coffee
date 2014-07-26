@@ -43,7 +43,7 @@ customFreedomCoreProviders = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
   'build/peerconnection/*.js'
-  'build/coreproviders/interfaces/*.js'
+  'build/coreproviders/freedom-interfaces/*.js'
   'build/coreproviders/providers/*.js'
 ]
 
