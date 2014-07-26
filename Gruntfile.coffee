@@ -43,7 +43,7 @@ customFreedomCoreProviders = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
   'build/peerconnection/*.js'
-  'build/coreproviders/freedom-interfaces/*.js'
+  'build/coreproviders/interfaces/*.js'
   'build/coreproviders/providers/*.js'
 ]
 
@@ -190,7 +190,7 @@ module.exports = (grunt) ->
           dest: 'build/samples/freedomchat/'
         }, {
           expand: true, cwd: 'build/'
-          src: ['freedom-for-chrome-for-uproxy.js']
+          src: ['**/*.js']
           dest: 'build/samples/freedomchat/chrome/lib/'
         }, {
           expand: true, cwd: 'third_party/webrtc-adapter/'
