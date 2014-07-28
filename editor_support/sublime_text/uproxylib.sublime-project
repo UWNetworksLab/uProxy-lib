@@ -1,12 +1,13 @@
 {
   "folders": [
     {
-      "path": "../../src",
-      "name": "src",
+      "path": "../../",
+      "name": "root",
+      "follow_symlinks": true
     },
     {
       "path": "../../build/typescript-src",
-      "name": "build/ypescript-src",
+      "name": "build/typescript-src",
       "follow_symlinks": true
     }
   ],

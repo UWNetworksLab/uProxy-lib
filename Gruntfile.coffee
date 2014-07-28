@@ -47,11 +47,12 @@ customFreedomCoreProviders = [
   'build/coreproviders/providers/*.js'
 ]
 
+#------------------------------------------------------------------------------
 Rule =
-  #-------------------------------------------------------------------------
   # Function to make a typescript rule based on expected directory layout.
   typescriptSrc: (name) ->
     src: ['build/typescript-src/' + name + '/**/*.ts',
+          '!build/typescript-src/' + name + '/samples/**/*.ts'
           '!build/typescript-src/' + name + '/**/*.d.ts']
     dest: 'build/'
     options:
@@ -71,6 +72,30 @@ Rule =
       ignoreError: false
       noImplicitAny: true
       sourceMap: true
+  # Copy all source that is not typescript to the module's build directory.
+  copySrcModule: (name) ->
+    expand: true, cwd: 'src/'
+    src: [name + '/**', '!**/*.ts', '!**/*.sass']
+    dest: 'build'
+    onlyIf: 'modified'
+  # Samples get all compiled code (exlcuding code from sample dir itself - no
+  # recursive copying please!) in a 'lib' subdirectory.
+  copySampleFiles: (samplePath, libDir) -> { files: [
+    { # Copy the sample source to the build sample directory
+      expand: true, cwd: 'src/'
+      src: [samplePath + '/**/*'
+            '!' + samplePath + '/**/*.ts'
+            '!' + samplePath + '/**/*.sass']
+      dest: 'build/'
+      onlyIf: 'modified'
+    }, {  # Copy all modules in the build directory to the sample
+      expand: true, cwd: 'build'
+      src: ['**/*'
+            '!**/samples/**'
+            '!**/typescript-src/**']
+      dest: 'build/' + samplePath + '/' + libDir
+      onlyIf: 'modified'
+    } ] }
   # Function to make jasmine spec assuming expected dir layout.
   jasmineSpec: (name) ->
     src: FILES.jasmine_helpers.concat([
@@ -85,10 +110,10 @@ Rule =
   # and freedom-for-firefox do. The exception is that we don't include
   # FILES.lib -- since that's currently just es6-promises and because
   # that really doesn't need to be re-included, that's okay.
-  freedomForUproxy: (name, files, banners, footers) ->
+  uglifyFreedomForUproxy: (name, files, banners, footers) ->
     options:
       sourceMap: true
-      sourceMapName: 'build/freedom.js.map'
+      sourceMapName: 'build/freedom/' + name + '.map'
       sourceMapIncludeSources: true
       mangle: false
       beautify: true
@@ -97,7 +122,7 @@ Rule =
       footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
     files: [{
       src: freedomSrc.concat(customFreedomCoreProviders, files)
-      dest: path.join('build', name)
+      dest: path.join('build/freedom/', name)
     }]
 
 module.exports = (grunt) ->
@@ -123,86 +148,24 @@ module.exports = (grunt) ->
         dest: 'build/typescript-src/' } ] }
 
     copy:
-      # This rule is used to
+      # This rule is used to build the root level task-manager that is checked
+      # in.
       localTaskmanager: { files: [ {
         expand: true, cwd: 'build/taskmanager/'
         src: ['taskmanager.js']
         dest: '.' } ] }
-
-      logger: { files: [ {
-        expand: true, cwd: 'src/logger'
-        src: ['*.json']
-        dest: 'build/logger/' } ] }
-
-      peerconnection: { files: [ {
-        expand: true, cwd: 'src/peerconnection'
-        src: ['*.json']
-        dest: 'build/peerconnection/' } ] }
-
-      chat: {
-        files: [ {
-          expand: true, cwd: 'src/samples/chat/'
-          src: ['*.html']
-          dest: 'build/samples/chat/'
-        }, {
-          expand: true, cwd: 'build/peerconnection/'
-          src: ['**/*']
-          dest: 'build/samples/chat/peerconnection/'
-        }, {
-          expand: true, cwd: 'build/handler/'
-          src: ['**/*']
-          dest: 'build/samples/chat/handler/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/chat/webrtc-adapter/'
-        } ]
-      }
-
-      chat2: {
-        files: [ {
-          expand: true, cwd: 'src/samples/chat2/'
-          src: ['*.html']
-          dest: 'build/samples/chat2/'
-        }, {
-          expand: true, cwd: 'build/peerconnection/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/peerconnection/'
-        }, {
-          expand: true, cwd: 'build/handler/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/handler/'
-        }, {
-          expand: true, cwd: 'third_party/angular/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/angular/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/webrtc-adapter/'
-        } ]
-      }
-
-      # Throwaway app to verify freedom-for-uproxy works.
-      freedomchat: {
-        files: [ {
-          expand: true, cwd: 'src/samples/freedomchat/'
-          src: ['**/*']
-          dest: 'build/samples/freedomchat/'
-        }, {
-          expand: true, cwd: 'build/'
-          src: ['freedom-for-chrome-for-uproxy.js']
-          dest: 'build/samples/freedomchat/chrome/lib/'
-        }, {
-          expand: true, cwd: 'build/'
-          src: ['coreproviders/**']
-          dest: 'build/samples/freedomchat/chrome/lib/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/freedomchat/chrome/webrtc-adapter/'
-        } ]
-      }
+      # Copy any JavaScript from the third_party directory
+      thirdPartyJavaScript: { files: [ {
+          expand: true,
+          src: ['third_party/**/*.js']
+          dest: 'build/'
+          onlyIf: 'modified'
+        } ] }
+      logger: Rule.copySrcModule 'logger'
+      # Sample apps to demonstrate and run end-to-end tests.
+      sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
+      sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
+      sampleFreedomchat: Rule.copySampleFiles 'coreproviders/samples/freedomchat-chromeapp', 'lib'
 
     typescript:
       # For bootstrapping of this Gruntfile
@@ -214,15 +177,19 @@ module.exports = (grunt) ->
       # The uProxy modules library
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
+
       handler: Rule.typescriptSrc 'handler'
       handlerSpecDecl: Rule.typescriptSpecDecl 'handler'
+
       logger: Rule.typescriptSrc 'logger'
       loggerDecl: Rule.typescriptSpecDecl 'logger'
+
       peerconnection: Rule.typescriptSrc 'peerconnection'
-      chat: Rule.typescriptSrc 'samples/chat'
-      chat2: Rule.typescriptSrc 'samples/chat2'
+      chat: Rule.typescriptSrc 'peerconnection/samples/chat-webpage'
+      chat2: Rule.typescriptSrc 'peerconnection/samples/chat2-webpage'
+
       coreproviders: Rule.typescriptSrc 'coreproviders'
-      freedomchat: Rule.typescriptSrc 'samples/freedomchat'
+      freedomchat: Rule.typescriptSrc 'coreproviders/samples/freedomchat-chromeapp'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -232,17 +199,17 @@ module.exports = (grunt) ->
     clean: ['build/**']
 
     uglify:
-      freedomForUproxy: Rule.freedomForUproxy(
+      freedomForUproxy: Rule.uglifyFreedomForUproxy(
         'freedom-for-uproxy.js'
         []
         ['./node_modules/freedom/src/util/preamble.js']
         ['./node_modules/freedom/src/util/postamble.js'])
-      freedomForChromeForUproxy: Rule.freedomForUproxy(
+      freedomForChromeForUproxy: Rule.uglifyFreedomForUproxy(
         'freedom-for-chrome-for-uproxy.js'
         freedomForChromeSrc
         ['./node_modules/freedom/src/util/preamble.js']
         ['./node_modules/freedom/src/util/postamble.js'])
-      freedomForFirefoxForUproxy: Rule.freedomForUproxy(
+      freedomForFirefoxForUproxy: Rule.uglifyFreedomForUproxy(
         'freedom-for-firefox-for-uproxy.jsm'
         freedomForFirefoxSrc
         ['./node_modules/freedom-for-firefox/src/firefox-preamble.js', './node_modules/freedom/src/util/preamble.js']
@@ -261,55 +228,58 @@ module.exports = (grunt) ->
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
-  taskManager.add 'symlinkTypescriptBase', [
+  taskManager.add 'base', [
+    'copy:thirdPartyJavaScript'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
   ]
 
   taskManager.add 'taskmanager', [
-    'symlinkTypescriptBase'
+    'base'
     'typescript:taskmanagerSpecDecl'
     'typescript:taskmanager'
   ]
 
   taskManager.add 'arraybuffers', [
-    'symlinkTypescriptBase'
+    'base'
     'typescript:arraybuffersSpecDecl'
     'typescript:arraybuffers'
   ]
 
   taskManager.add 'handler', [
-    'symlinkTypescriptBase'
+    'base'
     'typescript:handlerSpecDecl'
     'typescript:handler'
   ]
 
   taskManager.add 'logger', [
-    'symlinkTypescriptBase'
+    'copy:logger'
+    'base'
     'typescript:logger'
   ]
 
   taskManager.add 'peerconnection', [
-    'copy:peerconnection'
-    'symlinkTypescriptBase'
+    'base'
     'typescript:peerconnection'
   ]
 
   taskManager.add 'chat', [
-    'copy:chat'
-    'symlinkTypescriptBase'
+    'base'
+    'peerconnection'
     'typescript:chat'
+    'copy:sampleChat'
   ]
 
   taskManager.add 'chat2', [
-    'copy:chat2'
-    'symlinkTypescriptBase'
+    'base'
+    'peerconnection'
     'typescript:chat2'
+    'copy:sampleChat2'
   ]
 
   taskManager.add 'coreproviders', [
+    'base'
     'peerconnection'
-    'symlinkTypescriptBase'
     'typescript:coreproviders'
   ]
 
@@ -329,14 +299,14 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'freedomchat', [
+    'base'
     'freedomForChromeForUproxy'
-    'symlinkTypescriptBase'
     'typescript:freedomchat'
-    'copy:freedomchat'
+    'copy:sampleFreedomchat'
   ]
 
   taskManager.add 'build', [
-    'symlinkTypescriptBase'
+    'base'
     'arraybuffers'
     'taskmanager'
     'handler'
@@ -353,7 +323,7 @@ module.exports = (grunt) ->
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
-    'symlinkTypescriptBase'
+    'base'
     'typescript:freedomDeclarations'
     'typescript:freedomDeclarationsSpecDecl'
     'build'
