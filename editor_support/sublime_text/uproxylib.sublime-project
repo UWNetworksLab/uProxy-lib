@@ -6,7 +6,7 @@
     },
     {
       "path": "../../build/typescript-src",
-      "name": "build/ypescript-src",
+      "name": "build/typescript-src",
       "follow_symlinks": true
     }
   ],
