@@ -13,6 +13,7 @@
     "grunt-contrib-clean": "^0.5.0",
     "grunt-contrib-coffee": "^0.10.1",
     "grunt-contrib-copy": "^0.5.0",
+    "grunt-contrib-symlink": "^0.3.0",
     "freedom": "0.5.0",
     "freedom-for-chrome": "0.2.1",
     "grunt-typescript": "^0.3.7",
