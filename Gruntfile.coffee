@@ -323,11 +323,7 @@ module.exports = (grunt) ->
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
-<<<<<<< HEAD
     'base'
-=======
-    'copyTypeScriptBase'
->>>>>>> renamed freedom-interfaces to freedom-declarations
     'typescript:freedomDeclarations'
     'typescript:freedomDeclarationsSpecDecl'
     'build'
