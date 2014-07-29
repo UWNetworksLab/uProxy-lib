@@ -11,32 +11,6 @@ FILES =
     '!node_modules/es6-promise/dist/promise-*.min.js'
   ]
 
-freedom = require 'freedom/Gruntfile'
-freedomForChrome = require 'freedom-for-chrome/Gruntfile'
-freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
-
-# Files comprising "core Freedom".
-freedomSrc = [].concat(
-  freedom.FILES.srcCore
-  freedom.FILES.srcPlatform
-)
-
-# Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
-dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
-
-# Chrome app-specific Freedom providers.
-# TODO: Figure out why this doesn't contain the full path.
-freedomForChromeSrc = [].concat(
-  freedomForChrome.FILES.platform
-).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
-
-# Firefox addon-specific files and Freedom providers.
-# TODO: Figure out why this doesn't contain the full path.
-freedomForFirefoxSrc = [].concat(
-  'src/backgroundframe-link.js'
-  'providers/*.js'
-).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
-
 # Our custom core providers, plus dependencies.
 # These files are included with our custom builds of Freedom.
 customFreedomCoreProviders = [
@@ -106,11 +80,38 @@ Rule =
       specs: 'build/' + name + '/**/*.spec.js'
       outfile: 'build/' + name + '/_SpecRunner.html'
       keepRunner: true
+
+module.exports = (grunt) ->
+
+  freedom = require 'freedom/Gruntfile'
+  freedomForChrome = require 'freedom-for-chrome/Gruntfile'
+  freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
+
+  # Files comprising "core Freedom".
+  freedomSrc = [].concat(
+    freedom.FILES.srcCore
+    freedom.FILES.srcPlatform
+  )
+
+  # Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
+  dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
+
+  # Chrome and Firefox-specific Freedom providers.
+  # TODO: Figure out why this doesn't contain the full path.
+  freedomForChromeSrc = [].concat(
+    freedomForChrome.FILES.platform
+  ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
+  freedomForFirefoxSrc = [].concat(
+    'src/backgroundframe-link.js'
+    'providers/*.js'
+  ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
+
+  # Builds Freedom, with optional extras.
   # By and large, we build Freedom the same way freedom-for-chrome
   # and freedom-for-firefox do. The exception is that we don't include
   # FILES.lib -- since that's currently just es6-promises and because
   # that really doesn't need to be re-included, that's okay.
-  uglifyFreedomForUproxy: (name, files, banners, footers) ->
+  uglifyFreedomForUproxy = (name, files, banners, footers) ->
     options:
       sourceMap: true
       sourceMapName: 'build/freedom/' + name + '.map'
@@ -124,8 +125,6 @@ Rule =
       src: freedomSrc.concat(customFreedomCoreProviders, files)
       dest: path.join('build/freedom/', name)
     }]
-
-module.exports = (grunt) ->
 
   #-------------------------------------------------------------------------
   grunt.initConfig {
@@ -282,17 +281,17 @@ module.exports = (grunt) ->
     clean: ['build/**']
 
     uglify:
-      freedomForUproxy: Rule.uglifyFreedomForUproxy(
+      freedomForUproxy: uglifyFreedomForUproxy(
         'freedom-for-uproxy.js'
         []
         ['./node_modules/freedom/src/util/preamble.js']
         ['./node_modules/freedom/src/util/postamble.js'])
-      freedomForChromeForUproxy: Rule.uglifyFreedomForUproxy(
+      freedomForChromeForUproxy: uglifyFreedomForUproxy(
         'freedom-for-chrome-for-uproxy.js'
         freedomForChromeSrc
         ['./node_modules/freedom/src/util/preamble.js']
         ['./node_modules/freedom/src/util/postamble.js'])
-      freedomForFirefoxForUproxy: Rule.uglifyFreedomForUproxy(
+      freedomForFirefoxForUproxy: uglifyFreedomForUproxy(
         'freedom-for-firefox-for-uproxy.jsm'
         freedomForFirefoxSrc
         ['./node_modules/freedom-for-firefox/src/firefox-preamble.js', './node_modules/freedom/src/util/preamble.js']
