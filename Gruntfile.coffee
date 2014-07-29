@@ -47,7 +47,7 @@ Rule =
       noImplicitAny: true
       sourceMap: true
   # Copy all source that is not typescript to the module's build directory.
-  copySrcModule: (name) ->
+  copyModule: (name) ->
     expand: true, cwd: 'src/'
     src: [name + '/**', '!**/*.ts', '!**/*.sass']
     dest: 'build'
@@ -160,7 +160,7 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
-      logger: Rule.copySrcModule 'logger'
+      logger: Rule.copyModule 'logger'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
       sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
