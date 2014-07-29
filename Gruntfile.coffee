@@ -153,83 +153,6 @@ module.exports = (grunt) ->
         expand: true, cwd: 'build/taskmanager/'
         src: ['taskmanager.js']
         dest: '.' } ] }
-<<<<<<< HEAD
-
-      logger: { files: [ {
-        expand: true, cwd: 'src/logger'
-        src: ['*.json']
-        dest: 'build/logger/' } ] }
-
-      peerconnection: { files: [ {
-        expand: true, cwd: 'src/peerconnection'
-        src: ['*.json']
-        dest: 'build/peerconnection/' } ] }
-
-      chat: {
-        files: [ {
-          expand: true, cwd: 'src/samples/chat/'
-          src: ['*.html']
-          dest: 'build/samples/chat/'
-        }, {
-          expand: true, cwd: 'build/peerconnection/'
-          src: ['**/*']
-          dest: 'build/samples/chat/peerconnection/'
-        }, {
-          expand: true, cwd: 'build/handler/'
-          src: ['**/*']
-          dest: 'build/samples/chat/handler/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/chat/webrtc-adapter/'
-        } ]
-      }
-
-      chat2: {
-        files: [ {
-          expand: true, cwd: 'src/samples/chat2/'
-          src: ['*.html']
-          dest: 'build/samples/chat2/'
-        }, {
-          expand: true, cwd: 'build/peerconnection/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/peerconnection/'
-        }, {
-          expand: true, cwd: 'build/handler/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/handler/'
-        }, {
-          expand: true, cwd: 'third_party/angular/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/angular/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/chat2/webrtc-adapter/'
-        } ]
-      }
-
-      # Throwaway app to verify freedom-for-uproxy works.
-      freedomchat: {
-        files: [ {
-          expand: true, cwd: 'src/samples/freedomchat/'
-          src: ['**/*']
-          dest: 'build/samples/freedomchat/'
-        }, {
-          expand: true, cwd: 'build/'
-          src: ['freedom-for-chrome-for-uproxy.js']
-          dest: 'build/samples/freedomchat/chrome/lib/'
-        }, {
-          expand: true, cwd: 'build/'
-          src: ['coreproviders/**']
-          dest: 'build/samples/freedomchat/chrome/lib/'
-        }, {
-          expand: true, cwd: 'third_party/webrtc-adapter/'
-          src: ['**/*']
-          dest: 'build/samples/freedomchat/chrome/webrtc-adapter/'
-        } ]
-      }
-=======
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
@@ -242,20 +165,14 @@ module.exports = (grunt) ->
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
       sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
       sampleFreedomchat: Rule.copySampleFiles 'coreproviders/samples/freedomchat-chromeapp', 'lib'
->>>>>>> dev
 
     typescript:
       # For bootstrapping of this Gruntfile
       taskmanager: Rule.typescriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
       # Freedom interfaces (no real spec, only for typescript checking)
-<<<<<<< HEAD
-      freedomDeclarations: Rule.typeScriptSrc 'freedom-declarations'
-      freedomDeclarationsSpecDecl: Rule.typeScriptSpecDecl 'freedom-declarations'
-=======
       freedomDeclarations: Rule.typescriptSrc 'freedom-declarations'
       freedomDeclarationsSpecDecl: Rule.typescriptSpecDecl 'freedom-declarations'
->>>>>>> dev
       # The uProxy modules library
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
@@ -405,11 +322,7 @@ module.exports = (grunt) ->
   # This is the target run by Travis. Targets in here should run locally
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
-<<<<<<< HEAD
-    'copyTypeScriptBase'
-=======
     'base'
->>>>>>> dev
     'typescript:freedomDeclarations'
     'typescript:freedomDeclarationsSpecDecl'
     'build'
