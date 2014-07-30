@@ -21,17 +21,17 @@ var b :PcLib.Pc = freedom['core.uproxypeerconnection'](pcConfig);
 
 // Connect the two signalling channels.
 // Normally, these messages would be sent over the internet.
-a.on('signalMessage', (signal:WebRtc.SignallingMessage) => {
+a.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
   console.log('signalling channel A message: ' + JSON.stringify(signal));
   b.handleSignalMessage(signal);
 });
-b.on('signalMessage', (signal:WebRtc.SignallingMessage) => {
+b.on('signalForPeer', (signal:WebRtc.SignallingMessage) => {
   console.log('signalling channel B message: ' + JSON.stringify(signal));
   a.handleSignalMessage(signal);
 });
 
-b.on('peerCreatedChannel', (channelLabel:string) => {
-  console.log('i can see that a created a data channel called ' + channelLabel);
+b.on('peerOpenedChannel', (channelLabel:string) => {
+  console.log('I can see that `a` created a data channel called ' + channelLabel);
 });
 
 a.onceConnecting().then(() => { console.log('a is connecting...'); });
@@ -49,37 +49,38 @@ b.onceConnected().then(logEndpoints.bind(null, 'b'));
 
 // Negotiate a peerconnection.
 // Once negotiated, enable the UI and add send/receive handlers.
-a.negotiateConnection().then((endpoints:WebRtc.ConnectionAddresses) => {
-  // Send messages over the datachannel, in response to events from the UI.
-  var sendMessage = (pc:PcLib.Pc, message:Chat.Message) => {
-    pc.send('text', { str: message.message }).catch((e) => {
-      console.error('error sending message: ' + e.message);
-    });
-  };
-  freedom.on('sendA', sendMessage.bind(null, a));
-  freedom.on('sendB', sendMessage.bind(null, b));
+a.negotiateConnection()
+  .then((endpoints:WebRtc.ConnectionAddresses) => {
+    // Send messages over the datachannel, in response to events from the UI.
+    var sendMessage = (pc:PcLib.Pc, message:Chat.Message) => {
+      pc.send('text', { str: message.message }).catch((e) => {
+        console.error('error sending message: ' + e.message);
+      });
+    };
+    freedom.on('sendA', sendMessage.bind(null, a));
+    freedom.on('sendB', sendMessage.bind(null, b));
 
-  // Handle messages received on the datachannel(s).
-  // The message is forwarded to the UI.
-  var receiveMessage = (name:string, d:PcLib.LabelledDataChannelMessage) => {
-    if (d.message.str === undefined) {
-      console.error('only text messages are supported');
-      return;
-    }
-    freedom.emit('receive' + name, {
-      message: d.message.str
-    });
-  };
-  a.on('fromPeerData', receiveMessage.bind(null, 'A'));
-  b.on('fromPeerData', receiveMessage.bind(null, 'B'));
+    // Handle messages received on the datachannel(s).
+    // The message is forwarded to the UI.
+    var receiveMessage = (name:string, d:PcLib.LabelledDataChannelMessage) => {
+      if (d.message.str === undefined) {
+        console.error('only text messages are supported');
+        return;
+      }
+      freedom.emit('receive' + name, {
+        message: d.message.str
+      });
+    };
+    a.on('dataFromPeer', receiveMessage.bind(null, 'A'));
+    b.on('dataFromPeer', receiveMessage.bind(null, 'B'));
 
-  a.openDataChannel('text').then(() => {
-    console.log('datachannel open!');
-    freedom.emit('ready', {});
-  }, (e) => {
-    console.error('could not setup datachannel: ' + e.message);
-    freedom.emit('error', {});
+    a.openDataChannel('text').then(() => {
+      console.log('datachannel open!');
+      freedom.emit('ready', {});
+    }, (e) => {
+      console.error('could not setup datachannel: ' + e.message);
+      freedom.emit('error', {});
+    });
+  }, (e:Error) => {
+    console.error('could not negotiate peerconnection: ' + e.message);
   });
-}, (e) => {
-  console.error('could not negotiate peerconnection: ' + e.message);
-});

@@ -71,7 +71,7 @@ declare module WebRtc {
     public openDataChannel :(channelLabel: string,
                              options?: RTCDataChannelInit) => DataChannel;
     // Or handle data channels opened by the peer (these events will )
-    public peerCreatedChannelQueue :Handler.Queue<DataChannel, void>;
+    public peerOpenedChannelQueue :Handler.Queue<DataChannel, void>;
 
     // The |handleSignalMessage| function should be called with signalling
     // messages from the remote peer.
@@ -79,7 +79,7 @@ declare module WebRtc {
     // The underlying handler that holds/handles signals intended to go to the
     // remote peer. A handler should be set that sends messages to the remote
     // peer.
-    public toPeerSignalQueue :Handler.Queue<SignallingMessage, void>;
+    public signalForPeerQueue :Handler.Queue<SignallingMessage, void>;
 
     // Closing the peer connection will close all associated data channels
     // and set |pcState| to |DISCONNECTED| (and hence fulfills
