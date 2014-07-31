@@ -51,11 +51,11 @@ module exports {
     return {
       files: [
         { // Copy the sample source to the build sample directory
-          expand: true, cwd: 'src/',
-          src: [samplePath + '/**/*',
-                '!' + samplePath + '/**/*.ts',
-                '!' + samplePath + '/**/*.sass'],
-          dest: 'build/',
+          expand: true, cwd: 'src/' + samplePath
+          src: ['**/*',
+                '!**/*.ts',
+                '!**/*.sass'],
+          dest: 'build/' + samplePath,
           onlyIf: 'modified',
         }, {  // Copy all modules in the build directory to the sample
           expand: true, cwd: 'build',

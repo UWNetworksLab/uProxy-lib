@@ -1,9 +1,6 @@
 TaskManager = require './tools/taskmanager'
 Rule = require './tools/common-grunt-rules'
 
-console.log(TaskManager);
-console.log(Rule);
-
 fs = require 'fs'
 path = require 'path'
 
