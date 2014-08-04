@@ -94,6 +94,7 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
+      peerconnection: Rule.copyModule 'peerconnection'
       logger: Rule.copyModule 'logger'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
@@ -194,6 +195,7 @@ module.exports = (grunt) ->
   taskManager.add 'peerconnection', [
     'base'
     'typescript:peerconnection'
+    'copy:peerconnection'
   ]
 
   taskManager.add 'chat', [
