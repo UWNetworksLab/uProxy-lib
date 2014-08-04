@@ -9,7 +9,7 @@ path = require 'path'
 customFreedomCoreProviders = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
-  'build/third_party/webrtc-adapter/adapter.js'
+  'build/peerconnection/third_party/adapter.js'
   'build/peerconnection/*.js'
   'build/coreproviders/interfaces/*.js'
   'build/coreproviders/providers/*.js'
