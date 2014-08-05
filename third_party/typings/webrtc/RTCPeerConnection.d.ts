@@ -212,24 +212,11 @@ declare enum RTCSignalingState {
   'closed'
 }
 
-// UPROXY NOTE:
-// A few additions have been made below to work with Chrome's
-// current implementation of RTCPeerConnection.getStats() call.
-// They are marked with // UPROXY
-
 // This is based on the current implementation of WebRtc in Chrome; the spec is
 // a little unclear on this.
 // http://dev.w3.org/2011/webrtc/editor/webrtc.html#idl-def-RTCStatsReport
 interface RTCStatsReport {
-  result: () => RTCStats[] // UPROXY
-}
-
- // UPROXY
-interface RTCStats {
-  timestamp: Object; // TODO: find/define the type for DOMHiResTimeStamp
-  type: string; // RTCStatsType;
-  id: string;
-  stat?: (s:string) => string;
+  stat(id: string): string;
 }
 
 interface RTCStatsCallback {
@@ -254,9 +241,7 @@ interface RTCPeerConnection {
   signalingState: string; // RTCSignalingState; see TODO(1)
   updateIce(configuration?: RTCConfiguration,
             constraints?: RTCMediaConstraints): void;
-  addIceCandidate(candidate: RTCIceCandidate,
-                  successCallback?: RTCVoidCallback, // UPROXY
-                  failureCallback?: RTCPeerConnectionErrorCallback): void; // UPROXY
+  addIceCandidate(candidate: RTCIceCandidate): void;
   iceGatheringState: string;  // RTCIceGatheringState; see TODO(1)
   iceConnectionState: string;  // RTCIceConnectionState; see TODO(1)
   getLocalStreams(): MediaStream[];
