@@ -9,6 +9,7 @@ path = require 'path'
 customFreedomCoreTopLevel = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
+  'build/logging/logging.js'
 ]
 
 customFreedomCoreProviders = [
@@ -104,7 +105,6 @@ module.exports = (grunt) ->
           onlyIf: 'modified'
         } ] }
       peerconnection: Rule.copyModule 'peerconnection'
-      # logger: Rule.copyModule 'logger'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
       sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
@@ -124,8 +124,8 @@ module.exports = (grunt) ->
       handler: Rule.typescriptSrc 'handler'
       handlerSpecDecl: Rule.typescriptSpecDecl 'handler'
 
-      # logger: Rule.typescriptSrc 'logger'
-      # loggerSpecDecl: Rule.typescriptSpecDecl 'logger'
+      logging: Rule.typescriptSrc 'logging'
+      loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
 
       peerconnection: Rule.typescriptSrc 'peerconnection'
       chat: Rule.typescriptSrc 'peerconnection/samples/chat-webpage'
@@ -139,8 +139,7 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      coreproviders: Rule.jasmineSpec 'coreproviders'
-      # logging: Rule.jasmineSpec 'logger'
+      logging: Rule.jasmineSpec 'logging'
 
     clean: ['build/**']
 
@@ -198,11 +197,12 @@ module.exports = (grunt) ->
     'typescript:handler'
   ]
 
-  # taskManager.add 'logger', [
-  #   'copy:logger'
-  #   'base'
-  #   'typescript:logger'
-  # ]
+  taskManager.add 'logging', [
+    'copy:logging'
+    'base'
+    'typescript:logging'
+    'jasmine:logging'
+  ]
 
   taskManager.add 'peerconnection', [
     'base'
@@ -260,7 +260,7 @@ module.exports = (grunt) ->
     'arraybuffers'
     'taskmanager'
     'handler'
-    # 'logger'
+    'logging'
     'peerconnection'
     'chat'
     'chat2'
@@ -280,7 +280,7 @@ module.exports = (grunt) ->
     'jasmine:handler'
     'jasmine:taskmanager'
     'jasmine:arraybuffers'
-    # 'jasmine:logger'
+    'jasmine:logging'
   ]
 
   taskManager.add 'default', [
