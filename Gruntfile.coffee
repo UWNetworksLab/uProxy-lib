@@ -4,20 +4,17 @@ Rule = require './tools/common-grunt-rules'
 fs = require 'fs'
 path = require 'path'
 
-customFreedomCoreTopLevel = [
+# Our custom core provider dependencies. These files are included with our
+# custom builds of Freedom. Note: they assume that the JS environment has
+# included at least |customFreedomCoreTopLevel|
+customFreedomCoreProviders = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
   'build/logging/logging.js'
   'build/webrtc/third_party/adapter.js'
   'build/webrtc/*.js'
-]
-
-# Our custom core provider dependencies. These files are included with our
-# custom builds of Freedom. Note: they assume that the JS environment has
-# included at least |customFreedomCoreTopLevel|
-customFreedomCoreProviders = [
-  'build/freedom/coreproviders/providers/*.js'
-  'build/freedom/coreproviders/interfaces/*.js'
+  'build/freedom/coreproviders/*.js'
+  'build/freedom/interfaces/*.js'
 ]
 
 module.exports = (grunt) ->
@@ -60,9 +57,7 @@ module.exports = (grunt) ->
       banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
       footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
     files: [{
-      src: freedomSrc
-            .concat(customFreedomCoreProviders)
-            .concat(files)
+      src: freedomSrc.concat(customFreedomCoreProviders).concat(files)
       dest: path.join('build/freedom/', name)
     }]
 
@@ -145,18 +140,22 @@ module.exports = (grunt) ->
       freedomForWebpagesForUproxy: uglifyFreedomForUproxy(
         'freedom-for-webpages-for-uproxy.js'
         []
-        ['./node_modules/freedom/src/util/preamble.js']
-        ['./node_modules/freedom/src/util/postamble.js'])
+        [ './node_modules/freedom/src/util/preamble.js']
+        [ 'src/freedom/uproxy-freedom-postamble.js',
+          './node_modules/freedom/src/util/postamble.js'])
       freedomForChromeForUproxy: uglifyFreedomForUproxy(
         'freedom-for-chrome-for-uproxy.js'
         freedomForChromeSrc
-        ['./node_modules/freedom/src/util/preamble.js']
-        ['./node_modules/freedom/src/util/postamble.js'])
+        [ './node_modules/freedom/src/util/preamble.js']
+        [ 'src/freedom/uproxy-freedom-postamble.js',
+          './node_modules/freedom/src/util/postamble.js'])
       freedomForFirefoxForUproxy: uglifyFreedomForUproxy(
         'freedom-for-firefox-for-uproxy.jsm'
         freedomForFirefoxSrc
-        ['./node_modules/freedom-for-firefox/src/firefox-preamble.js', './node_modules/freedom/src/util/preamble.js']
-        ['./node_modules/freedom-for-firefox/src/firefox-postamble.js'])
+        [ './node_modules/freedom-for-firefox/src/firefox-preamble.js',
+          './node_modules/freedom/src/util/preamble.js']
+        [ 'src/freedom/uproxy-freedom-postamble.js',
+          './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -229,6 +228,7 @@ module.exports = (grunt) ->
     'handler'
     'webrtc'
     'typescript:freedomCoreproviders'
+    'typescript:freedomInterfaces'
   ]
 
   taskManager.add 'freedomForWebpagesForUproxy', [
