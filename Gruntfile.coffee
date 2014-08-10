@@ -6,17 +6,19 @@ path = require 'path'
 
 # Our custom core providers, plus dependencies.
 # These files are included with our custom builds of Freedom.
-customFreedomCoreProviders = [
+customFreedomCoreTopLevel = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
+]
+
+customFreedomCoreProviders = [
   'build/peerconnection/third_party/adapter.js'
   'build/peerconnection/*.js'
-  'build/coreproviders/interfaces/*.js'
   'build/coreproviders/providers/*.js'
+  'build/coreproviders/interfaces/*.js'
 ]
 
 module.exports = (grunt) ->
-
   freedom = require 'freedom/Gruntfile'
   freedomForChrome = require 'freedom-for-chrome/Gruntfile'
   freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
@@ -53,10 +55,17 @@ module.exports = (grunt) ->
       mangle: false
       beautify: true
       preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
-      banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
-      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      # banner:
+      # customFreedomCoreTopLevel.concat(banners)
+      #   .map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      # footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
     files: [{
-      src: freedomSrc.concat(customFreedomCoreProviders, files)
+      src: customFreedomCoreTopLevel
+            .concat(banners)
+            .concat(freedomSrc)
+            .concat(customFreedomCoreProviders)
+            .concat(files)
+            .concat(footers)
       dest: path.join('build/freedom/', name)
     }]
 
@@ -95,7 +104,7 @@ module.exports = (grunt) ->
           onlyIf: 'modified'
         } ] }
       peerconnection: Rule.copyModule 'peerconnection'
-      logger: Rule.copyModule 'logger'
+      # logger: Rule.copyModule 'logger'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
       sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
@@ -115,26 +124,29 @@ module.exports = (grunt) ->
       handler: Rule.typescriptSrc 'handler'
       handlerSpecDecl: Rule.typescriptSpecDecl 'handler'
 
-      logger: Rule.typescriptSrc 'logger'
-      loggerDecl: Rule.typescriptSpecDecl 'logger'
+      # logger: Rule.typescriptSrc 'logger'
+      # loggerSpecDecl: Rule.typescriptSpecDecl 'logger'
 
       peerconnection: Rule.typescriptSrc 'peerconnection'
       chat: Rule.typescriptSrc 'peerconnection/samples/chat-webpage'
       chat2: Rule.typescriptSrc 'peerconnection/samples/chat2-webpage'
 
       coreproviders: Rule.typescriptSrc 'coreproviders'
+      coreprovidersSpecDecl: Rule.typescriptSpecDecl 'coreproviders'
       freedomchat: Rule.typescriptSrc 'coreproviders/samples/freedomchat-chromeapp'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logger: Rule.jasmineSpec 'logger'
+      coreproviders: Rule.jasmineSpec 'coreproviders'
+      # logging: Rule.jasmineSpec 'logger'
+
     clean: ['build/**']
 
     uglify:
-      freedomForUproxy: uglifyFreedomForUproxy(
-        'freedom-for-uproxy.js'
+      freedomForWebpagesForUproxy: uglifyFreedomForUproxy(
+        'freedom-for-webpages-for-uproxy.js'
         []
         ['./node_modules/freedom/src/util/preamble.js']
         ['./node_modules/freedom/src/util/postamble.js'])
@@ -186,11 +198,11 @@ module.exports = (grunt) ->
     'typescript:handler'
   ]
 
-  taskManager.add 'logger', [
-    'copy:logger'
-    'base'
-    'typescript:logger'
-  ]
+  # taskManager.add 'logger', [
+  #   'copy:logger'
+  #   'base'
+  #   'typescript:logger'
+  # ]
 
   taskManager.add 'peerconnection', [
     'base'
@@ -214,13 +226,16 @@ module.exports = (grunt) ->
 
   taskManager.add 'coreproviders', [
     'base'
+    'arraybuffers'
+    'handler'
     'peerconnection'
     'typescript:coreproviders'
+    'jasmine:coreproviders'
   ]
 
-  taskManager.add 'freedomForUproxy', [
+  taskManager.add 'freedomForWebpagesForUproxy', [
     'coreproviders'
-    'uglify:freedomForUproxy'
+    'uglify:freedomForWebpagesForUproxy'
   ]
 
   taskManager.add 'freedomForChromeForUproxy', [
@@ -235,7 +250,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'freedomchat', [
     'base'
-    'freedomForChromeForUproxy'
+    'freedomForWebpagesForUproxy'
     'typescript:freedomchat'
     'copy:sampleFreedomchat'
   ]
@@ -245,14 +260,14 @@ module.exports = (grunt) ->
     'arraybuffers'
     'taskmanager'
     'handler'
-    'logger'
+    # 'logger'
     'peerconnection'
     'chat'
     'chat2'
-    'freedomchat'
-    'freedomForUproxy'
+    'freedomForWebpagesForUproxy'
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
+    'freedomchat'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
@@ -265,7 +280,7 @@ module.exports = (grunt) ->
     'jasmine:handler'
     'jasmine:taskmanager'
     'jasmine:arraybuffers'
-    'jasmine:logger'
+    # 'jasmine:logger'
   ]
 
   taskManager.add 'default', [
