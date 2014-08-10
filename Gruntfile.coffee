@@ -6,13 +6,8 @@ path = require 'path'
 
 # Our custom core provider dependencies. These files are included with our
 # custom builds of Freedom. Note: they assume that the JS environment has
-# included at least |customFreedomCoreTopLevel|
+# includes the necessary dependencies (see samples/freedomchat-chromeapp)
 customFreedomCoreProviders = [
-  'build/arraybuffers/arraybuffers.js'
-  'build/handler/queue.js'
-  'build/logging/logging.js'
-  'build/webrtc/third_party/adapter.js'
-  'build/webrtc/*.js'
   'build/freedom/coreproviders/*.js'
   'build/freedom/interfaces/*.js'
 ]
