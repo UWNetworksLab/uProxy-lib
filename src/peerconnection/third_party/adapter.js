@@ -4,6 +4,7 @@ var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
+var createIceServer = null;
 
 if (navigator.mozGetUserMedia) {
   console.log("This appears to be Firefox");

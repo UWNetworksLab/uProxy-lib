@@ -9,6 +9,7 @@ path = require 'path'
 customFreedomCoreProviders = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
+  'build/peerconnection/third_party/adapter.js'
   'build/peerconnection/*.js'
   'build/coreproviders/interfaces/*.js'
   'build/coreproviders/providers/*.js'
@@ -93,6 +94,7 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
+      peerconnection: Rule.copyModule 'peerconnection'
       logger: Rule.copyModule 'logger'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
@@ -193,6 +195,7 @@ module.exports = (grunt) ->
   taskManager.add 'peerconnection', [
     'base'
     'typescript:peerconnection'
+    'copy:peerconnection'
   ]
 
   taskManager.add 'chat', [
