@@ -4,17 +4,18 @@ Rule = require './tools/common-grunt-rules'
 fs = require 'fs'
 path = require 'path'
 
-# Our custom core providers, plus dependencies.
-# These files are included with our custom builds of Freedom.
 customFreedomCoreTopLevel = [
   'build/arraybuffers/arraybuffers.js'
   'build/handler/queue.js'
   'build/logging/logging.js'
-]
-
-customFreedomCoreProviders = [
   'build/webrtc/third_party/adapter.js'
   'build/webrtc/*.js'
+]
+
+# Our custom core provider dependencies. These files are included with our
+# custom builds of Freedom. Note: they assume that the JS environment has
+# included at least |customFreedomCoreTopLevel|
+customFreedomCoreProviders = [
   'build/freedom/coreproviders/providers/*.js'
   'build/freedom/coreproviders/interfaces/*.js'
 ]
@@ -56,17 +57,12 @@ module.exports = (grunt) ->
       mangle: false
       beautify: true
       preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
-      # banner:
-      # customFreedomCoreTopLevel.concat(banners)
-      #   .map((fileName) -> fs.readFileSync(fileName)).join('\n')
-      # footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
     files: [{
-      src: customFreedomCoreTopLevel
-            .concat(banners)
-            .concat(freedomSrc)
+      src: freedomSrc
             .concat(customFreedomCoreProviders)
             .concat(files)
-            .concat(footers)
       dest: path.join('build/freedom/', name)
     }]
 
@@ -200,14 +196,15 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'logging', [
-    'copy:logging'
     'base'
+    'typescript:loggingSpecDecl'
     'typescript:logging'
     'jasmine:logging'
   ]
 
   taskManager.add 'webrtc', [
     'base'
+    'logging'
     'typescript:webrtc'
     'copy:webrtc'
   ]
@@ -226,27 +223,26 @@ module.exports = (grunt) ->
     'copy:sampleChat2'
   ]
 
-  taskManager.add 'coreproviders', [
+  taskManager.add 'freedomCoreproviders', [
     'base'
     'arraybuffers'
     'handler'
     'webrtc'
-    'typescript:coreproviders'
-    'jasmine:coreproviders'
+    'typescript:freedomCoreproviders'
   ]
 
   taskManager.add 'freedomForWebpagesForUproxy', [
-    'coreproviders'
+    'freedomCoreproviders'
     'uglify:freedomForWebpagesForUproxy'
   ]
 
   taskManager.add 'freedomForChromeForUproxy', [
-    'coreproviders'
+    'freedomCoreproviders'
     'uglify:freedomForChromeForUproxy'
   ]
 
   taskManager.add 'freedomForFirefoxForUproxy', [
-    'coreproviders'
+    'freedomCoreproviders'
     'uglify:freedomForFirefoxForUproxy'
   ]
 
@@ -263,7 +259,7 @@ module.exports = (grunt) ->
     'taskmanager'
     'handler'
     'logging'
-    'peerconnection'
+    'webrtc'
     'chat'
     'chat2'
     'freedomForWebpagesForUproxy'
@@ -276,8 +272,8 @@ module.exports = (grunt) ->
   # and on Travis/Sauce Labs.
   taskManager.add 'test', [
     'base'
-    'typescript:freedomDeclarations'
-    'typescript:freedomDeclarationsSpecDecl'
+    'typescript:freedomTypings'
+    'typescript:freedomTypingsSpecDecl'
     'build'
     'jasmine:handler'
     'jasmine:taskmanager'
