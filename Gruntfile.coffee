@@ -13,10 +13,10 @@ customFreedomCoreTopLevel = [
 ]
 
 customFreedomCoreProviders = [
-  'build/peerconnection/third_party/adapter.js'
-  'build/peerconnection/*.js'
-  'build/coreproviders/providers/*.js'
-  'build/coreproviders/interfaces/*.js'
+  'build/webrtc/third_party/adapter.js'
+  'build/webrtc/*.js'
+  'build/freedom/coreproviders/providers/*.js'
+  'build/freedom/coreproviders/interfaces/*.js'
 ]
 
 module.exports = (grunt) ->
@@ -115,8 +115,8 @@ module.exports = (grunt) ->
       taskmanager: Rule.typescriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
       # Freedom interfaces (no real spec, only for typescript checking)
-      freedomDeclarations: Rule.typescriptSrc 'freedom-declarations'
-      freedomDeclarationsSpecDecl: Rule.typescriptSpecDecl 'freedom-declarations'
+      freedomDeclarations: Rule.typescriptSrc 'freedom/typings'
+      freedomDeclarationsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
       # The uProxy modules library
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
