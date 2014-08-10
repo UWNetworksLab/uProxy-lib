@@ -104,19 +104,17 @@ module.exports = (grunt) ->
           dest: 'build/'
           onlyIf: 'modified'
         } ] }
-      peerconnection: Rule.copyModule 'peerconnection'
+      webrtc: Rule.copyModule 'webrtc'
       # Sample apps to demonstrate and run end-to-end tests.
-      sampleChat: Rule.copySampleFiles 'peerconnection/samples/chat-webpage', 'lib'
-      sampleChat2: Rule.copySampleFiles 'peerconnection/samples/chat2-webpage', 'lib'
-      sampleFreedomchat: Rule.copySampleFiles 'coreproviders/samples/freedomchat-chromeapp', 'lib'
+      sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
+      sampleChat2: Rule.copySampleFiles 'webrtc/samples/chat2-webpage', 'lib'
+      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-chromeapp', 'lib'
 
     typescript:
       # For bootstrapping of this Gruntfile
       taskmanager: Rule.typescriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
-      # Freedom interfaces (no real spec, only for typescript checking)
-      freedomDeclarations: Rule.typescriptSrc 'freedom/typings'
-      freedomDeclarationsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
+
       # The uProxy modules library
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
@@ -127,13 +125,17 @@ module.exports = (grunt) ->
       logging: Rule.typescriptSrc 'logging'
       loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
 
-      peerconnection: Rule.typescriptSrc 'peerconnection'
-      chat: Rule.typescriptSrc 'peerconnection/samples/chat-webpage'
-      chat2: Rule.typescriptSrc 'peerconnection/samples/chat2-webpage'
+      webrtc: Rule.typescriptSrc 'webrtc'
+      chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
+      chat2: Rule.typescriptSrc 'webrtc/samples/chat2-webpage'
 
-      coreproviders: Rule.typescriptSrc 'coreproviders'
-      coreprovidersSpecDecl: Rule.typescriptSpecDecl 'coreproviders'
-      freedomchat: Rule.typescriptSrc 'coreproviders/samples/freedomchat-chromeapp'
+      # Freedom interfaces (no real spec, only for typescript checking)
+      freedomTypings: Rule.typescriptSrc 'freedom/typings'
+      freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
+      freedomInterfaces: Rule.typescriptSrc 'freedom/interfaces'
+      freedomCoreproviders: Rule.typescriptSrc 'freedom/coreproviders'
+
+      freedomChat: Rule.typescriptSrc 'freedom/samples/freedomchat-chromeapp'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -204,22 +206,22 @@ module.exports = (grunt) ->
     'jasmine:logging'
   ]
 
-  taskManager.add 'peerconnection', [
+  taskManager.add 'webrtc', [
     'base'
-    'typescript:peerconnection'
-    'copy:peerconnection'
+    'typescript:webrtc'
+    'copy:webrtc'
   ]
 
   taskManager.add 'chat', [
     'base'
-    'peerconnection'
+    'webrtc'
     'typescript:chat'
     'copy:sampleChat'
   ]
 
   taskManager.add 'chat2', [
     'base'
-    'peerconnection'
+    'webrtc'
     'typescript:chat2'
     'copy:sampleChat2'
   ]
@@ -228,7 +230,7 @@ module.exports = (grunt) ->
     'base'
     'arraybuffers'
     'handler'
-    'peerconnection'
+    'webrtc'
     'typescript:coreproviders'
     'jasmine:coreproviders'
   ]
@@ -248,11 +250,11 @@ module.exports = (grunt) ->
     'uglify:freedomForFirefoxForUproxy'
   ]
 
-  taskManager.add 'freedomchat', [
+  taskManager.add 'freedomChat', [
     'base'
     'freedomForWebpagesForUproxy'
-    'typescript:freedomchat'
-    'copy:sampleFreedomchat'
+    'typescript:freedomChat'
+    'copy:sampleFreedomChat'
   ]
 
   taskManager.add 'build', [
@@ -267,7 +269,7 @@ module.exports = (grunt) ->
     'freedomForWebpagesForUproxy'
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
-    'freedomchat'
+    'freedomChat'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
