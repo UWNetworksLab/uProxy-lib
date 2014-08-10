@@ -5,11 +5,6 @@
       "name": "root",
       "follow_symlinks": true
     },
-    {
-      "path": "../../build/typescript-src",
-      "name": "build/typescript-src",
-      "follow_symlinks": true
-    }
   ],
   "settings": {
     "tab_size": 2,
@@ -19,15 +14,15 @@
 
     "typescript": {
       "roots":[
-          "root.ts",
+        "root.ts",
       ],
-      "settings":{
+      "settings": {
         "auto_complete":true,
         "node_path":"none",
         "error_on_save_only":false,
         "build_on_save":false,
         "show_build_file":false,
-        "build_parameters":{
+        "build_parameters": {
           "pre_processing_commands":[],
           "post_processing_commands":[],
           "output_dir_path":"none",
