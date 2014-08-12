@@ -1,0 +1,30 @@
+<html>
+<head>
+  <title>PeerConnection chat client</title>
+</head>
+
+<body>
+  <div>A:</div>
+  <textarea id="sendAreaA" disabled></textarea>
+  <textarea id="receiveAreaA" disabled></textarea>
+  <div>
+    <button id="sendButtonA">Send</button>
+  </div>
+
+  <hr>
+
+  <div>B:</div>
+  <textarea id="sendAreaB" disabled></textarea>
+  <textarea id="receiveAreaB" disabled></textarea>
+  <div>
+    <button id="sendButtonB">Send</button>
+  </div>
+
+  <script src='lib/handler/queue.js'></script>
+  <script src='lib/logging/logging.js'></script>
+  <script src='lib/webrtc/third_party/adapter.js'></script>
+  <script src='lib/webrtc/datachannel.js'></script>
+  <script src='lib/webrtc/peerconnection.js'></script>
+  <script src='main.js'></script>
+</body>
+</html>

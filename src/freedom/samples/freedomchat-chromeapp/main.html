@@ -1,0 +1,49 @@
+<html>
+<head>
+  <title>PeerConnection chat client</title>
+  <!-- Dependencies for freedom-for-*-for-uproxy -->
+  <script src='lib/logging/logging.js'></script>
+  <script src='lib/handler/queue.js'></script>
+  <script src='lib/webrtc/third_party/adapter.js'></script>
+  <script src='lib/webrtc/datachannel.js'></script>
+  <script src='lib/webrtc/peerconnection.js'></script>
+</head>
+
+<body>
+  <div>A:</div>
+  <textarea id="sendAreaA" disabled></textarea>
+  <textarea id="receiveAreaA" disabled></textarea>
+  <div>
+    <button id="sendButtonA">Send</button>
+  </div>
+
+  <hr>
+
+  <div>B:</div>
+  <textarea id="sendAreaB" disabled></textarea>
+  <textarea id="receiveAreaB" disabled></textarea>
+  <div>
+    <button id="sendButtonB">Send</button>
+  </div>
+
+  <!-- Note the object in the script tag is JSON-parsed, and must have double-quotes on keys (due to odd freedom parsing of it), and has this format:
+    {
+      // This is useful for debugging.
+      //
+      "debug": true
+
+      // This makes modules run in iFrames instead of WebWorkers. You get
+      // syntax error warnings from iFrames where WebWorker's silently die.
+      //
+      "portType": "Frame"
+    }
+  -->
+  <script src='lib/freedom/freedom-for-webpages-for-uproxy.js'
+          data-manifest='freedom-module.json'>
+  {
+    "debug": false
+  }
+  </script>
+  <script src='main.js'></script>
+</body>
+</html>
