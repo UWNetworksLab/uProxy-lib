@@ -33,7 +33,7 @@ Quick note about how to use logging:
 * Now following functions are available to record log messages. 
 ```
  log.debug('simple debug message with no further argument');
- log.info('It can have arguments, like local link from %1:%2 to %1:%3', ['localhost', 3000, 3002]);
+ log.info('It takes args, like from %1:%2 to %1:%3', ['localhost', 3000, 3002]);
  log.warn('Warning message need some attention.');
  log.error('Error message definitely need attension from %1', [name_var]);
 ```
