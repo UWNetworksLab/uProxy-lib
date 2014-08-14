@@ -221,6 +221,7 @@ module.exports = (grunt) ->
     'base'
     'arraybuffers'
     'handler'
+    'logging'
     'webrtc'
     'typescript:freedomCoreproviders'
     'typescript:freedomInterfaces'
