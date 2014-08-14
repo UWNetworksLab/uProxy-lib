@@ -50,7 +50,7 @@ module.exports = (grunt) ->
       beautify: true
       preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
       banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
-      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n')
+      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n') + '//# sourceMappingURL=' + name + '.map'
     files: [{
       src: freedomSrc.concat(customFreedomCoreProviders).concat(files)
       dest: path.join('build/freedom/', name)
@@ -206,6 +206,7 @@ module.exports = (grunt) ->
   taskManager.add 'chat', [
     'base'
     'webrtc'
+    'logging'
     'typescript:chat'
     'copy:sampleChat'
   ]
