@@ -4,6 +4,8 @@
 
 Distributed on NPM as [uproxy-lib](https://www.npmjs.org/package/uproxy-lib).
 
+## What is in this directory? 
+
 This currently consists of:
 
  * `tools`: tools to help write other Gruntfiles (taskmanager and common grunt rules compiled as JS).
@@ -21,7 +23,7 @@ This currently consists of:
  * `third_party`: Some third party code we use. Mostly TypeScript declarations (e.g. jasmine, WebCrypto, WebRtc, Angular, etc), and some some utility code for providing a common interface to new APIs we use (e.g. the WebRtc adaptor).
 
 
-Quick note about how to use logging:
+## How to use logging
 
 * Please include "logging/logging.js" in the html file where freedom library is loaded, please make sure this loading happens before freedom code.
 * In the freedom module's manifestition file where log is used, please add dependency "core.log". If your app need to access the log, you also need to include dependency of "core.logmanager"
@@ -40,3 +42,5 @@ Quick note about how to use logging:
  log.warn('Warning message need some attention.');
  log.error('Error message definitely need attension from %1', [name_var]);
 ```
+
+For a complete example, see: https://github.com/uProxy/uproxy-lib/tree/dev/src/freedom/samples/freedomchat-chromeapp
