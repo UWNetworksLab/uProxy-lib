@@ -239,10 +239,14 @@ module WebRtc {
     // description that should be set as the local description and sent to the
     // peer.
     private createOffer_ = () : Promise<RTCSessionDescription> => {
-      return new Promise((F,R) => { this.pc_.createOffer(F, R); });
+      return new Promise((F,R) => {
+        this.pc_.createOffer(F, R, this.config_.webrtcMediaConstraints);
+      });
     }
     private createAnswer_ = () : Promise<RTCSessionDescription> => {
-      return new Promise((F,R) => { this.pc_.createAnswer(F, R); });
+      return new Promise((F,R) => {
+        this.pc_.createAnswer(F, R, this.config_.webrtcMediaConstraints);
+      });
     }
     // Setting the local description will be followed by sending the SDP message
     // to the peer, so we return the description value here.
