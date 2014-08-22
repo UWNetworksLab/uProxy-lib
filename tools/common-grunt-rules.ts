@@ -51,7 +51,7 @@ module exports {
     return {
       files: [
         { // Copy the sample source to the build sample directory
-          expand: true, cwd: 'src/' + samplePath
+          expand: true, cwd: 'src/' + samplePath,
           src: ['**/*',
                 '!**/*.ts',
                 '!**/*.sass'],
@@ -75,7 +75,8 @@ module exports {
         // Help Jasmine's PhantomJS understand promises.
         'node_modules/es6-promise/dist/promise-*.js',
         '!node_modules/es6-promise/dist/promise-*amd.js',
-        '!node_modules/es6-promise/dist/promise-*.min.js'
+        '!node_modules/es6-promise/dist/promise-*.min.js',
+        'node_modules/arraybuffer-slice/index.js'
       ];
     return {
       src: jasmine_helpers.concat([

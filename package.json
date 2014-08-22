@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "es6-promise": "^1.0.0",
+    "arraybuffer-slice": "~0.1.2",
     "grunt": "~0.4.4",
     "grunt-contrib-jasmine": "~0.6.4",
     "grunt-contrib-clean": "~0.5.0",
@@ -22,6 +23,7 @@
     "freedom-for-firefox": "~0.4.1"
   },
   "scripts": {
-    "test": "grunt --verbose"
+    "test": "grunt --verbose",
+    "prepublish": "grunt default"
   }
 }
