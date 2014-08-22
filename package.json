@@ -23,7 +23,6 @@
     "freedom-for-firefox": "~0.4.1"
   },
   "scripts": {
-    "test": "grunt --verbose",
-    "prepublish": "grunt default"
+    "test": "grunt --verbose"
   }
 }
