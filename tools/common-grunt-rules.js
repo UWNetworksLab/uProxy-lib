@@ -57,12 +57,12 @@ var exports;
         return {
             files: [
                 {
-                    expand: true, cwd: 'src/',
+                    expand: true, cwd: 'src/' + samplePath,
                     src: [
-                        samplePath + '/**/*',
-                        '!' + samplePath + '/**/*.ts',
-                        '!' + samplePath + '/**/*.sass'],
-                    dest: 'build/',
+                        '**/*',
+                        '!**/*.ts',
+                        '!**/*.sass'],
+                    dest: 'build/' + samplePath,
                     onlyIf: 'modified'
                 }, {
                     expand: true, cwd: 'build',
@@ -70,6 +70,14 @@ var exports;
                         '**/*',
                         '!**/samples/**',
                         '!**/typescript-src/**'],
+                    dest: 'build/' + samplePath + '/' + libDir,
+                    onlyIf: 'modified'
+                }, {
+                    expand: true, cwd: 'build',
+                    src: [
+                        'typescript-src/**/*.ts',
+                        '!**/*.d.ts',
+                        '!**/*.spec.ts'],
                     dest: 'build/' + samplePath + '/' + libDir,
                     onlyIf: 'modified'
                 }
@@ -83,7 +91,8 @@ var exports;
         var jasmine_helpers = [
             'node_modules/es6-promise/dist/promise-*.js',
             '!node_modules/es6-promise/dist/promise-*amd.js',
-            '!node_modules/es6-promise/dist/promise-*.min.js'
+            '!node_modules/es6-promise/dist/promise-*.min.js',
+            'node_modules/arraybuffer-slice/index.js'
         ];
         return {
             src: jasmine_helpers.concat([
