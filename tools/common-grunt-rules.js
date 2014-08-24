@@ -72,6 +72,14 @@ var exports;
                         '!**/typescript-src/**'],
                     dest: 'build/' + samplePath + '/' + libDir,
                     onlyIf: 'modified'
+                }, {
+                    expand: true, cwd: 'build',
+                    src: [
+                        'typescript-src/**/*.ts',
+                        '!**/*.d.ts',
+                        '!**/*.spec.ts'],
+                    dest: 'build/' + samplePath + '/' + libDir,
+                    onlyIf: 'modified'
                 }
             ]
         };

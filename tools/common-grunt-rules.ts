@@ -64,6 +64,13 @@ module exports {
                 '!**/typescript-src/**'],
           dest: 'build/' + samplePath + '/' + libDir,
           onlyIf: 'modified'
+        }, {  // Copy all modules typescript for sourcemaps to work
+          expand: true, cwd: 'build',
+          src: ['typescript-src/**/*.ts',
+                '!**/*.d.ts',
+                '!**/*.spec.ts'],
+          dest: 'build/' + samplePath + '/' + libDir,
+          onlyIf: 'modified'
         }
       ]
     };
