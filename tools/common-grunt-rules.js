@@ -8,8 +8,8 @@ var exports;
         return {
             src: [
                 'build/typescript-src/' + name + '/**/*.ts',
-                '!build/typescript-src/' + name + '/samples/**/*.ts',
-                '!build/typescript-src/' + name + '/**/*.d.ts'],
+                '!**/*.d.ts',
+                '!build/typescript-src/' + name + '/**/samples/**'],
             dest: 'build/',
             options: {
                 basePath: 'build/typescript-src/',
@@ -28,7 +28,8 @@ var exports;
         return {
             src: [
                 'build/typescript-src/' + name + '/**/*.spec.ts',
-                'build/typescript-src/' + name + '/**/*.d.ts'],
+                'build/typescript-src/' + name + '/**/*.d.ts',
+                '!build/typescript-src/' + name + '/**/samples/**'],
             dest: 'build/',
             options: {
                 basePath: 'build/typescript-src/',
