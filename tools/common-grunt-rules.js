@@ -29,7 +29,7 @@ var exports;
             src: [
                 'build/typescript-src/' + name + '/**/*.spec.ts',
                 'build/typescript-src/' + name + '/**/*.d.ts',
-                '!build/typescript-src/' + name + '/**/samples/**/*'],
+                '!build/typescript-src/' + name + '/**/samples/**'],
             dest: 'build/',
             options: {
                 basePath: 'build/typescript-src/',
