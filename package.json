@@ -26,8 +26,8 @@
     "grunt-typescript": "~0.3.7",
     "grunt-contrib-uglify": "~0.5.0",
     "es5-shim": "^4.0.0",
-    "freedom": "~0.5.0",
-    "freedom-for-chrome": "~0.3.2",
+    "freedom": "git://github.com/freedomjs/freedom.git#iislucas-fixconfig",
+    "freedom-for-chrome": "git://github.com/freedomjs/freedom-for-chrome.git#iislucas-tcpfixes",
     "freedom-for-firefox": "~0.4.1"
   },
   "scripts": {
