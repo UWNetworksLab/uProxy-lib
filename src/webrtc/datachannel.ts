@@ -183,13 +183,22 @@ module WebRtc {
 
     // Assumes data is chunked.
     private handleSendDataToPeer_ = (data:Data) : Promise<void> => {
-      if(data.str) {
-        this.rtcDataChannel_.send(data.str);
-      } else if(data.buffer) {
-        this.rtcDataChannel_.send(data.buffer);
-      } else {
+      try {
+        if(data.str) {
+          this.rtcDataChannel_.send(data.str);
+        } else if(data.buffer) {
+          this.rtcDataChannel_.send(data.buffer);
+        } else {
+          // Data is good when it meets the type expected of the Data. If type-
+          // saftey is ensured at compile time, this should never happen.
+          return Promise.reject(new Error(
+              'Bad data: ' + JSON.stringify(data)));
+        }
+      // Can raise NetworkError if channel died, for example.
+      } catch (e) {
+        log.debug('Error in send' + e.toString());
         return Promise.reject(new Error(
-            'Bad data: ' + JSON.stringify(data)));
+            'Error in send: ' + JSON.stringify(e)));
       }
       this.conjestionControlSendHandler();
       return Promise.resolve<void>();
