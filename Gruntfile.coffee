@@ -102,6 +102,8 @@ module.exports = (grunt) ->
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
 
       # The uProxy modules library
+      crypto: Rule.typescriptSrc 'crypto'
+
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
 
@@ -177,6 +179,11 @@ module.exports = (grunt) ->
     'typescript:taskmanager'
   ]
 
+  taskManager.add 'crypto', [
+    'base'
+    'typescript:crypto'
+  ]
+
   taskManager.add 'arraybuffers', [
     'base'
     'typescript:arraybuffersSpecDecl'
@@ -199,6 +206,7 @@ module.exports = (grunt) ->
   taskManager.add 'webrtc', [
     'base'
     'logging'
+    'crypto'
     'typescript:webrtc'
     'copy:webrtc'
   ]
@@ -256,6 +264,7 @@ module.exports = (grunt) ->
     'taskmanager'
     'handler'
     'logging'
+    'crypto'
     'webrtc'
     'chat'
     'chat2'
