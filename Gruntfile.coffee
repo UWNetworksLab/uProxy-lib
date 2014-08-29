@@ -48,12 +48,33 @@ module.exports = (grunt) ->
       sourceMapIncludeSources: true
       mangle: false
       beautify: true
-      preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
+      preserveComments: 'all'
       banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
       footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n') + '//# sourceMappingURL=' + name + '.map'
     files: [{
       src: freedomSrc.concat(customFreedomCoreProviders).concat(files)
       dest: path.join('build/freedom/', name)
+    }]
+
+  # Builds the env that uproxy for * for freedom needs. e.g. stuff for peer
+  # connection etc.
+  uglifyUproxyFreedomCoreEnv =
+    options:
+      sourceMap: true
+      sourceMapName: 'build/freedom/uproxy-freedom-core-env.map'
+      sourceMapIncludeSources: true
+      mangle: false
+      beautify: true
+      preserveComments: 'all'
+    files: [{
+      src: ['build/arraybuffers/arraybuffers.js'
+            'build/handler/queue.js'
+            'build/crypto/random.js'
+            'build/logging/logging.js'
+            'build/webrtc/third_party/adapter.js'
+            'build/webrtc/datachannel.js'
+            'build/webrtc/peerconnection.js']
+      dest: path.join('build/freedom/uproxy-freedom-core-env.js')
     }]
 
   #-------------------------------------------------------------------------
@@ -153,6 +174,7 @@ module.exports = (grunt) ->
           './node_modules/freedom/src/util/preamble.js']
         [ 'src/freedom/uproxy-freedom-postamble.js',
           './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
+      uglifyUproxyFreedomCoreEnv: uglifyUproxyFreedomCoreEnv
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -171,6 +193,15 @@ module.exports = (grunt) ->
     'copy:thirdPartyJavaScript'
     'symlink:thirdPartyTypescriptSrc'
     'symlink:typescriptSrc'
+  ]
+
+  taskManager.add 'uproxyFreedomCoreEnv', [
+    'crypto'
+    'arraybuffers'
+    'handler'
+    'logging'
+    'webrtc'
+    'uglify:uglifyUproxyFreedomCoreEnv'
   ]
 
   taskManager.add 'taskmanager', [
@@ -254,6 +285,7 @@ module.exports = (grunt) ->
   taskManager.add 'freedomChat', [
     'base'
     'freedomForWebpagesForUproxy'
+    'uproxyFreedomCoreEnv'
     'typescript:freedomChat'
     'copy:sampleFreedomChat'
   ]
@@ -271,6 +303,7 @@ module.exports = (grunt) ->
     'freedomForWebpagesForUproxy'
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
+    'uproxyFreedomCoreEnv'
     'freedomChat'
   ]
 
