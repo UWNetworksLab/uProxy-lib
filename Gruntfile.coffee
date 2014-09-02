@@ -58,10 +58,10 @@ module.exports = (grunt) ->
 
   # Builds the env that uproxy for * for freedom needs. e.g. stuff for peer
   # connection etc.
-  uglifyUproxyFreedomCoreEnv =
+  uglifyUproxyCoreEnv =
     options:
       sourceMap: true
-      sourceMapName: 'build/freedom/uproxy-freedom-core-env.map'
+      sourceMapName: 'build/freedom/uproxy-core-env.map'
       sourceMapIncludeSources: true
       mangle: false
       beautify: true
@@ -74,7 +74,7 @@ module.exports = (grunt) ->
             'build/webrtc/third_party/adapter.js'
             'build/webrtc/datachannel.js'
             'build/webrtc/peerconnection.js']
-      dest: path.join('build/freedom/uproxy-freedom-core-env.js')
+      dest: path.join('build/freedom/uproxy-core-env.js')
     }]
 
   #-------------------------------------------------------------------------
@@ -174,7 +174,7 @@ module.exports = (grunt) ->
           './node_modules/freedom/src/util/preamble.js']
         [ 'src/freedom/uproxy-freedom-postamble.js',
           './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
-      uglifyUproxyFreedomCoreEnv: uglifyUproxyFreedomCoreEnv
+      uglifyUproxyCoreEnv: uglifyUproxyCoreEnv
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -195,13 +195,13 @@ module.exports = (grunt) ->
     'symlink:typescriptSrc'
   ]
 
-  taskManager.add 'uproxyFreedomCoreEnv', [
+  taskManager.add 'uproxyCoreEnv', [
     'crypto'
     'arraybuffers'
     'handler'
     'logging'
     'webrtc'
-    'uglify:uglifyUproxyFreedomCoreEnv'
+    'uglify:uglifyUproxyCoreEnv'
   ]
 
   taskManager.add 'taskmanager', [
@@ -244,15 +244,14 @@ module.exports = (grunt) ->
 
   taskManager.add 'chat', [
     'base'
-    'webrtc'
-    'logging'
+    'uproxyCoreEnv'
     'typescript:chat'
     'copy:sampleChat'
   ]
 
   taskManager.add 'chat2', [
     'base'
-    'webrtc'
+    'uproxyCoreEnv'
     'typescript:chat2'
     'copy:sampleChat2'
   ]
@@ -285,7 +284,7 @@ module.exports = (grunt) ->
   taskManager.add 'freedomChat', [
     'base'
     'freedomForWebpagesForUproxy'
-    'uproxyFreedomCoreEnv'
+    'uproxyCoreEnv'
     'typescript:freedomChat'
     'copy:sampleFreedomChat'
   ]
@@ -298,12 +297,12 @@ module.exports = (grunt) ->
     'logging'
     'crypto'
     'webrtc'
+    'uproxyCoreEnv'
     'chat'
     'chat2'
     'freedomForWebpagesForUproxy'
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
-    'uproxyFreedomCoreEnv'
     'freedomChat'
   ]
 
