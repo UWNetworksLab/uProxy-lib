@@ -48,12 +48,33 @@ module.exports = (grunt) ->
       sourceMapIncludeSources: true
       mangle: false
       beautify: true
-      preserveComments: (node, comment) -> comment.value.indexOf('jslint') != 0
+      preserveComments: 'all'
       banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
       footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n') + '//# sourceMappingURL=' + name + '.map'
     files: [{
       src: freedomSrc.concat(customFreedomCoreProviders).concat(files)
       dest: path.join('build/freedom/', name)
+    }]
+
+  # Builds the env that uproxy for * for freedom needs. e.g. stuff for peer
+  # connection etc.
+  uglifyUproxyCoreEnv =
+    options:
+      sourceMap: true
+      sourceMapName: 'build/freedom/uproxy-core-env.map'
+      sourceMapIncludeSources: true
+      mangle: false
+      beautify: true
+      preserveComments: 'all'
+    files: [{
+      src: ['build/arraybuffers/arraybuffers.js'
+            'build/handler/queue.js'
+            'build/crypto/random.js'
+            'build/logging/logging.js'
+            'build/webrtc/third_party/adapter.js'
+            'build/webrtc/datachannel.js'
+            'build/webrtc/peerconnection.js']
+      dest: path.join('build/freedom/uproxy-core-env.js')
     }]
 
   #-------------------------------------------------------------------------
@@ -102,6 +123,8 @@ module.exports = (grunt) ->
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
 
       # The uProxy modules library
+      crypto: Rule.typescriptSrc 'crypto'
+
       arraybuffers: Rule.typescriptSrc 'arraybuffers'
       arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
 
@@ -151,6 +174,7 @@ module.exports = (grunt) ->
           './node_modules/freedom/src/util/preamble.js']
         [ 'src/freedom/uproxy-freedom-postamble.js',
           './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
+      uglifyUproxyCoreEnv: uglifyUproxyCoreEnv
   }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
@@ -171,10 +195,24 @@ module.exports = (grunt) ->
     'symlink:typescriptSrc'
   ]
 
+  taskManager.add 'uproxyCoreEnv', [
+    'crypto'
+    'arraybuffers'
+    'handler'
+    'logging'
+    'webrtc'
+    'uglify:uglifyUproxyCoreEnv'
+  ]
+
   taskManager.add 'taskmanager', [
     'base'
     'typescript:taskmanagerSpecDecl'
     'typescript:taskmanager'
+  ]
+
+  taskManager.add 'crypto', [
+    'base'
+    'typescript:crypto'
   ]
 
   taskManager.add 'arraybuffers', [
@@ -199,21 +237,21 @@ module.exports = (grunt) ->
   taskManager.add 'webrtc', [
     'base'
     'logging'
+    'crypto'
     'typescript:webrtc'
     'copy:webrtc'
   ]
 
   taskManager.add 'chat', [
     'base'
-    'webrtc'
-    'logging'
+    'uproxyCoreEnv'
     'typescript:chat'
     'copy:sampleChat'
   ]
 
   taskManager.add 'chat2', [
     'base'
-    'webrtc'
+    'uproxyCoreEnv'
     'typescript:chat2'
     'copy:sampleChat2'
   ]
@@ -246,6 +284,7 @@ module.exports = (grunt) ->
   taskManager.add 'freedomChat', [
     'base'
     'freedomForWebpagesForUproxy'
+    'uproxyCoreEnv'
     'typescript:freedomChat'
     'copy:sampleFreedomChat'
   ]
@@ -256,7 +295,9 @@ module.exports = (grunt) ->
     'taskmanager'
     'handler'
     'logging'
+    'crypto'
     'webrtc'
+    'uproxyCoreEnv'
     'chat'
     'chat2'
     'freedomForWebpagesForUproxy'

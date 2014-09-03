@@ -14,7 +14,7 @@
 
     "typescript": {
       "roots":[
-        "root.ts",
+        "root.ts"
       ],
       "settings": {
         "auto_complete":true,
