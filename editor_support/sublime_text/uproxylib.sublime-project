@@ -4,7 +4,7 @@
       "path": "../../",
       "name": "uproxy-lib project",
       "follow_symlinks": true
-    },
+    }
   ],
   "settings": {
     "tab_size": 2,
@@ -14,7 +14,7 @@
 
     "typescript": {
       "roots":[
-        "root.ts",
+        "root.ts"
       ],
       "settings": {
         "auto_complete":true,
