@@ -107,7 +107,7 @@ module.exports = (grunt) ->
       # Copy any JavaScript from the third_party directory
       thirdPartyJavaScript: { files: [ {
           expand: true,
-          src: ['third_party/**/*.js']
+          src: ['third_party/**/*.js', 'third_party/**/*.js.map']
           dest: 'build/'
           onlyIf: 'modified'
         } ] }

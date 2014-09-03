@@ -8,11 +8,20 @@
 
 // Common on/emit for message passing interfaces.
 interface EventDispatchFn<T> { (eventType:string, value?:T) : void; }
-interface EventHandlerFn<T> { (eventType:string, handler:(eventData:T) => void) : void; }
+interface EventHandlerFn<T> {
+  (eventType:string, handler:(eventData:T) => void) : void;
+}
 
 interface OnAndEmit<T,T2> {
   on   :EventHandlerFn<T>;
   emit :EventDispatchFn<T2>;
+}
+
+// The type for a core provider's 'continuation' function argument. It's
+// basically a promise-like thing.
+// CONSIDER: generalise the error value to a type-parameter.
+interface CoreProviderCallback<T> {
+  (fulfill?:T, reject?:{message: string}) : void;
 }
 
 declare module freedom {
