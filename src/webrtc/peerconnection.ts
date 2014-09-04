@@ -1,9 +1,11 @@
 /// <reference path='RTCPeerConnection.d.ts' />
+/// <reference path="../crypto/random.d.ts"/>
 /// <reference path='../handler/queue.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path='../third_party/typings/webcrypto/WebCrypto.d.ts' />
 /// <reference path='../third_party/typings/webrtc/RTCPeerConnection.d.ts' />
 /// <reference path='../logging/logging.d.ts' />
+
+/// <reference path='datachannel.ts' />
 
 // DataPeer - a class that wraps peer connections and data channels.
 //
@@ -69,13 +71,6 @@ module WebRtc {
     CONNECTED,    // Can move to DISCONNECTED.
     DISCONNECTED  // End-state, cannot change.
   };
-
-  // Small convenience wrapper for WebCrypto random Uint32.
-  export var randomUint32 = () : number => {
-    var randomArray = new Uint32Array(1);
-    crypto.getRandomValues(randomArray);
-    return randomArray[0];
-  }
 
   // Quick port of djb2 for comparison of SDP headers to choose initiator.
   export var stringHash = (s:string) : number => {
@@ -173,7 +168,7 @@ module WebRtc {
       }
 
       this.peerName = this.config_.peerName ||
-          'unnamed-pc-' + randomUint32();
+          'unnamed-pc-' + Crypto.randomUint32();
 
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;

@@ -1,34 +1,38 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "10.0.3",
+  "version": "11.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
   },
   "bugs": {
     "url": "https://github.com/uProxy/uproxy/issues",
-    "email": "uproxy-eng@googlegroups.com"
+    "email": "info@uproxy.org"
   },
   "licenses": [ {
     "type": "Apache-2.0",
     "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
   } ],
-  "devDependencies": {
+  "dependencies": {
     "es6-promise": "^1.0.0",
     "arraybuffer-slice": "~0.1.2",
+    "es5-shim": "^4.0.0"
+  },
+  "devDependencies": {
     "grunt": "~0.4.4",
     "grunt-contrib-jasmine": "~0.6.4",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-coffee": "~0.10.1",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-symlink": "~0.3.0",
+    "grunt-contrib-uglify": "~0.5.1",
+    "grunt-contrib-watch": "~0.6.1",
     "grunt-typescript": "~0.3.7",
-    "grunt-contrib-uglify": "~0.5.0",
-    "es5-shim": "^4.0.0",
+    "typescript": "^1.0.1",
     "freedom": "git://github.com/freedomjs/freedom.git#iislucas-fixconfig",
     "freedom-for-chrome": "git://github.com/freedomjs/freedom-for-chrome.git#iislucas-tcpfixes",
-    "freedom-for-firefox": "~0.4.1"
+    "freedom-for-firefox": "~0.4.2"
   },
   "scripts": {
     "test": "grunt test",
