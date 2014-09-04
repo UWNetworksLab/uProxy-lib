@@ -159,6 +159,9 @@ module WebRtc {
     public signalForPeerQueue :Handler.Queue<SignallingMessage,void>;
     public fromPeerCandidateQueue :Handler.Queue<RTCIceCandidate,void>;
 
+    // https://code.google.com/p/webrtc/issues/detail?id=3778
+    private closeWorkaroundIndex_ = 0;
+
     // if |createOffer| is true, the consturctor will immidiately initiate
     // negotiation.
     constructor(private config_ :PeerConnectionConfig) {
@@ -564,6 +567,15 @@ module WebRtc {
         : DataChannel => {
       log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
           '; options=' + JSON.stringify(options));
+
+      // https://code.google.com/p/webrtc/issues/detail?id=3778
+      if (options !== undefined) {
+        if (!('id' in options)) {
+          options.id = this.closeWorkaroundIndex_++;
+        }
+      } else {
+        options = { id: this.closeWorkaroundIndex_++ };
+      }
       var rtcDataChannel = this.pc_.createDataChannel(channelLabel, options);
 
       // Firefox does not fire the |'negotiationneeded'| event, so we need to
