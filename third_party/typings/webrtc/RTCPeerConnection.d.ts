@@ -262,7 +262,8 @@ interface RTCPeerConnection {
   onicecandidate: (event: RTCIceCandidateEvent) => void;
   onidentityresult: (event: Event) => void;
   onsignalingstatechange: (event: Event) => void;
-  getStats: (successCallback: RTCStatsCallback,
+  getStats: (selector: MediaStreamTrack,
+             successCallback: RTCStatsCallback,
              failureCallback: RTCPeerConnectionErrorCallback) => void;
 }
 declare var RTCPeerConnection: {
