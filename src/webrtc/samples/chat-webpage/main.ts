@@ -94,22 +94,27 @@ function send(pc:WebRtc.PeerConnection, textArea:HTMLInputElement) {
 sendButtonA.onclick = send.bind(null, a, sendAreaA);
 sendButtonB.onclick = send.bind(null, b, sendAreaB);
 
-// Have a negotiate a peerconnection. Once negotiated, open data channel. Once
+// Don't have to negotiate a peerconnection in firefox. Once negotiated, open data channel. Once
 // that works, enable the UI.
-a.negotiateConnection()
-  .then(() => {
-    var aTextDataChannel = a.openDataChannel('text');
-    aTextDataChannel.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
-      log.info('a: dataFromPeer: ' + JSON.stringify(data));
-      receiveAreaA.value = JSON.stringify(data);
-    });
-  })
-  .then(() => {
+if (typeof mozRTCPeerConnection !== 'undefined') {
+  openChannel();
+} else {
+  a.negotiateConnection().then(() => {
     log.info('peerconnection negotiated!');
-    sendAreaA.disabled = false;
-    sendAreaB.disabled = false;
-    sendButtonA.disabled = false;
-    sendButtonB.disabled = false;
-}, (e) => {
-  log.error('could not negotiate peerconnection: ' + e.message);
-});
+    openChannel();
+  }, (e) => {
+    log.error('could not negotiate peerconnection: ' + e.message);
+  });
+}
+
+function openChannel() {
+  var aTextDataChannel = a.openDataChannel('text');
+  aTextDataChannel.dataFromPeerQueue.setSyncHandler((data:WebRtc.Data) => {
+    log.info('a: dataFromPeer: ' + JSON.stringify(data));
+    receiveAreaA.value = JSON.stringify(data);
+  });
+  sendAreaA.disabled = false;
+  sendAreaB.disabled = false;
+  sendButtonA.disabled = false;
+  sendButtonB.disabled = false;
+}
