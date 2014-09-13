@@ -87,14 +87,14 @@ module.exports = (grunt) ->
         expand: true,
         overwrite: true,
         cwd: 'src',
-        src: ['*'],
+        src: ['**/*.ts'],
         dest: 'build/typescript-src/' } ] }
       # Symlink third_party into typescript-src
       thirdPartyTypescriptSrc: { files: [ {
         expand: true,
         overwrite: true,
         cwd: '.',
-        src: ['third_party'],
+        src: ['third_party/**/*.ts'],
         dest: 'build/typescript-src/' } ] }
 
     copy:
