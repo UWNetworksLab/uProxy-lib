@@ -118,7 +118,6 @@ module.exports = (grunt) ->
       webrtc: Rule.copyModule 'webrtc'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
-      sampleChat2: Rule.copySampleFiles 'webrtc/samples/chat2-webpage', 'lib'
       sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-webpage', 'lib'
 
     typescript:
@@ -140,7 +139,6 @@ module.exports = (grunt) ->
 
       webrtc: Rule.typescriptSrc 'webrtc'
       chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
-      chat2: Rule.typescriptSrc 'webrtc/samples/chat2-webpage'
 
       # Freedom interfaces (no real spec, only for typescript checking)
       freedomTypings: Rule.typescriptSrc 'freedom/typings'
@@ -253,13 +251,6 @@ module.exports = (grunt) ->
     'copy:sampleChat'
   ]
 
-  taskManager.add 'chat2', [
-    'base'
-    'uproxyCoreEnv'
-    'typescript:chat2'
-    'copy:sampleChat2'
-  ]
-
   taskManager.add 'freedomCoreproviders', [
     'base'
     'arraybuffers'
@@ -303,7 +294,6 @@ module.exports = (grunt) ->
     'webrtc'
     'uproxyCoreEnv'
     'chat'
-    'chat2'
     'freedomForWebpagesForUproxy'
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
