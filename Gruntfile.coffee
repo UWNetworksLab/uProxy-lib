@@ -119,7 +119,7 @@ module.exports = (grunt) ->
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
       sampleChat2: Rule.copySampleFiles 'webrtc/samples/chat2-webpage', 'lib'
-      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-chromeapp', 'lib'
+      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-webpage', 'lib'
 
     typescript:
       # For bootstrapping of this Gruntfile
@@ -148,7 +148,7 @@ module.exports = (grunt) ->
       freedomInterfaces: Rule.typescriptSrc 'freedom/interfaces'
       freedomCoreproviders: Rule.typescriptSrc 'freedom/coreproviders'
 
-      freedomChat: Rule.typescriptSrc 'freedom/samples/freedomchat-chromeapp'
+      freedomChat: Rule.typescriptSrc 'freedom/samples/freedomchat-webpage'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
