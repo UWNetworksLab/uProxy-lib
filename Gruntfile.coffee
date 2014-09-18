@@ -119,6 +119,7 @@ module.exports = (grunt) ->
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
       sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-webpage', 'lib'
+      sampleFreedomCopyPaste: Rule.copySampleFiles 'freedom/samples/freedom-copypaste-webpage', 'lib'
 
     typescript:
       # For bootstrapping of this Gruntfile
@@ -138,7 +139,6 @@ module.exports = (grunt) ->
       loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
 
       webrtc: Rule.typescriptSrc 'webrtc'
-      chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
 
       # Freedom interfaces (no real spec, only for typescript checking)
       freedomTypings: Rule.typescriptSrc 'freedom/typings'
@@ -146,7 +146,10 @@ module.exports = (grunt) ->
       freedomInterfaces: Rule.typescriptSrc 'freedom/interfaces'
       freedomCoreproviders: Rule.typescriptSrc 'freedom/coreproviders'
 
+      # Samples.
+      chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
       freedomChat: Rule.typescriptSrc 'freedom/samples/freedomchat-webpage'
+      freedomCopyPaste: Rule.typescriptSrc 'freedom/samples/freedom-copypaste-webpage'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -284,6 +287,14 @@ module.exports = (grunt) ->
     'copy:sampleFreedomChat'
   ]
 
+  taskManager.add 'freedomCopyPaste', [
+    'base'
+    'freedomForWebpagesForUproxy'
+    'uproxyCoreEnv'
+    'typescript:freedomCopyPaste'
+    'copy:sampleFreedomCopyPaste'
+  ]
+
   taskManager.add 'build', [
     'base'
     'arraybuffers'
@@ -298,6 +309,7 @@ module.exports = (grunt) ->
     'freedomForChromeForUproxy'
     'freedomForFirefoxForUproxy'
     'freedomChat'
+    'freedomCopyPaste'
   ]
 
   # This is the target run by Travis. Targets in here should run locally
