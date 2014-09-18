@@ -118,7 +118,7 @@ module.exports = (grunt) ->
       webrtc: Rule.copyModule 'webrtc'
       # Sample apps to demonstrate and run end-to-end tests.
       sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
-      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedomchat-webpage', 'lib'
+      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedom-chat-webpage', 'lib'
       sampleFreedomCopyPaste: Rule.copySampleFiles 'freedom/samples/freedom-copypaste-webpage', 'lib'
 
     typescript:
@@ -148,7 +148,7 @@ module.exports = (grunt) ->
 
       # Samples.
       chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
-      freedomChat: Rule.typescriptSrc 'freedom/samples/freedomchat-webpage'
+      freedomChat: Rule.typescriptSrc 'freedom/samples/freedom-chat-webpage'
       freedomCopyPaste: Rule.typescriptSrc 'freedom/samples/freedom-copypaste-webpage'
 
     jasmine:
