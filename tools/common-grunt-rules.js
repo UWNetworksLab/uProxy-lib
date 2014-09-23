@@ -1,85 +1,80 @@
-//-----------------------------------------------------------------------------
 // Naming this `exports` is bit of a hack to allow this file to be compiled
 // normally and still used by commonjs-style require.
 var exports;
 (function (exports) {
-    // Function to make a typescript rule based on expected directory layout.
+    // Compiles a module's source files, excluding tests and declarations.
+    // The files must already be available under build/.
     function typescriptSrc(name) {
         return {
             src: [
-                'build/typescript-src/' + name + '/**/*.ts',
-                '!**/*.d.ts',
-                '!build/typescript-src/' + name + '/**/samples/**'],
-            dest: 'build/',
+                'build/' + name + '/**/*.ts',
+                '!**/*.spec.ts',
+                '!**/*.d.ts'
+            ],
             options: {
-                basePath: 'build/typescript-src/',
-                ignoreError: false,
+                sourceRoot: 'build/',
+                target: 'es5',
+                comments: false,
                 noImplicitAny: true,
-                sourceMap: true
+                sourceMap: true,
+                fast: 'always'
             }
         };
     }
     exports.typescriptSrc = typescriptSrc;
 
-    // This is a typescript compilation rule that makes sure unit tests can
-    // typecheck with the declaration files only. This is a quick way to check
-    // declaration files are approximately valid/match the implementation file.
+    // Compiles a module's tests and declarations, in order to
+    // help test that declarations match their implementation.
+    // The files must already be available under build/.
     function typescriptSpecDecl(name) {
         return {
             src: [
-                'build/typescript-src/' + name + '/**/*.spec.ts',
-                'build/typescript-src/' + name + '/**/*.d.ts',
-                '!build/typescript-src/' + name + '/**/samples/**'],
-            dest: 'build/',
+                'build/' + name + '/**/*.spec.ts',
+                'build/' + name + '/**/*.d.ts'
+            ],
             options: {
-                basePath: 'build/typescript-src/',
-                ignoreError: false,
+                sourceRoot: 'build/',
+                target: 'es5',
+                comments: false,
                 noImplicitAny: true,
-                sourceMap: true
+                sourceMap: true,
+                declaration: true,
+                fast: 'always'
             }
         };
     }
     exports.typescriptSpecDecl = typescriptSpecDecl;
 
-    // Copy all source that is not typescript to the module's build directory.
+    // Copies a module's directory from build/ to dist/.
+    // Test-related files are excluded.
     function copyModule(name) {
         return {
-            expand: true, cwd: 'src/',
-            src: [name + '/**', '!**/*.ts', '!**/*.sass'],
-            dest: 'build',
+            expand: true,
+            cwd: 'build/',
+            src: [
+                name + '/**',
+                '!**/*.spec.*'
+            ],
+            dest: 'dist/',
             onlyIf: 'modified'
         };
     }
     exports.copyModule = copyModule;
 
-    // Samples get all compiled code (exlcuding code from sample dir itself - no
-    // recursive copying please!) in a 'lib' subdirectory.
-    function copySampleFiles(samplePath, libDir) {
+    // Copies build/* to a sample's directory under dist/.
+    // The sample's own directory and test-related files are excluded.
+    function copySampleFiles(name) {
         return {
             files: [
                 {
-                    expand: true, cwd: 'src/' + samplePath,
+                    expand: true,
+                    cwd: 'build/',
                     src: [
-                        '**/*',
-                        '!**/*.ts',
-                        '!**/*.sass'],
-                    dest: 'build/' + samplePath,
-                    onlyIf: 'modified'
-                }, {
-                    expand: true, cwd: 'build',
-                    src: [
-                        '**/*',
-                        '!**/samples/**',
-                        '!**/typescript-src/**'],
-                    dest: 'build/' + samplePath + '/' + libDir,
-                    onlyIf: 'modified'
-                }, {
-                    expand: true, cwd: 'build',
-                    src: [
-                        'typescript-src/**/*.ts',
-                        '!**/*.d.ts',
-                        '!**/*.spec.ts'],
-                    dest: 'build/' + samplePath + '/' + libDir,
+                        '**',
+                        '!**/*.spec.*',
+                        '!' + name + '/**/*'
+                    ],
+                    dest: 'dist/' + name + '/lib/',
                     onlyIf: 'modified'
                 }
             ]
