@@ -113,6 +113,19 @@ module.exports = (grunt) ->
       logging: Rule.copyModule 'logging'
       webrtc: Rule.copyModule 'webrtc'
 
+      uproxyCoreEnv: {
+        files: [
+          {
+            expand: true
+            cwd: 'build/freedom/'
+            src: [
+              'uproxy-core-env.*'
+            ]
+            dest: 'dist/freedom/'
+          }
+        ]
+      }
+
       freedomTypings: Rule.copyModule 'freedom/typings'
       freedomBuilds: {
         files: [
@@ -121,7 +134,6 @@ module.exports = (grunt) ->
             cwd: 'build/freedom/'
             src: [
               'freedom-for-*.*'
-              'uproxy-core-env.*'
             ]
             dest: 'dist/freedom/'
           }
@@ -216,6 +228,7 @@ module.exports = (grunt) ->
     'logging'
     'webrtc'
     'uglify:uglifyUproxyCoreEnv'
+    'copy:uproxyCoreEnv'
   ]
 
   taskManager.add 'taskmanager', [
@@ -262,6 +275,7 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'freedom', [
+    'base'
     'uproxyCoreEnv'
     'ts:freedomCoreProviders'
     'ts:freedomInterfaces'
@@ -275,6 +289,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'simpleWebrtcChat', [
     'base'
+    'uproxyCoreEnv'
     'webrtc'
     'ts:simpleWebrtcChat'
     'copy:simpleWebrtcChat'
