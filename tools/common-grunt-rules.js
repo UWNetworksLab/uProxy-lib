@@ -61,18 +61,17 @@ var exports;
     }
     exports.copyModule = copyModule;
 
-    // Copies build/* to a sample's directory under dist/.
-    // The sample's own directory and test-related files are excluded.
+    // Copies dist/* to a sample's directory under dist/.
+    // The samples directory itself is excluded.
     function copySampleFiles(name) {
         return {
             files: [
                 {
                     expand: true,
-                    cwd: 'build/',
+                    cwd: 'dist/',
                     src: [
                         '**',
-                        '!**/*.spec.*',
-                        '!' + name + '/**/*'
+                        '!samples/**'
                     ],
                     dest: 'dist/' + name + '/lib/',
                     onlyIf: 'modified'
