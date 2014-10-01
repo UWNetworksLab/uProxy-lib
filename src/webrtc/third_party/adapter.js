@@ -14,13 +14,20 @@ var candidateTypeMapping = {
     'relayed': 'relay'
 }
 
-if (navigator.mozGetUserMedia) {
+if (!navigator || navigator.mozGetUserMedia) {
+  // navigator object is not defined in FF add-on environment.
   console.log("This appears to be Firefox");
 
   webrtcDetectedBrowser = "firefox";
 
-  webrtcDetectedVersion =
-           parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+  if (navigator) {
+    webrtcDetectedVersion =
+             parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
+
+    // Get UserMedia (only difference is the prefix).
+    // Code from Adam Barth.
+    getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+  }
 
   // The RTCPeerConnection object.
   RTCPeerConnection = mozRTCPeerConnection;
@@ -30,10 +37,6 @@ if (navigator.mozGetUserMedia) {
 
   // The RTCIceCandidate object.
   RTCIceCandidate = mozRTCIceCandidate;
-
-  // Get UserMedia (only difference is the prefix).
-  // Code from Adam Barth.
-  getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
   // Creates iceServer from the url for FF.
   createIceServer = function(url, username, password) {
