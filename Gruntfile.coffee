@@ -146,6 +146,9 @@ module.exports = (grunt) ->
       simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
       simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
 
+      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
+      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
+
     ts:
       # For bootstrapping of this Gruntfile
       taskmanager: Rule.typescriptSrc 'taskmanager'
@@ -172,6 +175,7 @@ module.exports = (grunt) ->
 
       simpleWebrtcChat: Rule.typescriptSrc 'samples/simple-webrtc-chat'
       simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
+      copypasteFreedomChat: Rule.typescriptSrc 'samples/copypaste-freedom-chat'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -304,12 +308,18 @@ module.exports = (grunt) ->
     'copy:simpleFreedomChatLib'
   ]
 
-  # TODO: copypaste freedom chat once this is merged:
-  #       https://github.com/uProxy/uproxy-lib/pull/71
+  taskManager.add 'copypasteFreedomChat', [
+    'base'
+    'freedom'
+    'ts:copypasteFreedomChat'
+    'copy:copypasteFreedomChat'
+    'copy:copypasteFreedomChatLib'
+  ]
 
   taskManager.add 'samples', [
     'simpleWebrtcChat'
     'simpleFreedomChat'
+    'copypasteFreedomChat'
   ]
 
   taskManager.add 'build', [
