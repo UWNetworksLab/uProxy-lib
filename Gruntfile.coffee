@@ -78,25 +78,29 @@ module.exports = (grunt) ->
     }]
 
   #-------------------------------------------------------------------------
-  grunt.initConfig {
+  grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
     # TODO: This must be factored out into common-grunt-rules.
     symlink:
       # Symlink each source file under src/ under build/.
-      build: { files: [ {
-        expand: true
-        cwd: 'src/'
-        src: ['**/*']
-        filter: 'isFile'
-        dest: 'build/' } ] }
+      build:
+        files: [
+          expand: true
+          cwd: 'src/'
+          src: ['**/*']
+          filter: 'isFile'
+          dest: 'build/'
+        ]
       # Symlink each directory under third_party/ under build/third_party/.
-      thirdParty: { files: [ {
-        expand: true,
-        cwd: 'third_party/'
-        src: ['*']
-        filter: 'isDirectory'
-        dest: 'build/third_party/' } ] }
+      thirdParty:
+        files: [
+          expand: true,
+          cwd: 'third_party/'
+          src: ['*']
+          filter: 'isDirectory'
+          dest: 'build/third_party/'
+        ]
 
     copy:
       crypto: Rule.copyModule 'crypto'
@@ -106,33 +110,27 @@ module.exports = (grunt) ->
       logging: Rule.copyModule 'logging'
       webrtc: Rule.copyModule 'webrtc'
 
-      uproxyCoreEnv: {
+      uproxyCoreEnv:
         files: [
-          {
-            expand: true
-            cwd: 'build/freedom/'
-            src: [
-              'uproxy-core-env.*'
-            ]
-            dest: 'dist/freedom/'
-          }
+          expand: true
+          cwd: 'build/freedom/'
+          src: [
+            'uproxy-core-env.*'
+          ]
+          dest: 'dist/freedom/'
         ]
-      }
 
       freedomTypings: Rule.copyModule 'freedom/typings'
       freedomCustomCoreProvidersTypings: Rule.copyModule 'freedom/coreproviders'
-      freedomBuilds: {
+      freedomBuilds:
         files: [
-          {
-            expand: true
-            cwd: 'build/freedom/'
-            src: [
-              'freedom-for-*.*'
-            ]
-            dest: 'dist/freedom/'
-          }
+          expand: true
+          cwd: 'build/freedom/'
+          src: [
+            'freedom-for-*.*'
+          ]
+          dest: 'dist/freedom/'
         ]
-      }
 
       simpleWebrtcChat: Rule.copyModule 'samples/simple-webrtc-chat'
       simpleWebrtcChatLib: Rule.copySampleFiles 'samples/simple-webrtc-chat'
@@ -200,7 +198,6 @@ module.exports = (grunt) ->
         [ 'src/freedom/uproxy-freedom-postamble.js',
           './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
       uglifyUproxyCoreEnv: uglifyUproxyCoreEnv
-  }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
