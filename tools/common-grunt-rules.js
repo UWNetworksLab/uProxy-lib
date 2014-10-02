@@ -61,17 +61,19 @@ var exports;
     }
     exports.copyModule = copyModule;
 
-    // Copies dist/* to a sample's directory under dist/.
-    // The samples directory itself is excluded.
+    // Copies build/* to a sample's directory under dist/.
+    // The samples directory itself and TypeScript files are excluded.
+    // TODO: copy dist/* instead
     function copySampleFiles(name) {
         return {
             files: [
                 {
                     expand: true,
-                    cwd: 'dist/',
+                    cwd: 'build/',
                     src: [
                         '**',
-                        '!samples/**'
+                        '!samples/**',
+                        '!**/*.ts'
                     ],
                     dest: 'dist/' + name + '/lib/',
                     onlyIf: 'modified'
