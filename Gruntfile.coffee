@@ -99,13 +99,6 @@ module.exports = (grunt) ->
         dest: 'build/third_party/' } ] }
 
     copy:
-      # This rule is used to build the root level task-manager that is checked
-      # in.
-      localTaskmanager: { files: [ {
-        expand: true, cwd: 'build/taskmanager/'
-        src: ['taskmanager.js']
-        dest: '.' } ] }
-
       crypto: Rule.copyModule 'crypto'
 
       arraybuffers: Rule.copyModule 'arraybuffers'
