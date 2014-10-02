@@ -17,6 +17,7 @@ var exports;
                 comments: false,
                 noImplicitAny: true,
                 sourceMap: true,
+                declaration: false,
                 fast: 'always'
             }
         };
@@ -38,7 +39,7 @@ var exports;
                 comments: false,
                 noImplicitAny: true,
                 sourceMap: true,
-                declaration: true,
+                declaration: false,
                 fast: 'always'
             }
         };
