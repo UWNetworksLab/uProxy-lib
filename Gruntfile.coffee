@@ -78,50 +78,70 @@ module.exports = (grunt) ->
     }]
 
   #-------------------------------------------------------------------------
-  grunt.initConfig {
+  grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
 
+    # TODO: This must be factored out into common-grunt-rules.
     symlink:
-      options:
-        # We should have overwirte set to true, but there is a bug:
-        # https://github.com/gruntjs/grunt-contrib-symlink/issues/12 This stops
-        # us from being able to sym-link into node_modules and have building
-        # work correctly.
-        overwrite: false
-      # Symlink all module directories in `src` into typescript-src
-      typescriptSrc: { files: [ {
-        expand: true,
-        cwd: 'src',
-        src: ['**/*.ts'],
-        dest: 'build/typescript-src/' } ] }
-      # Symlink third_party into typescript-src
-      thirdPartyTypescriptSrc: { files: [ {
-        expand: true,
-        cwd: '.',
-        src: ['third_party/**/*.ts'],
-        dest: 'build/typescript-src/' } ] }
+      # Symlink each source file under src/ under build/.
+      build:
+        files: [
+          expand: true
+          cwd: 'src/'
+          src: ['**/*']
+          filter: 'isFile'
+          dest: 'build/'
+        ]
+      # Symlink each directory under third_party/ under build/third_party/.
+      thirdParty:
+        files: [
+          expand: true,
+          cwd: 'third_party/'
+          src: ['*']
+          filter: 'isDirectory'
+          dest: 'build/third_party/'
+        ]
 
     copy:
-      # This rule is used to build the root level task-manager that is checked
-      # in.
-      localTaskmanager: { files: [ {
-        expand: true, cwd: 'build/taskmanager/'
-        src: ['taskmanager.js']
-        dest: '.' } ] }
-      # Copy any JavaScript from the third_party directory
-      thirdPartyJavaScript: { files: [ {
-          expand: true,
-          src: ['third_party/**/*.js', 'third_party/**/*.js.map']
-          dest: 'build/'
-          onlyIf: 'modified'
-        } ] }
-      webrtc: Rule.copyModule 'webrtc'
-      # Sample apps to demonstrate and run end-to-end tests.
-      sampleChat: Rule.copySampleFiles 'webrtc/samples/chat-webpage', 'lib'
-      sampleFreedomChat: Rule.copySampleFiles 'freedom/samples/freedom-chat-webpage', 'lib'
-      sampleFreedomCopyPaste: Rule.copySampleFiles 'freedom/samples/freedom-copypaste-webpage', 'lib'
+      crypto: Rule.copyModule 'crypto'
 
-    typescript:
+      arraybuffers: Rule.copyModule 'arraybuffers'
+      handler: Rule.copyModule 'handler'
+      logging: Rule.copyModule 'logging'
+      webrtc: Rule.copyModule 'webrtc'
+
+      uproxyCoreEnv:
+        files: [
+          expand: true
+          cwd: 'build/freedom/'
+          src: [
+            'uproxy-core-env.*'
+          ]
+          dest: 'dist/freedom/'
+        ]
+
+      freedomTypings: Rule.copyModule 'freedom/typings'
+      freedomCustomCoreProvidersTypings: Rule.copyModule 'freedom/coreproviders'
+      freedomBuilds:
+        files: [
+          expand: true
+          cwd: 'build/freedom/'
+          src: [
+            'freedom-for-*.*'
+          ]
+          dest: 'dist/freedom/'
+        ]
+
+      simpleWebrtcChat: Rule.copyModule 'samples/simple-webrtc-chat'
+      simpleWebrtcChatLib: Rule.copySampleFiles 'samples/simple-webrtc-chat'
+
+      simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
+      simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
+
+      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
+      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
+
+    ts:
       # For bootstrapping of this Gruntfile
       taskmanager: Rule.typescriptSrc 'taskmanager'
       taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
@@ -140,16 +160,14 @@ module.exports = (grunt) ->
 
       webrtc: Rule.typescriptSrc 'webrtc'
 
-      # Freedom interfaces (no real spec, only for typescript checking)
-      freedomTypings: Rule.typescriptSrc 'freedom/typings'
+      # freedom/typings only contains specs and declarations.
       freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
+      freedomCoreProviders: Rule.typescriptSrc 'freedom/coreproviders'
       freedomInterfaces: Rule.typescriptSrc 'freedom/interfaces'
-      freedomCoreproviders: Rule.typescriptSrc 'freedom/coreproviders'
 
-      # Samples.
-      chat: Rule.typescriptSrc 'webrtc/samples/chat-webpage'
-      freedomChat: Rule.typescriptSrc 'freedom/samples/freedom-chat-webpage'
-      freedomCopyPaste: Rule.typescriptSrc 'freedom/samples/freedom-copypaste-webpage'
+      simpleWebrtcChat: Rule.typescriptSrc 'samples/simple-webrtc-chat'
+      simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
+      copypasteFreedomChat: Rule.typescriptSrc 'samples/copypaste-freedom-chat'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -157,7 +175,7 @@ module.exports = (grunt) ->
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       logging: Rule.jasmineSpec 'logging'
 
-    clean: ['build/**']
+    clean: ['build/', 'dist/', '.tscache/']
 
     uglify:
       freedomForWebpagesForUproxy: uglifyFreedomForUproxy(
@@ -180,7 +198,6 @@ module.exports = (grunt) ->
         [ 'src/freedom/uproxy-freedom-postamble.js',
           './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
       uglifyUproxyCoreEnv: uglifyUproxyCoreEnv
-  }  # grunt.initConfig
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -188,16 +205,15 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-typescript'
+  grunt.loadNpmTasks 'grunt-ts'
 
   #-------------------------------------------------------------------------
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'base', [
-    'copy:thirdPartyJavaScript'
-    'symlink:thirdPartyTypescriptSrc'
-    'symlink:typescriptSrc'
+    'symlink:build'
+    'symlink:thirdParty'
   ]
 
   taskManager.add 'uproxyCoreEnv', [
@@ -207,96 +223,98 @@ module.exports = (grunt) ->
     'logging'
     'webrtc'
     'uglify:uglifyUproxyCoreEnv'
+    'copy:uproxyCoreEnv'
   ]
 
   taskManager.add 'taskmanager', [
     'base'
-    'typescript:taskmanagerSpecDecl'
-    'typescript:taskmanager'
+    'ts:taskmanager'
+    'ts:taskmanagerSpecDecl'
   ]
 
   taskManager.add 'crypto', [
     'base'
-    'typescript:crypto'
+    'ts:crypto'
+    'copy:crypto'
   ]
 
   taskManager.add 'arraybuffers', [
     'base'
-    'typescript:arraybuffersSpecDecl'
-    'typescript:arraybuffers'
+    'ts:arraybuffers'
+    'ts:arraybuffersSpecDecl'
+    'copy:arraybuffers'
   ]
 
   taskManager.add 'handler', [
     'base'
-    'typescript:handlerSpecDecl'
-    'typescript:handler'
+    'ts:handler'
+    'ts:handlerSpecDecl'
+    'copy:handler'
   ]
 
   taskManager.add 'logging', [
     'base'
-    'typescript:loggingSpecDecl'
-    'typescript:logging'
-    'jasmine:logging'
+    'ts:logging'
+    'ts:loggingSpecDecl'
+    'copy:logging'
   ]
 
   taskManager.add 'webrtc', [
-    'base'
     'logging'
     'crypto'
-    'typescript:webrtc'
+    'handler'
+    'uproxyCoreEnv'
+    'base'
+    'ts:webrtc'
     'copy:webrtc'
   ]
 
-  taskManager.add 'chat', [
+  taskManager.add 'freedom', [
     'base'
     'uproxyCoreEnv'
-    'typescript:chat'
-    'copy:sampleChat'
-  ]
-
-  taskManager.add 'freedomCoreproviders', [
-    'base'
-    'arraybuffers'
-    'handler'
-    'logging'
-    'webrtc'
-    'typescript:freedomCoreproviders'
-    'typescript:freedomInterfaces'
-  ]
-
-  taskManager.add 'freedomForWebpagesForUproxy', [
-    'freedomCoreproviders'
+    'ts:freedomCoreProviders'
+    'ts:freedomInterfaces'
+    'ts:freedomTypingsSpecDecl'
     'uglify:freedomForWebpagesForUproxy'
-  ]
-
-  taskManager.add 'freedomForChromeForUproxy', [
-    'freedomCoreproviders'
     'uglify:freedomForChromeForUproxy'
-  ]
-
-  taskManager.add 'freedomForFirefoxForUproxy', [
-    'freedomCoreproviders'
     'uglify:freedomForFirefoxForUproxy'
+    'copy:freedomTypings'
+    'copy:freedomCustomCoreProvidersTypings'
+    'copy:freedomBuilds'
   ]
 
-  taskManager.add 'freedomChat', [
+  taskManager.add 'simpleWebrtcChat', [
     'base'
-    'freedomForWebpagesForUproxy'
     'uproxyCoreEnv'
-    'typescript:freedomChat'
-    'copy:sampleFreedomChat'
+    'webrtc'
+    'ts:simpleWebrtcChat'
+    'copy:simpleWebrtcChat'
+    'copy:simpleWebrtcChatLib'
   ]
 
-  taskManager.add 'freedomCopyPaste', [
+  taskManager.add 'simpleFreedomChat', [
     'base'
-    'freedomForWebpagesForUproxy'
-    'uproxyCoreEnv'
-    'typescript:freedomCopyPaste'
-    'copy:sampleFreedomCopyPaste'
+    'freedom'
+    'ts:simpleFreedomChat'
+    'copy:simpleFreedomChat'
+    'copy:simpleFreedomChatLib'
+  ]
+
+  taskManager.add 'copypasteFreedomChat', [
+    'base'
+    'freedom'
+    'ts:copypasteFreedomChat'
+    'copy:copypasteFreedomChat'
+    'copy:copypasteFreedomChatLib'
+  ]
+
+  taskManager.add 'samples', [
+    'simpleWebrtcChat'
+    'simpleFreedomChat'
+    'copypasteFreedomChat'
   ]
 
   taskManager.add 'build', [
-    'base'
     'arraybuffers'
     'taskmanager'
     'handler'
@@ -304,33 +322,16 @@ module.exports = (grunt) ->
     'crypto'
     'webrtc'
     'uproxyCoreEnv'
-    'chat'
-    'freedomForWebpagesForUproxy'
-    'freedomForChromeForUproxy'
-    'freedomForFirefoxForUproxy'
-    'freedomChat'
-    'freedomCopyPaste'
+    'freedom'
+    'samples'
   ]
 
-  # This is the target run by Travis. Targets in here should run locally
-  # and on Travis/Sauce Labs.
   taskManager.add 'test', [
-    'base'
-    'typescript:freedomTypings'
-    'typescript:freedomTypingsSpecDecl'
+    'build', 'jasmine'
+  ]
+
+  grunt.registerTask 'default', [
     'build'
-    'jasmine:handler'
-    'jasmine:taskmanager'
-    'jasmine:arraybuffers'
-    'jasmine:logging'
-  ]
-
-  taskManager.add 'default', [
-    'build', 'test'
-  ]
-
-  taskManager.add 'distr', [
-    'build', 'test', 'copy:localTaskmanager'
   ]
 
   #-------------------------------------------------------------------------
