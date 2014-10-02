@@ -127,6 +127,7 @@ module.exports = (grunt) ->
       }
 
       freedomTypings: Rule.copyModule 'freedom/typings'
+      freedomCustomCoreProvidersTypings: Rule.copyModule 'freedom/coreproviders'
       freedomBuilds: {
         files: [
           {
@@ -288,6 +289,7 @@ module.exports = (grunt) ->
     'uglify:freedomForChromeForUproxy'
     'uglify:freedomForFirefoxForUproxy'
     'copy:freedomTypings'
+    'copy:freedomCustomCoreProvidersTypings'
     'copy:freedomBuilds'
   ]
 
