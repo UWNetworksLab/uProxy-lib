@@ -263,7 +263,6 @@ module.exports = (grunt) ->
     'logging'
     'crypto'
     'handler'
-    'uproxyCoreEnv'
     'base'
     'ts:webrtc'
     'copy:webrtc'
