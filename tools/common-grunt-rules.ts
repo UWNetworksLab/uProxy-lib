@@ -46,6 +46,8 @@ module exports {
 
   // Copies a module's directory from build/ to dist/.
   // Test-related files are excluded.
+  // CONSIDER: rename to copyModuleToDest so you can understand it when only
+  // reading the Gruntfile.
   export function copyModule(name:string) {
     return {
       expand: true,

@@ -104,7 +104,7 @@ module.exports = (grunt) ->
 
     copy:
       crypto: Rule.copyModule 'crypto'
-
+      taskmanager: Rule.copyModule 'taskmanager'
       arraybuffers: Rule.copyModule 'arraybuffers'
       handler: Rule.copyModule 'handler'
       logging: Rule.copyModule 'logging'
@@ -230,6 +230,7 @@ module.exports = (grunt) ->
     'base'
     'ts:taskmanager'
     'ts:taskmanagerSpecDecl'
+    'copy:taskmanager'
   ]
 
   taskManager.add 'crypto', [
