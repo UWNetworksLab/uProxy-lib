@@ -1,4 +1,4 @@
-// Naming this `exports` is bit of a hack to allow this file to be compiled
+// Naming this `exports` is bit trick to allow this file to be compiled
 // normally and still used by commonjs-style require.
 var exports;
 (function (exports) {
@@ -9,7 +9,7 @@ var exports;
             src: [
                 'build/' + name + '/**/*.ts',
                 '!**/*.spec.ts',
-                '!**/*.d.ts'
+                '!**/*.d.ts',
             ],
             options: {
                 sourceRoot: 'build/',
@@ -23,7 +23,6 @@ var exports;
         };
     }
     exports.typescriptSrc = typescriptSrc;
-
     // Compiles a module's tests and declarations, in order to
     // help test that declarations match their implementation.
     // The files must already be available under build/.
@@ -31,7 +30,7 @@ var exports;
         return {
             src: [
                 'build/' + name + '/**/*.spec.ts',
-                'build/' + name + '/**/*.d.ts'
+                'build/' + name + '/**/*.d.ts',
             ],
             options: {
                 sourceRoot: 'build/',
@@ -45,9 +44,10 @@ var exports;
         };
     }
     exports.typescriptSpecDecl = typescriptSpecDecl;
-
     // Copies a module's directory from build/ to dist/.
     // Test-related files are excluded.
+    // CONSIDER: rename to copyModuleToDest so you can understand it when only
+    // reading the Gruntfile.
     function copyModule(name) {
         return {
             expand: true,
@@ -61,7 +61,6 @@ var exports;
         };
     }
     exports.copyModule = copyModule;
-
     // Copies build/* to a sample's directory under dist/.
     // The samples directory itself and TypeScript files are excluded.
     // TODO: copy dist/* instead
@@ -74,7 +73,7 @@ var exports;
                     src: [
                         '**',
                         '!samples/**',
-                        '!**/*.ts'
+                        '!**/*.ts',
                     ],
                     dest: 'dist/' + name + '/lib/',
                     onlyIf: 'modified'
@@ -83,7 +82,6 @@ var exports;
         };
     }
     exports.copySampleFiles = copySampleFiles;
-
     // Function to make jasmine spec assuming expected dir layout.
     function jasmineSpec(name) {
         var jasmine_helpers = [
@@ -99,10 +97,10 @@ var exports;
             ]),
             options: {
                 specs: 'build/' + name + '/**/*.spec.js',
-                outfile: 'build/' + name + '/_SpecRunner.html',
+                outfile: 'build/' + name + '/SpecRunner.html',
                 keepRunner: true
             }
         };
     }
     exports.jasmineSpec = jasmineSpec;
-})(exports || (exports = {}));
+})(exports || (exports = {})); // module Rules

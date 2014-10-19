@@ -1,4 +1,4 @@
-// Naming this `exports` is bit of a hack to allow this file to be compiled
+// Naming this `exports` is bit trick to allow this file to be compiled
 // normally and still used by commonjs-style require.
 module exports {
 
@@ -98,7 +98,7 @@ module exports {
       ]),
       options: {
         specs: 'build/' + name + '/**/*.spec.js',
-        outfile: 'build/' + name + '/_SpecRunner.html',
+        outfile: 'build/' + name + '/SpecRunner.html',
         keepRunner: true
       }
     };
