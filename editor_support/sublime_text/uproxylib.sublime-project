@@ -2,7 +2,7 @@
   "folders": [
     {
       "path": "../..",
-      "name": "uproxy-lib-root",
+      "name": "uproxy-lib",
       "follow_symlinks": true
     },
     {
