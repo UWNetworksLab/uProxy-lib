@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "13.1.1",
+  "version": "14.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -32,9 +32,8 @@
     "grunt-contrib-watch": "~0.6.1",
     "grunt-ts": "^1.11",
     "typescript": "^1.1.0-1",
-    "freedom": "~0.5.7",
-    "freedom-for-chrome": "~0.3.3",
-    "freedom-for-firefox": "~0.4.3"
+    "freedom-for-chrome": "~0.4.1",
+    "freedom-for-firefox": "~0.5.0"
   },
   "scripts": {
     "test": "grunt test",

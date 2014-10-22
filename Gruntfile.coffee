@@ -1,82 +1,9 @@
 TaskManager = require './tools/taskmanager'
 Rule = require './tools/common-grunt-rules'
 
-fs = require 'fs'
 path = require 'path'
 
-# Our custom core provider dependencies. These files are included with our
-# custom builds of Freedom. Note: they assume that the JS environment has
-# includes the necessary dependencies (see samples/freedomchat-chromeapp)
-customFreedomCoreProviders = [
-  'build/freedom/coreproviders/*.js'
-  'build/freedom/interfaces/*.js'
-]
-
 module.exports = (grunt) ->
-  freedom = require 'freedom/Gruntfile'
-  freedomForChrome = require 'freedom-for-chrome/Gruntfile'
-  freedomForFirefox = require 'freedom-for-firefox/Gruntfile'
-
-  # Files comprising "core Freedom".
-  freedomSrc = [].concat(
-    freedom.FILES.srcCore
-    freedom.FILES.srcPlatform
-  )
-
-  # Like Unix's dirname, e.g. 'a/b/c.js' -> 'a/b'
-  dirname = (path) -> path.substr(0, path.lastIndexOf('/'))
-
-  # Chrome and Firefox-specific Freedom providers.
-  # TODO: Figure out why this doesn't contain the full path.
-  freedomForChromeSrc = [].concat(
-    freedomForChrome.FILES.platform
-  ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
-  freedomForFirefoxSrc = [].concat(
-    'src/backgroundframe-link.js'
-    'providers/*.js'
-  ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
-
-  # Builds Freedom, with optional extras.
-  # By and large, we build Freedom the same way freedom-for-chrome
-  # and freedom-for-firefox do. The exception is that we don't include
-  # FILES.lib -- since that's currently just es6-promises and because
-  # that really doesn't need to be re-included, that's okay.
-  uglifyFreedomForUproxy = (name, files, banners, footers) ->
-    options:
-      sourceMap: true
-      sourceMapName: 'build/freedom/' + name + '.map'
-      sourceMapIncludeSources: true
-      mangle: false
-      beautify: true
-      preserveComments: 'all'
-      banner: banners.map((fileName) -> fs.readFileSync(fileName)).join('\n')
-      footer: footers.map((fileName) -> fs.readFileSync(fileName)).join('\n') + '//# sourceMappingURL=' + name + '.map'
-    files: [{
-      src: freedomSrc.concat(customFreedomCoreProviders).concat(files)
-      dest: path.join('build/freedom/', name)
-    }]
-
-  # Builds the env that uproxy for * for freedom needs. e.g. stuff for peer
-  # connection etc.
-  uglifyUproxyCoreEnv =
-    options:
-      sourceMap: true
-      sourceMapName: 'build/freedom/uproxy-core-env.map'
-      sourceMapIncludeSources: true
-      mangle: false
-      beautify: true
-      preserveComments: 'all'
-    files: [{
-      src: ['build/arraybuffers/arraybuffers.js'
-            'build/handler/queue.js'
-            'build/crypto/random.js'
-            'build/logging/logging.js'
-            'build/webrtc/third_party/adapter.js'
-            'build/webrtc/datachannel.js'
-            'build/webrtc/peerconnection.js']
-      dest: path.join('build/freedom/uproxy-core-env.js')
-    }]
-
   #-------------------------------------------------------------------------
   grunt.initConfig
     pkg: grunt.file.readJSON 'package.json'
@@ -101,6 +28,20 @@ module.exports = (grunt) ->
           filter: 'isDirectory'
           dest: 'build/third_party/'
         ]
+      # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
+      freedom:
+        files: [ {
+          expand: true
+          cwd: path.dirname(require.resolve('freedom-for-chrome/Gruntfile'))
+          src: ['freedom-for-chrome.js']
+          dest: 'build/freedom/'
+        }, {
+          expand: true
+          cwd: path.dirname(require.resolve('freedom-for-firefox/Gruntfile'))
+          src: ['freedom-for-firefox.jsm']
+          dest: 'build/freedom/'
+        } ]
+      #require.resolve 'freedom-for-firefox/freedom-for-firefox.jsm'
 
     copy:
       crypto: Rule.copyModule 'crypto'
@@ -110,27 +51,7 @@ module.exports = (grunt) ->
       logging: Rule.copyModule 'logging'
       webrtc: Rule.copyModule 'webrtc'
 
-      uproxyCoreEnv:
-        files: [
-          expand: true
-          cwd: 'build/freedom/'
-          src: [
-            'uproxy-core-env.*'
-          ]
-          dest: 'dist/freedom/'
-        ]
-
       freedomTypings: Rule.copyModule 'freedom/typings'
-      freedomCustomCoreProvidersTypings: Rule.copyModule 'freedom/coreproviders'
-      freedomBuilds:
-        files: [
-          expand: true
-          cwd: 'build/freedom/'
-          src: [
-            'freedom-for-*.*'
-          ]
-          dest: 'dist/freedom/'
-        ]
 
       simpleWebrtcChat: Rule.copyModule 'samples/simple-webrtc-chat'
       simpleWebrtcChatLib: Rule.copySampleFiles 'samples/simple-webrtc-chat'
@@ -162,8 +83,6 @@ module.exports = (grunt) ->
 
       # freedom/typings only contains specs and declarations.
       freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
-      freedomCoreProviders: Rule.typescriptSrc 'freedom/coreproviders'
-      freedomInterfaces: Rule.typescriptSrc 'freedom/interfaces'
 
       simpleWebrtcChat: Rule.typescriptSrc 'samples/simple-webrtc-chat'
       simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
@@ -176,28 +95,6 @@ module.exports = (grunt) ->
       logging: Rule.jasmineSpec 'logging'
 
     clean: ['build/', 'dist/', '.tscache/']
-
-    uglify:
-      freedomForWebpagesForUproxy: uglifyFreedomForUproxy(
-        'freedom-for-webpages-for-uproxy.js'
-        []
-        [ './node_modules/freedom/src/util/preamble.js']
-        [ 'src/freedom/uproxy-freedom-postamble.js',
-          './node_modules/freedom/src/util/postamble.js'])
-      freedomForChromeForUproxy: uglifyFreedomForUproxy(
-        'freedom-for-chrome-for-uproxy.js'
-        freedomForChromeSrc
-        [ './node_modules/freedom/src/util/preamble.js']
-        [ 'src/freedom/uproxy-freedom-postamble.js',
-          './node_modules/freedom/src/util/postamble.js'])
-      freedomForFirefoxForUproxy: uglifyFreedomForUproxy(
-        'freedom-for-firefox-for-uproxy.jsm'
-        freedomForFirefoxSrc
-        [ './node_modules/freedom-for-firefox/src/firefox-preamble.js',
-          './node_modules/freedom/src/util/preamble.js']
-        [ 'src/freedom/uproxy-freedom-postamble.js',
-          './node_modules/freedom-for-firefox/src/firefox-postamble.js'])
-      uglifyUproxyCoreEnv: uglifyUproxyCoreEnv
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -214,16 +111,6 @@ module.exports = (grunt) ->
   taskManager.add 'base', [
     'symlink:build'
     'symlink:thirdParty'
-  ]
-
-  taskManager.add 'uproxyCoreEnv', [
-    'crypto'
-    'arraybuffers'
-    'handler'
-    'logging'
-    'webrtc'
-    'uglify:uglifyUproxyCoreEnv'
-    'copy:uproxyCoreEnv'
   ]
 
   taskManager.add 'taskmanager', [
@@ -271,21 +158,12 @@ module.exports = (grunt) ->
 
   taskManager.add 'freedom', [
     'base'
-    'uproxyCoreEnv'
-    'ts:freedomCoreProviders'
-    'ts:freedomInterfaces'
+    'symlink:freedom'
     'ts:freedomTypingsSpecDecl'
-    'uglify:freedomForWebpagesForUproxy'
-    'uglify:freedomForChromeForUproxy'
-    'uglify:freedomForFirefoxForUproxy'
-    'copy:freedomTypings'
-    'copy:freedomCustomCoreProvidersTypings'
-    'copy:freedomBuilds'
   ]
 
   taskManager.add 'simpleWebrtcChat', [
     'base'
-    'uproxyCoreEnv'
     'webrtc'
     'ts:simpleWebrtcChat'
     'copy:simpleWebrtcChat'
@@ -321,7 +199,6 @@ module.exports = (grunt) ->
     'logging'
     'crypto'
     'webrtc'
-    'uproxyCoreEnv'
     'freedom'
     'samples'
   ]
