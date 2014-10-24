@@ -41,7 +41,6 @@ module.exports = (grunt) ->
           src: ['freedom-for-firefox.jsm']
           dest: 'build/freedom/'
         } ]
-      #require.resolve 'freedom-for-firefox/freedom-for-firefox.jsm'
 
     copy:
       crypto: Rule.copyModule 'crypto'
