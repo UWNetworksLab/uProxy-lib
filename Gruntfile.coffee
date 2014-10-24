@@ -172,6 +172,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'simpleFreedomChat', [
     'base'
+    'logging'
     'freedom'
     'ts:simpleFreedomChat'
     'copy:simpleFreedomChat'
@@ -180,6 +181,7 @@ module.exports = (grunt) ->
 
   taskManager.add 'copypasteFreedomChat', [
     'base'
+    'logging'
     'freedom'
     'ts:copypasteFreedomChat'
     'copy:copypasteFreedomChat'
