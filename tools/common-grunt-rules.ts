@@ -1,5 +1,5 @@
-// Naming this `exports` is bit of a hack to allow this file to be compiled
-// normally and still used by commonjs-style require.
+// Naming this `exports` is a trick to allow this file to be compiled normally
+// and still used by commonjs-style require.
 module exports {
 
   // Compiles a module's source files, excluding tests and declarations.
@@ -46,6 +46,8 @@ module exports {
 
   // Copies a module's directory from build/ to dist/.
   // Test-related files are excluded.
+  // CONSIDER: rename to copyModuleToDest so you can understand it when only
+  // reading the Gruntfile.
   export function copyModule(name:string) {
     return {
       expand: true,
@@ -96,7 +98,7 @@ module exports {
       ]),
       options: {
         specs: 'build/' + name + '/**/*.spec.js',
-        outfile: 'build/' + name + '/_SpecRunner.html',
+        outfile: 'build/' + name + '/SpecRunner.html',
         keepRunner: true
       }
     };
