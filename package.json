@@ -38,6 +38,7 @@
     "typescript": "^1.1.0-1"
   },
   "scripts": {
+    "install": "grunt build",
     "test": "grunt test",
     "prepublish": "grunt test"
   }
