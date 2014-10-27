@@ -110,6 +110,7 @@ module.exports = (grunt) ->
   taskManager.add 'base', [
     'symlink:build'
     'symlink:thirdParty'
+    'symlink:freedom'
   ]
 
   taskManager.add 'taskmanager', [
@@ -157,8 +158,8 @@ module.exports = (grunt) ->
 
   taskManager.add 'freedom', [
     'base'
-    'symlink:freedom'
     'ts:freedomTypingsSpecDecl'
+    'copy:freedomTypings'
   ]
 
   taskManager.add 'simpleWebrtcChat', [
