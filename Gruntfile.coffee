@@ -32,6 +32,7 @@ module.exports = (grunt) ->
     freedomForChrome.FILES.platform
   ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-chrome/Gruntfile')), fileName)
   freedomForFirefoxSrc = [].concat(
+    '../../build/freedom/uproxy-core-env.js'
     'src/backgroundframe-link.js'
     'providers/*.js'
   ).map (fileName) -> path.join(dirname(require.resolve('freedom-for-firefox/Gruntfile')), fileName)
