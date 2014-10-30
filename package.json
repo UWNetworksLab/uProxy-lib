@@ -19,11 +19,11 @@
   "dependencies": {
     "es6-promise": "^1.0.0",
     "arraybuffer-slice": "~0.1.2",
+    "freedom": "^0.6.4",
     "es5-shim": "^4.0.0"
   },
   "peerDependencies": {
-    "freedom-for-chrome": "~0.4.1",
-    "freedom-for-firefox": "~0.5.0"
+    "freedom": "^0.6.4"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

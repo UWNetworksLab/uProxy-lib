@@ -32,13 +32,8 @@ module.exports = (grunt) ->
       freedom:
         files: [ {
           expand: true
-          cwd: path.dirname(require.resolve('freedom-for-chrome/Gruntfile'))
-          src: ['freedom-for-chrome.js']
-          dest: 'build/freedom/'
-        }, {
-          expand: true
-          cwd: path.dirname(require.resolve('freedom-for-firefox/Gruntfile'))
-          src: ['freedom-for-firefox.jsm']
+          cwd: path.dirname(require.resolve('freedom/Gruntfile'))
+          src: ['freedom.js']
           dest: 'build/freedom/'
         } ]
 
