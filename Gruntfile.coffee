@@ -47,9 +47,6 @@ module.exports = (grunt) ->
 
       freedomTypings: Rule.copyModule 'freedom/typings'
 
-      simpleWebrtcChat: Rule.copyModule 'samples/simple-webrtc-chat'
-      simpleWebrtcChatLib: Rule.copySampleFiles 'samples/simple-webrtc-chat'
-
       simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
       simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
 
@@ -78,7 +75,6 @@ module.exports = (grunt) ->
       # freedom/typings only contains specs and declarations.
       freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
 
-      simpleWebrtcChat: Rule.typescriptSrc 'samples/simple-webrtc-chat'
       simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
       copypasteFreedomChat: Rule.typescriptSrc 'samples/copypaste-freedom-chat'
 
@@ -157,14 +153,6 @@ module.exports = (grunt) ->
     'copy:freedomTypings'
   ]
 
-  taskManager.add 'simpleWebrtcChat', [
-    'base'
-    'webrtc'
-    'ts:simpleWebrtcChat'
-    'copy:simpleWebrtcChat'
-    'copy:simpleWebrtcChatLib'
-  ]
-
   taskManager.add 'simpleFreedomChat', [
     'base'
     'logging'
@@ -184,7 +172,6 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'samples', [
-    'simpleWebrtcChat'
     'simpleFreedomChat'
     'copypasteFreedomChat'
   ]
