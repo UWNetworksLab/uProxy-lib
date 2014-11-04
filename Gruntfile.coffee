@@ -82,7 +82,13 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logging: Rule.jasmineSpec 'logging'
+      logging:
+        src: [
+          'build/logging/mocks.js'
+          'build/logging/logging.js'
+        ]
+        options:
+          specs: 'build/logging/*.spec.js'
 
     clean: ['build/', 'dist/', '.tscache/']
 
@@ -157,6 +163,7 @@ module.exports = (grunt) ->
     'base'
     'logging'
     'freedom'
+    'webrtc'
     'ts:simpleFreedomChat'
     'copy:simpleFreedomChat'
     'copy:simpleFreedomChatLib'
