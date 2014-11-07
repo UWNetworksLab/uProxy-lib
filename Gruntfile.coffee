@@ -173,6 +173,7 @@ module.exports = (grunt) ->
     'base'
     'logging'
     'freedom'
+    'webrtc'
     'ts:copypasteFreedomChat'
     'copy:copypasteFreedomChat'
     'copy:copypasteFreedomChatLib'
