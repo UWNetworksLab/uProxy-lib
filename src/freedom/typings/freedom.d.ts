@@ -96,9 +96,11 @@ declare module freedom {
   }
 }  // declare module freedom
 
-interface Freedom {
+// The |then| continuation is defined on the global core freedom
+// environment where it is the freedom on/emit interface to the root module.
+interface Freedom extends Thenable<OnAndEmit<any,any>> {
   // Represents the call to freedom().
-  (manifestPath?:string, options?:any): any;
+  (manifestPath?:string, options?:any): void;
 
   // We use this specification so that you can reference any value in freedom by
   // a array-lookup of it's name. One day we'll have a nicer way to do this.
