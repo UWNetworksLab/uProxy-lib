@@ -54,7 +54,7 @@ module exports {
       cwd: 'build/',
       src: [
         name + '/**',
-        '!**/*.spec.*'
+        '!' + name + '/**/*.spec.*',
       ],
       dest: 'dist/',
       onlyIf: 'modified',
