@@ -8,8 +8,8 @@ var exports;
         return {
             src: [
                 'build/' + name + '/**/*.ts',
-                '!**/*.spec.ts',
-                '!**/*.d.ts',
+                '!build/' + name + '/**/*.spec.ts',
+                '!build/' + name + '/**/*.d.ts',
             ],
             options: {
                 sourceRoot: 'build/',
