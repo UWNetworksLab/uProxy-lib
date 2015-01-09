@@ -43,7 +43,7 @@ module.exports = (grunt) ->
       arraybuffers: Rule.copyModule 'arraybuffers'
       handler: Rule.copyModule 'handler'
       logging: Rule.copyModule 'logging'
-      logger: Rule.copyModule 'logger'
+      loggingprovider: Rule.copyModule 'loggingprovider'
       webrtc: Rule.copyModule 'webrtc'
 
       freedomTypings: Rule.copyModule 'freedom/typings'
@@ -71,8 +71,8 @@ module.exports = (grunt) ->
       logging: Rule.typescriptSrc 'logging'
       loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
 
-      logger: Rule.typescriptSrc 'logger'
-      loggerSpecDecl: Rule.typescriptSpecDecl 'logger'
+      loggingProvider: Rule.typescriptSrc 'loggingprovider'
+      loggingProviderSpecDecl: Rule.typescriptSpecDecl 'loggingprovider'
 
       webrtc: Rule.typescriptSrc 'webrtc'
 
@@ -86,13 +86,13 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logger:
+      loggingProvider:
         src: [
           'build/logging/mocks.js'
-          'build/logger/logger.js'
+          'build/loggingprovider/loggingprovider.js'
         ]
         options:
-          specs: 'build/logger/*.spec.js'
+          specs: 'build/loggingprovider/*.spec.js'
       logging:
         src: [
           'build/logging/mocks.js'
@@ -156,11 +156,11 @@ module.exports = (grunt) ->
     'copy:logging'
   ]
 
-  taskManager.add 'logger', [
+  taskManager.add 'loggingprovider', [
     'base'
-    'ts:logger'
-    'ts:loggerSpecDecl'
-    'copy:logger'
+    'ts:loggingProvider'
+    'ts:loggingProviderSpecDecl'
+    'copy:loggingprovider'
   ]
 
   taskManager.add 'webrtc', [
@@ -181,7 +181,7 @@ module.exports = (grunt) ->
   taskManager.add 'simpleFreedomChat', [
     'base'
     'logging'
-    'logger'
+    'loggingprovider'
     'freedom'
     'webrtc'
     'ts:simpleFreedomChat'
