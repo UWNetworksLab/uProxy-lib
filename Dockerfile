@@ -1,6 +1,6 @@
 # Dockerfile for a standard uproxy-lib instance
 
-FROM selenium/node-node
+FROM selenium/node-chrome
 MAINTAINER Lalon Aziz <klazizpro@gmail.com>
 
 USER root
