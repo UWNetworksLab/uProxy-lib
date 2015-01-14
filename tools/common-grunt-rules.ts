@@ -46,9 +46,7 @@ module exports {
 
   // Copies a module's directory from build/ to dist/.
   // Test-related files are excluded.
-  // CONSIDER: rename to copyModuleToDest so you can understand it when only
-  // reading the Gruntfile.
-  export function copyModule(name:string) {
+  export function copyModuleToDist(name:string) {
     return {
       expand: true,
       cwd: 'build/',
@@ -64,7 +62,7 @@ module exports {
   // Copies build/* to a sample's directory under dist/.
   // The samples directory itself and TypeScript files are excluded.
   // TODO: copy dist/* instead
-  export function copySampleFiles(name:string) {
+  export function copyDistLibsToSampleDir(name:string) {
     return {
       files: [
         {

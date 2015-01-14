@@ -10,24 +10,6 @@ module.exports = (grunt) ->
 
     # TODO: This must be factored out into common-grunt-rules.
     symlink:
-      # Symlink each source file under src/ under build/.
-      build:
-        files: [
-          expand: true
-          cwd: 'src/'
-          src: ['**/*']
-          filter: 'isFile'
-          dest: 'build/'
-        ]
-      # Symlink each directory under third_party/ under build/third_party/.
-      thirdParty:
-        files: [
-          expand: true,
-          cwd: 'third_party/'
-          src: ['*']
-          filter: 'isDirectory'
-          dest: 'build/third_party/'
-        ]
       # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
       freedom:
         files: [ {
@@ -38,59 +20,50 @@ module.exports = (grunt) ->
         } ]
 
     copy:
-      crypto: Rule.copyModule 'crypto'
-      taskmanager: Rule.copyModule 'taskmanager'
-      arraybuffers: Rule.copyModule 'arraybuffers'
-      handler: Rule.copyModule 'handler'
-      logging: Rule.copyModule 'logging'
-      webrtc: Rule.copyModule 'webrtc'
-
-      freedomTypings: Rule.copyModule 'freedom/typings'
-
-      simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
-      simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
-
-      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
-      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
+      distr:
+        files: [
+          {
+              expand: true,
+              cwd: 'build/dev/',
+              src: ['**',
+                    '!**/*.map',
+                    '!**/*.spec.js',
+              ],
+              dest: 'build/dist/',
+              onlyIf: 'modified'
+          }
+        ]
+      tools:
+        files: [
+          {
+              expand: true,
+              cwd: 'build/dev/',
+              src: ['**',
+                    '!**/*.map',
+                    '!**/*.spec.js',
+              ],
+              dest: 'build/dist/',
+              onlyIf: 'modified'
+          }
+        ]
 
     ts:
-      # For bootstrapping of this Gruntfile
-      taskmanager: Rule.typescriptSrc 'taskmanager'
-      taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
-
-      # The uProxy modules library
-      crypto: Rule.typescriptSrc 'crypto'
-
-      arraybuffers: Rule.typescriptSrc 'arraybuffers'
-      arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
-
-      handler: Rule.typescriptSrc 'handler'
-      handlerSpecDecl: Rule.typescriptSpecDecl 'handler'
-
-      logging: Rule.typescriptSrc 'logging'
-      loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
-
-      webrtc: Rule.typescriptSrc 'webrtc'
-
-      # freedom/typings only contains specs and declarations.
-      freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
-
-      simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
-      copypasteFreedomChat: Rule.typescriptSrc 'samples/copypaste-freedom-chat'
-
-    jasmine:
-      handler: Rule.jasmineSpec 'handler'
-      taskmanager: Rule.jasmineSpec 'taskmanager'
-      arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logging:
+      all:
         src: [
-          'build/logging/mocks.js'
-          'build/logging/logging.js'
+          'src/**/*.ts'
         ]
-        options:
-          specs: 'build/logging/*.spec.js'
+        sourceRoot: 'build/',
+        mapRoot: 'build/',
+        outDir: 'build/'
+        target: 'es5',
+        comments: true,
+        noImplicitAny: true,
+        sourceMap: true,
+        declaration: true,
+        module: 'commonjs'
+        fast: 'always',
 
-    clean: ['build/', 'dist/', '.tscache/']
+    clean: ['build/', '.tscache/']
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -104,17 +77,9 @@ module.exports = (grunt) ->
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
-  taskManager.add 'base', [
-    'symlink:build'
-    'symlink:thirdParty'
-    'symlink:freedom'
-  ]
-
-  taskManager.add 'taskmanager', [
-    'base'
-    'ts:taskmanager'
-    'ts:taskmanagerSpecDecl'
-    'copy:taskmanager'
+  taskManager.add 'tools', [
+    'ts:all'
+    'copy:tools'
   ]
 
   taskManager.add 'crypto', [
