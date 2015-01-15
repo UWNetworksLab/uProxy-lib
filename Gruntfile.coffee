@@ -1,7 +1,34 @@
 TaskManager = require './tools/taskmanager'
-Rule = require './tools/common-grunt-rules'
 
 path = require 'path'
+
+console.log("output for es6-require:" + require.resolve('es6-promise'));
+
+# Function to make jasmine spec assuming expected dir layout.
+jasmineSpec = (name, deps = []) ->
+  {
+    src: [
+      # Help Jasmine's PhantomJS understand promises.
+      require.resolve('arraybuffer-slice/index.js')
+      require.resolve('es6-promise')
+    ].concat(deps).concat([
+      'build/dev/' + name + '/**/*.js'
+      '!build/dev/' + name + '/**/*.spec.js'
+    ])
+    options:
+      specs: 'build/dev/' + name + '/**/*.spec.js'
+      outfile: 'build/dev/' + name + '/SpecRunner.html'
+      keepRunner: true
+  }
+
+browserifyTypeScript = (typeScriptEntryFileWithoutPostfix) ->
+  src: [typeScriptEntryFileWithoutPostfix + '.ts']
+  dest: typeScriptEntryFileWithoutPostfix + '.js'
+  options:
+    transform: ['tsify']
+    debug: true
+    bundleOptions: { debug: true }
+    browserifyOptions: { debug: true }
 
 module.exports = (grunt) ->
   #-------------------------------------------------------------------------
@@ -50,18 +77,25 @@ module.exports = (grunt) ->
       #
       # Assumes that `ts:dev` has happened.
       tools:
-        files: [
-          {
-              expand: true,
-              cwd: 'build/dev/',
-              src: ['taskmanager',
-                    '!**/*.map',
-                    '!**/*.spec.js',
-              ],
-              dest: 'build/dist/',
-              onlyIf: 'modified'
-          }
-        ]
+        files: [{
+          expand: true
+          cwd: 'build/dev/'
+          src: ['taskmanager/**'
+                '!**/*.map'
+                '!**/*.spec.js']
+          dest: 'tools/'
+          onlyIf: 'modified'
+        }]
+
+    tsd:
+      refresh:
+        options:
+          # execute a command
+          command: 'reinstall'
+          # optional: always get from HEAD
+          latest: true
+          # optional: specify config file
+          config: 'third_party/tsd.json'
 
     # Typescript rules
     ts:
@@ -79,7 +113,7 @@ module.exports = (grunt) ->
         module: 'commonjs'
         fast: 'always'
       # Compile everything into the distribution build directory.
-      distr:
+      dist:
         src: ['src/**/*.ts']
         #sourceRoot: 'build/'
         #mapRoot: 'build/'
@@ -93,21 +127,21 @@ module.exports = (grunt) ->
         fast: 'always'
 
     jamine:
-      handler:
-        src: [
-          'build/logging/mocks.js'
-          'build/logging/logging.js'
-        ]
-        options:
-          specs: 'build/logging/*.spec.js'
+      handler: jasmineSpec 'handler'
+      taskmanager: jasmineSpec 'taskmanager'
+      arraybuffers: jasmineSpec 'arraybuffers'
+      crypto: jasmineSpec 'taskmanager'
+      logging: jasmineSpec 'logging'
 
-      logging:
-        src: [
-          'build/logging/mocks.js'
-          'build/logging/logging.js'
-        ]
-        options:
-          specs: 'build/logging/*.spec.js'
+    browserify:
+      copypasteFreedomChatMain:
+        browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/main'
+      copypasteFreedomChatFreedomModule:
+        browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/freedom-module.ts'
+      simpleFreedomChatMain:
+        browserifyTypeScript 'build/dev/samples/simple-freedom-chat/main'
+      simpleFreedomChatFreedomModule:
+        browserifyTypeScript 'build/dev/samples/simple-freedom-chat/freedom-module.ts'
 
     # Compile everything into the development build directory.
     clean: ['build/'
@@ -121,77 +155,29 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
+  grunt.loadNpmTasks 'grunt-tsd'
 
   #-------------------------------------------------------------------------
   # Define the tasks
   taskManager = new TaskManager.Manager();
 
   taskManager.add 'tools', [
-    'ts:all'
+    'ts:dev'
     'copy:tools'
   ]
 
-  taskManager.add 'crypto', [
-    'base'
-    'ts:crypto'
-    'copy:crypto'
-  ]
-
-  taskManager.add 'arraybuffers', [
-    'base'
-    'ts:arraybuffers'
-    'ts:arraybuffersSpecDecl'
-    'copy:arraybuffers'
-  ]
-
-  taskManager.add 'handler', [
-    'base'
-    'ts:handler'
-    'ts:handlerSpecDecl'
-    'copy:handler'
-  ]
-
-  taskManager.add 'logging', [
-    'base'
-    'ts:logging'
-    'ts:loggingSpecDecl'
-    'copy:logging'
-  ]
-
-  taskManager.add 'webrtc', [
-    'logging'
-    'crypto'
-    'handler'
-    'base'
-    'ts:webrtc'
-    'copy:webrtc'
-  ]
-
-  taskManager.add 'freedom', [
-    'base'
-    'ts:freedomTypingsSpecDecl'
-    'copy:freedomTypings'
-  ]
-
   taskManager.add 'simpleFreedomChat', [
-    'base'
-    'logging'
-    'freedom'
-    'webrtc'
-    'ts:simpleFreedomChat'
-    'copy:simpleFreedomChat'
-    'copy:simpleFreedomChatLib'
+    'copy:dev'
+    'browserify:simpleFreedomChatMain'
+    'browserify:simpleFreedomChatFreedomModule'
   ]
 
   taskManager.add 'copypasteFreedomChat', [
-    'base'
-    'logging'
-    'freedom'
-    'webrtc'
-    'ts:copypasteFreedomChat'
-    'copy:copypasteFreedomChat'
-    'copy:copypasteFreedomChatLib'
+    'copy:dev'
+    'browserify:copypasteFreedomChatMain'
+    'browserify:copypasteFreedomChatFreedomModule'
   ]
 
   taskManager.add 'samples', [
@@ -199,23 +185,23 @@ module.exports = (grunt) ->
     'copypasteFreedomChat'
   ]
 
-  taskManager.add 'build', [
-    'arraybuffers'
-    'taskmanager'
-    'handler'
-    'logging'
-    'crypto'
-    'webrtc'
-    'freedom'
+  taskManager.add 'dev', [
+    'copy:dev'
+    'ts:dev'
     'samples'
   ]
 
+  taskManager.add 'dist', [
+    'copy:dist'
+    'ts:dist'
+  ]
+
   taskManager.add 'test', [
-    'build', 'jasmine'
+    'dev', 'jasmine'
   ]
 
   grunt.registerTask 'default', [
-    'build'
+    'dev', 'dist', 'test'
   ]
 
   #-------------------------------------------------------------------------
