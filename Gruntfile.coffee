@@ -20,25 +20,41 @@ module.exports = (grunt) ->
         } ]
 
     copy:
-      distr:
+      # Copy releveant non-typescript files to dev build.
+      dev:
         files: [
           {
               expand: true,
-              cwd: 'build/dev/',
-              src: ['**',
-                    '!**/*.map',
-                    '!**/*.spec.js',
-              ],
+              cwd: 'src/',
+              src: ['**/*.html', '**/*.css',  '**/*.js'],
+              dest: 'build/dev/',
+              onlyIf: 'modified'
+          }
+        ]
+
+      # Copy releveant non-typescript files to distribution build.
+      dist:
+        files: [
+          {
+              expand: true,
+              cwd: 'src/',
+              src: ['**/*.html', '**/*.css',  '**/*.js'],
               dest: 'build/dist/',
               onlyIf: 'modified'
           }
         ]
+
+      # Copies relevant build tools into the tools directory. Should only be run
+      # updating our build tools and wanting to commit and update (or when you
+      # want to experimentally mess about with our build tools)
+      #
+      # Assumes that `ts:dev` has happened.
       tools:
         files: [
           {
               expand: true,
               cwd: 'build/dev/',
-              src: ['**',
+              src: ['taskmanager',
                     '!**/*.map',
                     '!**/*.spec.js',
               ],
@@ -47,23 +63,57 @@ module.exports = (grunt) ->
           }
         ]
 
+    # Typescript rules
     ts:
-      all:
-        src: [
-          'src/**/*.ts'
-        ]
-        sourceRoot: 'build/',
-        mapRoot: 'build/',
-        outDir: 'build/'
-        target: 'es5',
-        comments: true,
-        noImplicitAny: true,
-        sourceMap: true,
-        declaration: true,
+      # Compile everything into the development build directory.
+      dev:
+        src: ['src/**/*.ts']
+        #sourceRoot: 'build/'
+        #mapRoot: 'build/'
+        outDir: 'build/dev/'
+        target: 'es5'
+        comments: true
+        noImplicitAny: true
+        sourceMap: true
+        declaration: true
         module: 'commonjs'
-        fast: 'always',
+        fast: 'always'
+      # Compile everything into the distribution build directory.
+      distr:
+        src: ['src/**/*.ts']
+        #sourceRoot: 'build/'
+        #mapRoot: 'build/'
+        outDir: 'build/dist/'
+        target: 'es5'
+        comments: false
+        noImplicitAny: true
+        sourceMap: false
+        declaration: true
+        module: 'commonjs'
+        fast: 'always'
 
-    clean: ['build/', '.tscache/']
+    jamine:
+      handler:
+        src: [
+          'build/logging/mocks.js'
+          'build/logging/logging.js'
+        ]
+        options:
+          specs: 'build/logging/*.spec.js'
+
+      logging:
+        src: [
+          'build/logging/mocks.js'
+          'build/logging/logging.js'
+        ]
+        options:
+          specs: 'build/logging/*.spec.js'
+
+    # Compile everything into the development build directory.
+    clean: ['build/'
+            # 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
+            '.tscache/'
+            'src/.baseDir.ts']
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'

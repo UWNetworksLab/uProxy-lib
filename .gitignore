@@ -11,3 +11,4 @@ build/*
 *.sublime-workspace
 .tscache
 dist/
+src/.baseDir.ts
