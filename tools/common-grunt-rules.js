@@ -16,7 +16,7 @@ function jasmineSpec(name) {
     };
 }
 exports.jasmineSpec = jasmineSpec;
-function browserifyTypeScript(filepath) {
+function browserify(filepath) {
     return {
         src: ['build/dev/' + filepath + '.js'],
         dest: 'build/dev/' + filepath + '.static.js',
@@ -25,7 +25,7 @@ function browserifyTypeScript(filepath) {
         }
     };
 }
-exports.browserifyTypeScript = browserifyTypeScript;
+exports.browserify = browserify;
 function copyFreedomToDest(destPath) {
     return { files: [{
         src: [require.resolve('freedom')],

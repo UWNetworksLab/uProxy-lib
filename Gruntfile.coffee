@@ -97,22 +97,27 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      crypto: Rule.jasmineSpec 'taskmanager'
       logging: Rule.jasmineSpec 'logging'
 
     browserify:
-      handlerQueueSpec:
-        Rule.browserifyTypeScript 'handler/queue.spec'
+      # Browserify specs
+      arraybuffersSpec:
+        Rule.browserify 'arraybuffers/arraybuffers.spec'
+      handlerSpec:
+        Rule.browserify 'handler/queue.spec'
       taskmanagerSpec:
-        Rule.browserifyTypeScript 'taskmanager/taskamanager.spec'
+        Rule.browserify 'taskmanager/taskmanager.spec'
+      loggingSpec:
+        Rule.browserify 'logging/logging.spec'
+      # Browserify for sample apps
       copypasteFreedomChatMain:
-        Rule.browserifyTypeScript 'samples/copypaste-freedom-chat/main'
+        Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule:
-        Rule.browserifyTypeScript 'samples/copypaste-freedom-chat/freedom-module.ts'
+        Rule.browserify 'samples/copypaste-freedom-chat/freedom-module.ts'
       simpleFreedomChatMain:
-        Rule.browserifyTypeScript 'samples/simple-freedom-chat/main'
+        Rule.browserify 'samples/simple-freedom-chat/main'
       simpleFreedomChatFreedomModule:
-        Rule.browserifyTypeScript 'samples/simple-freedom-chat/freedom-module.ts'
+        Rule.browserify 'samples/simple-freedom-chat/freedom-module.ts'
 
     # Compile everything into the development build directory.
     clean: ['build/'
@@ -166,9 +171,6 @@ module.exports = (grunt) ->
   taskManager.add 'dev', [
     'copy:dev'
     'ts:dev'
-    'browserify:handlerQueueSpec'
-    'jasmine:handler'
-    #'samples'
   ]
 
   taskManager.add 'dist', [
@@ -176,13 +178,20 @@ module.exports = (grunt) ->
     'ts:dist'
   ]
 
-  taskManager.add 'test', [
+  taskManager.add 'unit_tests', [
     'dev'
-    'jasmine'
+    'browserify:arraybuffersSpec'
+    'jasmine:arraybuffers'
+    'browserify:handlerSpec'
+    'jasmine:handler'
+    'browserify:taskmanagerSpec'
+    'jasmine:taskmanager'
+    'browserify:loggingSpec'
+    'jasmine:logging'
   ]
 
   grunt.registerTask 'default', [
-    'dev', 'dist', 'test'
+    'dev', 'unit_tests', 'dist'
   ]
 
   #-------------------------------------------------------------------------
