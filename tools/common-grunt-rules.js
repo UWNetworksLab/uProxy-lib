@@ -1,11 +1,12 @@
 // common-grunt-rules
 /// <reference path='../../third_party/typings/node/node.d.ts' />
+var path = require('path');
 // Assumes that the each spec file is a fully browserified js file.
 function jasmineSpec(name) {
     return {
         src: [
             require.resolve('arraybuffer-slice'),
-            path.dirname(require.resolve('es6-promise/package.json'))
+            path.join(path.dirname(require.resolve('es6-promise/package.json')), 'dist/promise-1.0.0.js')
         ],
         options: {
             specs: 'build/dev/' + name + '/**/*.spec.js',
@@ -15,7 +16,6 @@ function jasmineSpec(name) {
     };
 }
 exports.jasmineSpec = jasmineSpec;
-;
 function browserifyTypeScript(filepath) {
     return {
         src: [filepath + '.ts'],
@@ -35,3 +35,4 @@ function copyFreedomToDest(destPath) {
     }] };
 }
 exports.copyFreedomToDest = copyFreedomToDest;
+//# sourceMappingURL=common-grunt-rules.js.map

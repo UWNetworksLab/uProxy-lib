@@ -45,7 +45,7 @@ module.exports = (grunt) ->
         files: [{
           expand: true
           cwd: 'build/dev/taskmanager/'
-          src: ['**/*'
+          src: ['**/*.js'
                 '!**/*.map'
                 '!**/*.spec.js']
           dest: 'tools/'
