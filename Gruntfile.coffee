@@ -1,4 +1,81 @@
 TaskManager = require './tools/taskmanager'
+
+#-------------------------------------------------------------------------
+# The top level tasks. These are the highest level grunt-tasks defined in terms
+# of specific grunt rules below and given to grunt.initConfig
+taskManager = new TaskManager.Manager();
+
+# Setup makes sure the needed typescript definition files are in the right place
+# so that typescript compilation can find them using require and defines
+# references in the code.
+taskManager.add 'setup', [
+  'tsd:dev'
+]
+
+# This rebuilds the tools directory. It should not often be needed.
+taskManager.add 'tools', [
+  'ts:dev'
+  'copy:tools'
+]
+
+# Makes the base development build, excludes sample apps.
+taskManager.add 'base-dev', [
+  'copy:dev'
+  'ts:dev'
+]
+
+# Makes the development build, includes sample apps.
+taskManager.add 'dev', [
+  'base-dev'
+  'samples'
+]
+
+# Makes the distribution build.
+taskManager.add 'dist', [
+  'copy:dist'
+  'ts:dist'
+]
+
+# Build the simple freedom chat sample app.
+taskManager.add 'simpleFreedomChat', [
+  'base-dev'
+  'browserify:simpleFreedomChatMain'
+  'browserify:simpleFreedomChatFreedomModule'
+]
+
+# Build the copy/paste freedom chat sample app.
+taskManager.add 'copypasteFreedomChat', [
+  'base-dev'
+  'browserify:copypasteFreedomChatMain'
+  'browserify:copypasteFreedomChatFreedomModule'
+]
+
+# Build all sample apps.
+taskManager.add 'samples', [
+  'simpleFreedomChat'
+  'copypasteFreedomChat'
+]
+
+# Run unit tests
+taskManager.add 'unit_tests', [
+  'dev'
+  'browserify:arraybuffersSpec'
+  'jasmine:arraybuffers'
+  'browserify:handlerSpec'
+  'jasmine:handler'
+  'browserify:taskmanagerSpec'
+  'jasmine:taskmanager'
+  'browserify:loggingSpec'
+  'jasmine:logging'
+]
+
+# Default task, build dev, run tests, make the distribution build.
+taskManager.add 'default', ['dev', 'unit_tests', 'dist']
+
+
+#-------------------------------------------------------------------------
+#
+#-------------------------------------------------------------------------
 Rule = require './tools/common-grunt-rules'
 path = require 'path'
 
@@ -47,7 +124,8 @@ module.exports = (grunt) ->
           cwd: 'build/dev/taskmanager/'
           src: ['**/*.js'
                 '!**/*.map'
-                '!**/*.spec.js']
+                '!**/*.spec.js'
+                '!**/*.spec.static.js']
           dest: 'tools/'
           onlyIf: 'modified'
         }]
@@ -137,62 +215,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-tsd'
-
-  #-------------------------------------------------------------------------
-  # Define the tasks
-  taskManager = new TaskManager.Manager();
-
-  taskManager.add 'setup', [
-    'tsd:dev'
-  ]
-
-  taskManager.add 'tools', [
-    'ts:dev'
-    'copy:tools'
-  ]
-
-  taskManager.add 'simpleFreedomChat', [
-    'copy:dev'
-    'browserify:simpleFreedomChatMain'
-    'browserify:simpleFreedomChatFreedomModule'
-  ]
-
-  taskManager.add 'copypasteFreedomChat', [
-    'copy:dev'
-    'browserify:copypasteFreedomChatMain'
-    'browserify:copypasteFreedomChatFreedomModule'
-  ]
-
-  taskManager.add 'samples', [
-    'simpleFreedomChat'
-    'copypasteFreedomChat'
-  ]
-
-  taskManager.add 'dev', [
-    'copy:dev'
-    'ts:dev'
-  ]
-
-  taskManager.add 'dist', [
-    'copy:dist'
-    'ts:dist'
-  ]
-
-  taskManager.add 'unit_tests', [
-    'dev'
-    'browserify:arraybuffersSpec'
-    'jasmine:arraybuffers'
-    'browserify:handlerSpec'
-    'jasmine:handler'
-    'browserify:taskmanagerSpec'
-    'jasmine:taskmanager'
-    'browserify:loggingSpec'
-    'jasmine:logging'
-  ]
-
-  grunt.registerTask 'default', [
-    'dev', 'unit_tests', 'dist'
-  ]
 
   #-------------------------------------------------------------------------
   # Register the tasks
