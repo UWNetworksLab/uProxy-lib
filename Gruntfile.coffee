@@ -106,6 +106,34 @@ module.exports = (grunt) ->
               onlyIf: 'modified'
           }
         ]
+<<<<<<< HEAD
+=======
+      # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
+      freedom:
+        files: [ {
+          expand: true
+          cwd: path.dirname(require.resolve('freedom/Gruntfile'))
+          src: ['freedom.js']
+          dest: 'build/freedom/'
+        } ]
+
+    copy:
+      crypto: Rule.copyModule 'crypto'
+      taskmanager: Rule.copyModule 'taskmanager'
+      arraybuffers: Rule.copyModule 'arraybuffers'
+      handler: Rule.copyModule 'handler'
+      logging: Rule.copyModule 'logging'
+      loggingprovider: Rule.copyModule 'loggingprovider'
+      webrtc: Rule.copyModule 'webrtc'
+
+      freedomTypings: Rule.copyModule 'freedom/typings'
+
+      simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
+      simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
+
+      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
+      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
+>>>>>>> dev
 
       # Copy the freedom output file to sample apps
       freedomForSimpleFreedomChat:
@@ -176,6 +204,7 @@ module.exports = (grunt) ->
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       logging: Rule.jasmineSpec 'logging'
+      loggingprovider: Rule.jasmineSpec 'loggingprovider'
 
     browserify:
       # Browserify specs
