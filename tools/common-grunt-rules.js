@@ -5,7 +5,7 @@ function jasmineSpec(name) {
     return {
         src: [
             require.resolve('arraybuffer-slice'),
-            require.resolve('es6-promise')
+            path.dirname(require.resolve('es6-promise/package.json'))
         ],
         options: {
             specs: 'build/dev/' + name + '/**/*.spec.js',
