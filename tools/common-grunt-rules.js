@@ -9,7 +9,7 @@ function jasmineSpec(name) {
             path.join(path.dirname(require.resolve('es6-promise/package.json')), 'dist/promise-1.0.0.js')
         ],
         options: {
-            specs: 'build/dev/' + name + '/**/*.spec.js',
+            specs: 'build/dev/' + name + '/**/*.spec.static.js',
             outfile: 'build/dev/' + name + '/SpecRunner.html',
             keepRunner: true
         }
@@ -18,11 +18,10 @@ function jasmineSpec(name) {
 exports.jasmineSpec = jasmineSpec;
 function browserifyTypeScript(filepath) {
     return {
-        src: [filepath + '.ts'],
-        dest: filepath + '.js',
-        browserifyOptions: {
+        src: ['build/dev/' + filepath + '.js'],
+        dest: 'build/dev/' + filepath + '.static.js',
+        options: {
             debug: true,
-            transform: ['tsify']
         }
     };
 }

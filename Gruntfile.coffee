@@ -102,15 +102,17 @@ module.exports = (grunt) ->
 
     browserify:
       handlerQueueSpec:
-        Rule.browserifyTypeScript 'build/dev/handler/queue.spec'
+        Rule.browserifyTypeScript 'handler/queue.spec'
+      taskmanagerSpec:
+        Rule.browserifyTypeScript 'taskmanager/taskamanager.spec'
       copypasteFreedomChatMain:
-        Rule.browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/main'
+        Rule.browserifyTypeScript 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule:
-        Rule.browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/freedom-module.ts'
+        Rule.browserifyTypeScript 'samples/copypaste-freedom-chat/freedom-module.ts'
       simpleFreedomChatMain:
-        Rule.browserifyTypeScript 'build/dev/samples/simple-freedom-chat/main'
+        Rule.browserifyTypeScript 'samples/simple-freedom-chat/main'
       simpleFreedomChatFreedomModule:
-        Rule.browserifyTypeScript 'build/dev/samples/simple-freedom-chat/freedom-module.ts'
+        Rule.browserifyTypeScript 'samples/simple-freedom-chat/freedom-module.ts'
 
     # Compile everything into the development build directory.
     clean: ['build/'
@@ -164,7 +166,9 @@ module.exports = (grunt) ->
   taskManager.add 'dev', [
     'copy:dev'
     'ts:dev'
-    'samples'
+    'browserify:handlerQueueSpec'
+    'jasmine:handler'
+    #'samples'
   ]
 
   taskManager.add 'dist', [
