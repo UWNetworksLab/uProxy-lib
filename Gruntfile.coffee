@@ -1,50 +1,10 @@
 TaskManager = require './tools/taskmanager'
-
+Rule = require './tools/common-grunt-rules'
 path = require 'path'
 
-console.log("output for es6-require:" + require.resolve('es6-promise'));
-
-# Function to make jasmine spec assuming expected dir layout.
-jasmineSpec = (name, deps = []) ->
-  {
-    src: [
-      # Help Jasmine's PhantomJS understand promises.
-      require.resolve('arraybuffer-slice/index.js')
-      require.resolve('es6-promise')
-    ].concat(deps).concat([
-      'build/dev/' + name + '/**/*.js'
-      '!build/dev/' + name + '/**/*.spec.js'
-    ])
-    options:
-      specs: 'build/dev/' + name + '/**/*.spec.js'
-      outfile: 'build/dev/' + name + '/SpecRunner.html'
-      keepRunner: true
-  }
-
-browserifyTypeScript = (typeScriptEntryFileWithoutPostfix) ->
-  src: [typeScriptEntryFileWithoutPostfix + '.ts']
-  dest: typeScriptEntryFileWithoutPostfix + '.js'
-  options:
-    transform: ['tsify']
-    debug: true
-    bundleOptions: { debug: true }
-    browserifyOptions: { debug: true }
-
 module.exports = (grunt) ->
-  #-------------------------------------------------------------------------
-  grunt.initConfig
+  config =
     pkg: grunt.file.readJSON 'package.json'
-
-    # TODO: This must be factored out into common-grunt-rules.
-    symlink:
-      # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
-      freedom:
-        files: [ {
-          expand: true
-          cwd: path.dirname(require.resolve('freedom/Gruntfile'))
-          src: ['freedom.js']
-          dest: 'build/freedom/'
-        } ]
 
     copy:
       # Copy releveant non-typescript files to dev build.
@@ -58,7 +18,6 @@ module.exports = (grunt) ->
               onlyIf: 'modified'
           }
         ]
-
       # Copy releveant non-typescript files to distribution build.
       dist:
         files: [
@@ -71,6 +30,12 @@ module.exports = (grunt) ->
           }
         ]
 
+      # Copy the freedom output file to sample apps
+      freedomForSimpleFreedomChat:
+        Rule.copyFreedomToDest 'build/dev/samples/simple-freedom-chat/'
+      freedomForCopyPasteFreedomChat:
+        Rule.copyFreedomToDest 'build/dev/samples/copypaste-freedom-chat/'
+
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
       # want to experimentally mess about with our build tools)
@@ -79,8 +44,8 @@ module.exports = (grunt) ->
       tools:
         files: [{
           expand: true
-          cwd: 'build/dev/'
-          src: ['taskmanager/**'
+          cwd: 'build/dev/taskmanager/'
+          src: ['**/*'
                 '!**/*.map'
                 '!**/*.spec.js']
           dest: 'tools/'
@@ -88,7 +53,7 @@ module.exports = (grunt) ->
         }]
 
     tsd:
-      refresh:
+      dev:
         options:
           # execute a command
           command: 'reinstall'
@@ -102,52 +67,59 @@ module.exports = (grunt) ->
       # Compile everything into the development build directory.
       dev:
         src: ['src/**/*.ts']
-        #sourceRoot: 'build/'
-        #mapRoot: 'build/'
         outDir: 'build/dev/'
-        target: 'es5'
-        comments: true
-        noImplicitAny: true
-        sourceMap: true
-        declaration: true
-        module: 'commonjs'
-        fast: 'always'
+        options:
+          #sourceRoot: 'build/'
+          #mapRoot: 'build/'
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: true
+          declaration: true
+          module: 'commonjs'
+          fast: 'always'
       # Compile everything into the distribution build directory.
       dist:
         src: ['src/**/*.ts']
-        #sourceRoot: 'build/'
-        #mapRoot: 'build/'
         outDir: 'build/dist/'
-        target: 'es5'
-        comments: false
-        noImplicitAny: true
-        sourceMap: false
-        declaration: true
-        module: 'commonjs'
-        fast: 'always'
+        options:
+          #sourceRoot: 'build/'
+          #mapRoot: 'build/'
+          target: 'es5'
+          comments: false
+          noImplicitAny: true
+          sourceMap: false
+          declaration: true
+          module: 'commonjs'
+          fast: 'always'
 
-    jamine:
-      handler: jasmineSpec 'handler'
-      taskmanager: jasmineSpec 'taskmanager'
-      arraybuffers: jasmineSpec 'arraybuffers'
-      crypto: jasmineSpec 'taskmanager'
-      logging: jasmineSpec 'logging'
+    jasmine:
+      handler: Rule.jasmineSpec 'handler'
+      taskmanager: Rule.jasmineSpec 'taskmanager'
+      arraybuffers: Rule.jasmineSpec 'arraybuffers'
+      crypto: Rule.jasmineSpec 'taskmanager'
+      logging: Rule.jasmineSpec 'logging'
 
     browserify:
+      handlerQueueSpec:
+        Rule.browserifyTypeScript 'build/dev/handler/queue.spec'
       copypasteFreedomChatMain:
-        browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/main'
+        Rule.browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule:
-        browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/freedom-module.ts'
+        Rule.browserifyTypeScript 'build/dev/samples/copypaste-freedom-chat/freedom-module.ts'
       simpleFreedomChatMain:
-        browserifyTypeScript 'build/dev/samples/simple-freedom-chat/main'
+        Rule.browserifyTypeScript 'build/dev/samples/simple-freedom-chat/main'
       simpleFreedomChatFreedomModule:
-        browserifyTypeScript 'build/dev/samples/simple-freedom-chat/freedom-module.ts'
+        Rule.browserifyTypeScript 'build/dev/samples/simple-freedom-chat/freedom-module.ts'
 
     # Compile everything into the development build directory.
     clean: ['build/'
             # 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
             '.tscache/'
             'src/.baseDir.ts']
+
+  #-------------------------------------------------------------------------
+  grunt.initConfig config
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -162,6 +134,10 @@ module.exports = (grunt) ->
   #-------------------------------------------------------------------------
   # Define the tasks
   taskManager = new TaskManager.Manager();
+
+  taskManager.add 'setup', [
+    'tsd:dev'
+  ]
 
   taskManager.add 'tools', [
     'ts:dev'
@@ -197,7 +173,8 @@ module.exports = (grunt) ->
   ]
 
   taskManager.add 'test', [
-    'dev', 'jasmine'
+    'dev'
+    'jasmine'
   ]
 
   grunt.registerTask 'default', [

@@ -6,22 +6,22 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "es6-promise/es6-promise.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     },
     "webcrypto/WebCrypto.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     },
     "form-data/form-data.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     },
     "node/node.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     },
     "request/request.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
     }
   }
 }
