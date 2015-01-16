@@ -43,6 +43,7 @@ module.exports = (grunt) ->
       arraybuffers: Rule.copyModule 'arraybuffers'
       handler: Rule.copyModule 'handler'
       logging: Rule.copyModule 'logging'
+      loggingprovider: Rule.copyModule 'loggingprovider'
       webrtc: Rule.copyModule 'webrtc'
 
       freedomTypings: Rule.copyModule 'freedom/typings'
@@ -70,6 +71,9 @@ module.exports = (grunt) ->
       logging: Rule.typescriptSrc 'logging'
       loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
 
+      loggingProvider: Rule.typescriptSrc 'loggingprovider'
+      loggingProviderSpecDecl: Rule.typescriptSpecDecl 'loggingprovider'
+
       webrtc: Rule.typescriptSrc 'webrtc'
 
       # freedom/typings only contains specs and declarations.
@@ -82,10 +86,18 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
+      loggingProvider:
+        src: [
+          'build/logging/mocks.js'
+          'build/loggingprovider/loggingprovider.js'
+        ]
+        options:
+          specs: 'build/loggingprovider/*.spec.js'
       logging:
         src: [
           'build/logging/mocks.js'
-          'build/logging/logging.js'
+          'build/logging/logging.js',
+          require.resolve('es6-promise/dist/promise-1.0.0')
         ]
         options:
           specs: 'build/logging/*.spec.js'
@@ -144,6 +156,13 @@ module.exports = (grunt) ->
     'copy:logging'
   ]
 
+  taskManager.add 'loggingprovider', [
+    'base'
+    'ts:loggingProvider'
+    'ts:loggingProviderSpecDecl'
+    'copy:loggingprovider'
+  ]
+
   taskManager.add 'webrtc', [
     'logging'
     'crypto'
@@ -162,6 +181,7 @@ module.exports = (grunt) ->
   taskManager.add 'simpleFreedomChat', [
     'base'
     'logging'
+    'loggingprovider'
     'freedom'
     'webrtc'
     'ts:simpleFreedomChat'
