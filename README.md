@@ -17,6 +17,7 @@ This currently consists of:
    * `src/freedom/samples`: freedom-sample apps, e.g. P2P chat between two peerconnections in a single chrome app.
    * `src/freedom/typings`: typescript declarations for freedom, its core-providers, and main APIs.
  * `src/logging`: handy logging library
+ * `src/loggingprovider`: freedom logging provider
  * `src/taskmanager`: Smart grunt task management that avoid re-building the same components multiple times. This assumes that if a component was build once, then it never has to be build again in a single build run.
    * Note: We include the compiled `taskmanager.js`, which has source `src/taskmanager/taskmanager.ts`, so that the Gruntfile can use it. There is a special rule to rebuild this version of taskmanager. Got to love circular dependencies right?
  * `src/webrtc`: utility wrapper for WebRtc Peer Connections & Data Channels

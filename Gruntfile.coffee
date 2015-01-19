@@ -106,34 +106,6 @@ module.exports = (grunt) ->
               onlyIf: 'modified'
           }
         ]
-<<<<<<< HEAD
-=======
-      # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
-      freedom:
-        files: [ {
-          expand: true
-          cwd: path.dirname(require.resolve('freedom/Gruntfile'))
-          src: ['freedom.js']
-          dest: 'build/freedom/'
-        } ]
-
-    copy:
-      crypto: Rule.copyModule 'crypto'
-      taskmanager: Rule.copyModule 'taskmanager'
-      arraybuffers: Rule.copyModule 'arraybuffers'
-      handler: Rule.copyModule 'handler'
-      logging: Rule.copyModule 'logging'
-      loggingprovider: Rule.copyModule 'loggingprovider'
-      webrtc: Rule.copyModule 'webrtc'
-
-      freedomTypings: Rule.copyModule 'freedom/typings'
-
-      simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
-      simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
-
-      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
-      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
->>>>>>> dev
 
       # Copy the freedom output file to sample apps
       freedomForSimpleFreedomChat:
@@ -172,7 +144,7 @@ module.exports = (grunt) ->
     ts:
       # Compile everything into the development build directory.
       dev:
-        src: ['src/**/*.ts']
+        src: ['src/**/*.ts', '!src/**/*.d.ts']
         outDir: 'build/dev/'
         options:
           #sourceRoot: 'build/'
@@ -186,7 +158,7 @@ module.exports = (grunt) ->
           fast: 'always'
       # Compile everything into the distribution build directory.
       dist:
-        src: ['src/**/*.ts']
+        src: ['src/**/*.ts', '!src/**/*.d.ts']
         outDir: 'build/dist/'
         options:
           #sourceRoot: 'build/'
@@ -208,23 +180,16 @@ module.exports = (grunt) ->
 
     browserify:
       # Browserify specs
-      arraybuffersSpec:
-        Rule.browserify 'arraybuffers/arraybuffers.spec'
-      handlerSpec:
-        Rule.browserify 'handler/queue.spec'
-      taskmanagerSpec:
-        Rule.browserify 'taskmanager/taskmanager.spec'
-      loggingSpec:
-        Rule.browserify 'logging/logging.spec'
+      arraybuffersSpec: Rule.browserify 'arraybuffers/arraybuffers.spec'
+      handlerSpec: Rule.browserify 'handler/queue.spec'
+      taskmanagerSpec: Rule.browserify 'taskmanager/taskmanager.spec'
+      loggingSpec: Rule.browserify 'logging/logging.spec'
+      loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
       # Browserify for sample apps
-      copypasteFreedomChatMain:
-        Rule.browserify 'samples/copypaste-freedom-chat/main'
-      copypasteFreedomChatFreedomModule:
-        Rule.browserify 'samples/copypaste-freedom-chat/freedom-module.ts'
-      simpleFreedomChatMain:
-        Rule.browserify 'samples/simple-freedom-chat/main'
-      simpleFreedomChatFreedomModule:
-        Rule.browserify 'samples/simple-freedom-chat/freedom-module.ts'
+      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
+      copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module.ts'
+      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main'
+      simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module.ts'
 
     # Compile everything into the development build directory.
     clean: ['build/'
