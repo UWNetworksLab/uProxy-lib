@@ -91,7 +91,7 @@ module.exports = (grunt) ->
               expand: true,
               cwd: 'src/',
               src: ['**/*.html', '**/*.css',  '**/*.js'],
-              dest: 'build/dev/',
+              dest: 'build/src/',
               onlyIf: 'modified'
           }
         ]
@@ -100,8 +100,9 @@ module.exports = (grunt) ->
         files: [
           {
               expand: true,
-              cwd: 'src/',
-              src: ['**/*.html', '**/*.css',  '**/*.js'],
+              cwd: 'dev/',
+              src: ['**/*.html', '**/*.css',  '**/*.js',
+                    '!**/*.spec.js', '!**/*.spec.static.js'],
               dest: 'build/dist/',
               onlyIf: 'modified'
           }
@@ -109,9 +110,9 @@ module.exports = (grunt) ->
 
       # Copy the freedom output file to sample apps
       freedomForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'build/dev/samples/simple-freedom-chat/'
+        Rule.copyFreedomToDest 'build/samples/simple-freedom-chat/'
       freedomForCopyPasteFreedomChat:
-        Rule.copyFreedomToDest 'build/dev/samples/copypaste-freedom-chat/'
+        Rule.copyFreedomToDest 'build/samples/copypaste-freedom-chat/'
 
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
@@ -121,7 +122,7 @@ module.exports = (grunt) ->
       tools:
         files: [{
           expand: true
-          cwd: 'build/dev/taskmanager/'
+          cwd: 'build/src/taskmanager/'
           src: ['**/*.js'
                 '!**/*.map'
                 '!**/*.spec.js'
@@ -144,8 +145,8 @@ module.exports = (grunt) ->
     ts:
       # Compile everything into the development build directory.
       dev:
-        src: ['src/**/*.ts', '!src/**/*.d.ts']
-        outDir: 'build/dev/'
+        src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
+        outDir: 'build/'
         options:
           #sourceRoot: 'build/'
           #mapRoot: 'build/'
@@ -156,20 +157,30 @@ module.exports = (grunt) ->
           declaration: true
           module: 'commonjs'
           fast: 'always'
-      # Compile everything into the distribution build directory.
-      dist:
-        src: ['src/**/*.ts', '!src/**/*.d.ts']
-        outDir: 'build/dist/'
+      copypasteFreedomChatMain:
+        src: ['samples/copypaste-freedom-chat/main.ts']
+        outDir: 'build/'
         options:
-          #sourceRoot: 'build/'
-          #mapRoot: 'build/'
           target: 'es5'
-          comments: false
+          comments: true
           noImplicitAny: true
-          sourceMap: false
-          declaration: true
+          sourceMap: true
+          declaration: false
           module: 'commonjs'
           fast: 'always'
+      copypasteFreedomChatFreedomModule:
+        src: ['samples/copypaste-freedom-chat/freedom-module.ts']
+        outDir: 'build/'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: true
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
+      #simpleFreedomChatMain:
+      #simpleFreedomChatFreedomModule:
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
@@ -187,9 +198,9 @@ module.exports = (grunt) ->
       loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
-      copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module.ts'
+      copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main'
-      simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module.ts'
+      simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
 
     # Compile everything into the development build directory.
     clean: ['build/'

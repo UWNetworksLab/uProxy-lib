@@ -9,8 +9,8 @@ function jasmineSpec(name) {
             path.join(path.dirname(require.resolve('es6-promise/package.json')), 'dist/promise-1.0.0.js')
         ],
         options: {
-            specs: 'build/dev/' + name + '/**/*.spec.static.js',
-            outfile: 'build/dev/' + name + '/SpecRunner.html',
+            specs: 'build/src/' + name + '/**/*.spec.static.js',
+            outfile: 'build/src/' + name + '/SpecRunner.html',
             keepRunner: true
         }
     };
@@ -18,10 +18,10 @@ function jasmineSpec(name) {
 exports.jasmineSpec = jasmineSpec;
 function browserify(filepath) {
     return {
-        src: ['build/dev/' + filepath + '.js'],
-        dest: 'build/dev/' + filepath + '.static.js',
+        src: ['build/src/' + filepath + '.js'],
+        dest: 'build/src/' + filepath + '.static.js',
         options: {
-            debug: true
+            debug: true,
         }
     };
 }
@@ -34,3 +34,4 @@ function copyFreedomToDest(destPath) {
     }] };
 }
 exports.copyFreedomToDest = copyFreedomToDest;
+//# sourceMappingURL=common-grunt-rules.js.map

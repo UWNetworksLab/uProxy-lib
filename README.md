@@ -29,7 +29,7 @@ This currently consists of:
 * In the freedom module's manifestition file where log is used, please add dependency "core.log". If your app need to access the log, you also need to include dependency of "core.logmanager"
 * In freedom module code, reference the log declaration.
 ```
-/// <reference path="../../../freedom/coreproviders/uproxylogging.d.ts" />
+/// <reference path='../../../freedom/coreproviders/uproxylogging.d.ts' />
 ```
 * In freedom module code, log instance can be instantiated this way (replace module_name with name of your own choice).
 ```

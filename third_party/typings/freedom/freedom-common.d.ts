@@ -16,6 +16,16 @@ declare module freedom {
     controlChannel :string;
   }
 
+  interface ModuleSelfConstructor {
+    // Identifies a named API's provider class.
+    provideSynchronous :(classFn?:Function) => void;
+    provideAsynchronous :(classFn?:Function) => void;
+    providePromises :(classFn?:Function) => void;
+  }
+
+  interface ParentModuleThing extends ModuleSelfConstructor, OnAndEmit<any,any>
+    {}
+
   interface Logger {
     debug(...args:any[]) : void;
     info(...args:any[]) : void;
@@ -63,9 +73,18 @@ declare module freedom {
     };
   }
 
+  interface FreedomInCoreEnvOptions {
+    debug :string;  // debug level
+    logger :string;  // string to json for logging provider.
+  }
+
   interface FreedomInCoreEnv extends freedom.OnAndEmit<any,any> {
-    // Represents the call to freedom when you create a root module.
-    (manifestPath?:string, options?:any): any;
+    // Represents the call to freedom when you create a root module. Returns a
+    // promise to a factory constructor for the freedom module. The
+    // |manifestPath| should be a path to a json string that specifies the
+    // freedom module.
+    (manifestPath:string, options?:FreedomInCoreEnvOptions)
+      : Promise<Function>;
 
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
@@ -76,11 +95,11 @@ declare module freedom {
   interface FreedomInModuleEnv {
     // Represents the call to freedom(), which returns the parent module's
     // freedom stub interface in an on/emit style.
-    (): freedom.OnAndEmit<any,any>;
+    (): ParentModuleThing;
 
     // Creates an interface to the freedom core provider which can be used to
     // create loggers and channels.
-    core :() => freedom.Core
+    core : () => freedom.Core;
 
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
