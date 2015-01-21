@@ -1,6 +1,6 @@
 /// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
 
-declare module "freedom" {
+declare module freedom {
   // Common on/emit for message passing interfaces.
   interface EventDispatchFn<T> { (eventType:string, value?:T) : void; }
   interface EventHandlerFn<T> {
@@ -106,4 +106,10 @@ declare module "freedom" {
     // this.
     [moduleName:string] : Function;
   }
+}
+
+// This allows use of syntax: import freedomTypes = require('freedom.i');
+// which gives finer control to the naming prefix for types.
+declare module "freedom.i" {
+    export = freedom;
 }

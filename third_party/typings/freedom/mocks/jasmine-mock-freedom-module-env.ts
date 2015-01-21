@@ -2,7 +2,7 @@
 /// <reference path="../../es6-promise/es6-promise.d.ts" />
 /// <reference path="../freedom-common.d.ts" />
 
-import freedomTypes = require('freedom');
+import freedomTypes = require('freedom.i');
 
 export class MockParentModuleThing implements freedomTypes.ParentModuleThing {
   public on(t:string, f:Function) : void {

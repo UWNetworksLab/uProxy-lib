@@ -33,7 +33,6 @@ taskManager.add 'dev', [
 # Makes the distribution build.
 taskManager.add 'dist', [
   'copy:dist'
-  'ts:dist'
 ]
 
 # Build the simple freedom chat sample app.
@@ -145,12 +144,12 @@ module.exports = (grunt) ->
     ts:
       # Compile everything into the development build directory.
       dev:
-        src: ['src/**/*.ts', 'src/!**/*.d.ts', '!src/samples/**']
+        src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
         outDir: 'build/'
         options:
           #sourceRoot: 'build/'
           #mapRoot: 'build/'
-          # baseDir: 'src'
+          #baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
