@@ -38,6 +38,7 @@ taskManager.add 'dist', [
 # Build the simple freedom chat sample app.
 taskManager.add 'simpleFreedomChat', [
   'base-dev'
+  'copy:freedomjsForSimpleFreedomChat'
   'browserify:simpleFreedomChatMain'
   'browserify:simpleFreedomChatFreedomModule'
 ]
@@ -45,6 +46,7 @@ taskManager.add 'simpleFreedomChat', [
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
+  'copy:freedomjsForCopypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatFreedomModule'
 ]
@@ -66,6 +68,8 @@ taskManager.add 'unit_tests', [
   'jasmine:taskmanager'
   'browserify:loggingSpec'
   'jasmine:logging'
+  'browserify:loggingProviderSpec'
+  'jasmine:loggingProvider'
 ]
 
 # Default task, build dev, run tests, make the distribution build.
@@ -108,10 +112,10 @@ module.exports = (grunt) ->
         ]
 
       # Copy the freedom output file to sample apps
-      freedomForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'build/samples/simple-freedom-chat/'
-      freedomForCopyPasteFreedomChat:
-        Rule.copyFreedomToDest 'build/samples/copypaste-freedom-chat/'
+      freedomjsForSimpleFreedomChat:
+        Rule.copyFreedomToDest 'build/src/samples/simple-freedom-chat/freedom.js'
+      freedomjsForCopypasteFreedomChatMain:
+        Rule.copyFreedomToDest 'build/src/samples/copypaste-freedom-chat/freedom.js'
 
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
@@ -193,8 +197,9 @@ module.exports = (grunt) ->
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       logging:
-        Rule.jasmineSpec('logging',['third_party/typings/freedom/pre-spec-freedom.js'])
-      loggingprovider: Rule.jasmineSpec 'loggingprovider'
+        Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
+      loggingProvider:
+        Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
 
     browserify:
       # Browserify specs

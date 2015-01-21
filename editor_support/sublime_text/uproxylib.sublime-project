@@ -5,12 +5,6 @@
       "name": "uproxy-lib",
       "follow_symlinks": true
     },
-    {
-      "path": "../../build/",
-      "name": "typescript",
-      "follow_symlinks": true,
-      "file_exclude_patterns": ["*.js", "*.js.map"]
-    }
   ],
   "settings": {
     "tab_size": 2,
