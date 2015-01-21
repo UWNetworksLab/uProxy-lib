@@ -1,4 +1,4 @@
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="./freedom-common.d.ts" />
 
 // The freedom file, when loaded, will assume that a new variable |freedomcfg|

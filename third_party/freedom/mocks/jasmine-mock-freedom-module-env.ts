@@ -1,5 +1,5 @@
-/// <reference path='../../jasmine/jasmine.d.ts' />
-/// <reference path="../../es6-promise/es6-promise.d.ts" />
+/// <reference path='../../typings/jasmine/jasmine.d.ts' />
+/// <reference path="../../typings/es6-promise/es6-promise.d.ts" />
 /// <reference path="../freedom-common.d.ts" />
 
 import freedomTypes = require('freedom.i');

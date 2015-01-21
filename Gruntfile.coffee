@@ -142,14 +142,18 @@ module.exports = (grunt) ->
 
     # Typescript rules
     ts:
+      # Special task options, not a target option.
+      options:
+        baseDir: 'src'
       # Compile everything into the development build directory.
       dev:
         src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
         outDir: 'build/'
+        baseDir: 'src'
         options:
           #sourceRoot: 'build/'
           #mapRoot: 'build/'
-          #baseDir: 'src'
+          baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true

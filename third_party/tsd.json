@@ -6,22 +6,22 @@
   "bundle": "third_party/typings/tsd.d.ts",
   "installed": {
     "es6-promise/es6-promise.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     },
     "webcrypto/WebCrypto.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     },
     "form-data/form-data.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     },
     "node/node.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     },
     "request/request.d.ts": {
-      "commit": "2cc4331067a81e2ae6bc4590e7b33bf286c8f28f"
+      "commit": "0bf824eb633122fb748e17f89aa067cc4383c2df"
     }
   }
 }
