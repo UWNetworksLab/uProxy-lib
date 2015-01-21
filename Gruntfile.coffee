@@ -100,7 +100,7 @@ module.exports = (grunt) ->
         files: [
           {
               expand: true,
-              cwd: 'dev/',
+              cwd: 'build/src/',
               src: ['**/*.html', '**/*.css',  '**/*.js',
                     '!**/*.spec.js', '!**/*.spec.static.js'],
               dest: 'build/dist/',
@@ -145,11 +145,12 @@ module.exports = (grunt) ->
     ts:
       # Compile everything into the development build directory.
       dev:
-        src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
+        src: ['src/**/*.ts', 'src/!**/*.d.ts', '!src/samples/**']
         outDir: 'build/'
         options:
           #sourceRoot: 'build/'
           #mapRoot: 'build/'
+          # baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -158,9 +159,10 @@ module.exports = (grunt) ->
           module: 'commonjs'
           fast: 'always'
       copypasteFreedomChatMain:
-        src: ['samples/copypaste-freedom-chat/main.ts']
+        src: ['src/samples/copypaste-freedom-chat/main.ts']
         outDir: 'build/'
         options:
+          # baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -169,9 +171,10 @@ module.exports = (grunt) ->
           module: 'commonjs'
           fast: 'always'
       copypasteFreedomChatFreedomModule:
-        src: ['samples/copypaste-freedom-chat/freedom-module.ts']
+        src: ['src/samples/copypaste-freedom-chat/freedom-module.ts']
         outDir: 'build/'
         options:
+          #baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -186,7 +189,8 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logging: Rule.jasmineSpec 'logging'
+      logging:
+        Rule.jasmineSpec('logging',['third_party/typings/freedom/pre-spec-freedom.js'])
       loggingprovider: Rule.jasmineSpec 'loggingprovider'
 
     browserify:

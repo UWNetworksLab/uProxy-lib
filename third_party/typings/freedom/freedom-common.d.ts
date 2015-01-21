@@ -1,6 +1,6 @@
 /// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
 
-declare module freedom {
+declare module "freedom" {
   // Common on/emit for message passing interfaces.
   interface EventDispatchFn<T> { (eventType:string, value?:T) : void; }
   interface EventHandlerFn<T> {
@@ -78,7 +78,7 @@ declare module freedom {
     logger :string;  // string to json for logging provider.
   }
 
-  interface FreedomInCoreEnv extends freedom.OnAndEmit<any,any> {
+  interface FreedomInCoreEnv extends OnAndEmit<any,any> {
     // Represents the call to freedom when you create a root module. Returns a
     // promise to a factory constructor for the freedom module. The
     // |manifestPath| should be a path to a json string that specifies the
@@ -99,7 +99,7 @@ declare module freedom {
 
     // Creates an interface to the freedom core provider which can be used to
     // create loggers and channels.
-    core : () => freedom.Core;
+    core : () => Core;
 
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
