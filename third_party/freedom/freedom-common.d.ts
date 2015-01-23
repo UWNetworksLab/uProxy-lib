@@ -74,8 +74,8 @@ declare module freedom {
   }
 
   interface FreedomInCoreEnvOptions {
-    debug :string;  // debug level
-    logger :string;  // string to json for logging provider.
+    debug  ?:string;  // debug level
+    logger ?:string;  // string to json for logging provider.
   }
 
   interface FreedomInCoreEnv extends OnAndEmit<any,any> {
