@@ -1,6 +1,7 @@
 // common-grunt-rules
 /// <reference path='../../third_party/typings/node/node.d.ts' />
 var path = require('path');
+// Grunt Jasmine target creator
 // Assumes that the each spec file is a fully browserified js file.
 function jasmineSpec(name, morefiles) {
     if (!morefiles) {
@@ -19,6 +20,7 @@ function jasmineSpec(name, morefiles) {
     };
 }
 exports.jasmineSpec = jasmineSpec;
+// Grunt browserify target creator
 function browserify(filepath) {
     return {
         src: ['build/src/' + filepath + '.js'],
@@ -29,12 +31,34 @@ function browserify(filepath) {
     };
 }
 exports.browserify = browserify;
-function copyFreedomToDest(destPath) {
+// Grunt copy target creator: for copying freedom.js to
+function copyFreedomToDest(freedomRuntimeName, destPath) {
+    var freedomjsPath = require.resolve(freedomRuntimeName);
+    var fileTarget = { files: [{
+        nonull: true,
+        src: [freedomjsPath],
+        dest: path.join(destPath, path.basename(freedomjsPath)),
+        onlyIf: 'modified'
+    }] };
+    return fileTarget;
+}
+exports.copyFreedomToDest = copyFreedomToDest;
+// Grunt copy target creator: for copy a freedom library directory
+function copyFreedomLib(libPath, destPath) {
     return { files: [{
-        src: [require.resolve('freedom')],
+        expand: true,
+        cwd: 'build/src/',
+        src: [
+            libPath + '/*.json',
+            libPath + '/*.js',
+            libPath + '/*.html',
+            libPath + '/*.css',
+            '!' + libPath + '/*.spec.js',
+            '!' + libPath + '/SpecRunner.html'
+        ],
         dest: destPath,
         onlyIf: 'modified'
     }] };
 }
-exports.copyFreedomToDest = copyFreedomToDest;
+exports.copyFreedomLib = copyFreedomLib;
 //# sourceMappingURL=common-grunt-rules.js.map

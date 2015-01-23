@@ -36,24 +36,27 @@ taskManager.add 'dist', [
 ]
 
 # Build the simple freedom chat sample app.
-taskManager.add 'simpleFreedomChat', [
-  'base-dev'
-  'copy:freedomjsForSimpleFreedomChat'
-  'browserify:simpleFreedomChatMain'
-  'browserify:simpleFreedomChatFreedomModule'
-]
+# taskManager.add 'simpleFreedomChat', [
+#   'base-dev'
+#   'copy:freedomjsForSimpleFreedomChat'
+#   'browserify:simpleFreedomChatMain'
+#   'browserify:simpleFreedomChatFreedomModule'
+# ]
 
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
   'copy:freedomjsForCopypasteFreedomChatMain'
+  'copy:loggingLibForCopypasteFreedomChatMainModule'
+  'ts:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
+  'ts:copypasteFreedomChatFreedomModule'
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
 # Build all sample apps.
 taskManager.add 'samples', [
-  'simpleFreedomChat'
+#  'simpleFreedomChat'
   'copypasteFreedomChat'
 ]
 
@@ -64,8 +67,8 @@ taskManager.add 'unit_tests', [
   'jasmine:arraybuffers'
   'browserify:handlerSpec'
   'jasmine:handler'
-  'browserify:taskmanagerSpec'
-  'jasmine:taskmanager'
+  'browserify:buildToolsTaskmanagerSpec'
+  'jasmine:buildTools'
   'browserify:loggingSpec'
   'jasmine:logging'
   'browserify:loggingProviderSpec'
@@ -91,9 +94,10 @@ module.exports = (grunt) ->
       dev:
         files: [
           {
+              nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*.html', '**/*.css',  '**/*.js'],
+              src: ['**/*.html', '**/*.css', '**/*.json'],  # , '**/*.js'
               dest: 'build/src/',
               onlyIf: 'modified'
           }
@@ -102,6 +106,7 @@ module.exports = (grunt) ->
       dist:
         files: [
           {
+              nonull: true,
               expand: true,
               cwd: 'build/src/',
               src: ['**/*.html', '**/*.css',  '**/*.js',
@@ -112,10 +117,12 @@ module.exports = (grunt) ->
         ]
 
       # Copy the freedom output file to sample apps
-      freedomjsForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'build/src/samples/simple-freedom-chat/freedom.js'
+      #freedomjsForSimpleFreedomChat:
+      #  Rule.copyFreedomToDest 'freedom', 'build/src/samples/simple-freedom-chat/'
       freedomjsForCopypasteFreedomChatMain:
-        Rule.copyFreedomToDest 'build/src/samples/copypaste-freedom-chat/freedom.js'
+        Rule.copyFreedomToDest 'freedom', 'build/src/samples/copypaste-freedom-chat/'
+      loggingLibForCopypasteFreedomChatMainModule:
+        Rule.copyFreedomLib 'loggingprovider', 'build/src/samples/copypaste-freedom-chat/lib/'
 
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
@@ -124,8 +131,9 @@ module.exports = (grunt) ->
       # Assumes that `ts:dev` has happened.
       tools:
         files: [{
+          nonull: true,
           expand: true
-          cwd: 'build/src/taskmanager/'
+          cwd: 'build/src/build-tools/'
           src: ['**/*.js'
                 '!**/*.map'
                 '!**/*.spec.js'
@@ -146,9 +154,6 @@ module.exports = (grunt) ->
 
     # Typescript rules
     ts:
-      # Special task options, not a target option.
-      options:
-        baseDir: 'src'
       # Compile everything into the development build directory.
       dev:
         src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
@@ -156,8 +161,7 @@ module.exports = (grunt) ->
         baseDir: 'src'
         options:
           #sourceRoot: 'build/'
-          #mapRoot: 'build/'
-          baseDir: 'src'
+          mapRoot: 'src/'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -167,9 +171,9 @@ module.exports = (grunt) ->
           fast: 'always'
       copypasteFreedomChatMain:
         src: ['src/samples/copypaste-freedom-chat/main.ts']
-        outDir: 'build/'
+        outDir: 'build/src/'
+        baseDir: 'src'
         options:
-          # baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -179,9 +183,9 @@ module.exports = (grunt) ->
           fast: 'always'
       copypasteFreedomChatFreedomModule:
         src: ['src/samples/copypaste-freedom-chat/freedom-module.ts']
-        outDir: 'build/'
+        outDir: 'build/src/'
+        baseDir: 'src'
         options:
-          #baseDir: 'src'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -194,7 +198,7 @@ module.exports = (grunt) ->
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
-      taskmanager: Rule.jasmineSpec 'taskmanager'
+      buildTools: Rule.jasmineSpec 'build-tools'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       logging:
         Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
@@ -205,7 +209,7 @@ module.exports = (grunt) ->
       # Browserify specs
       arraybuffersSpec: Rule.browserify 'arraybuffers/arraybuffers.spec'
       handlerSpec: Rule.browserify 'handler/queue.spec'
-      taskmanagerSpec: Rule.browserify 'taskmanager/taskmanager.spec'
+      buildToolsTaskmanagerSpec: Rule.browserify 'build-tools/taskmanager.spec'
       loggingSpec: Rule.browserify 'logging/logging.spec'
       loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
       # Browserify for sample apps
