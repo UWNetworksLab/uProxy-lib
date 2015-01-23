@@ -22,6 +22,7 @@ taskManager.add 'tools', [
 taskManager.add 'base-dev', [
   'copy:dev'
   'ts:dev'
+  'browserify:loggingProvider'
 ]
 
 # Makes the development build, includes sample apps.
@@ -167,7 +168,7 @@ module.exports = (grunt) ->
         baseDir: 'src'
         options:
           #sourceRoot: 'build/'
-          mapRoot: 'src/'
+          mapRoot: '../'
           target: 'es5'
           comments: true
           noImplicitAny: true
@@ -231,7 +232,8 @@ module.exports = (grunt) ->
       logging:
         Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
       loggingProvider:
-        Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
+        Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
+      #  Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
 
     browserify:
       # Browserify specs
@@ -239,6 +241,7 @@ module.exports = (grunt) ->
       handlerSpec: Rule.browserify 'handler/queue.spec'
       buildToolsTaskmanagerSpec: Rule.browserify 'build-tools/taskmanager.spec'
       loggingSpec: Rule.browserify 'logging/logging.spec'
+      loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
       loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
