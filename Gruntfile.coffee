@@ -36,18 +36,21 @@ taskManager.add 'dist', [
 ]
 
 # Build the simple freedom chat sample app.
-# taskManager.add 'simpleFreedomChat', [
-#   'base-dev'
-#   'copy:freedomjsForSimpleFreedomChat'
-#   'browserify:simpleFreedomChatMain'
-#   'browserify:simpleFreedomChatFreedomModule'
-# ]
+taskManager.add 'simpleFreedomChat', [
+  'base-dev'
+  'copy:freedomjsForSimpleFreedomChat'
+  'copy:loggingLibForSimpleFreedomChat'
+  'ts:simpleFreedomChatMain'
+  'browserify:simpleFreedomChatMain'
+  'ts:simpleFreedomChatFreedomModule'
+  'browserify:simpleFreedomChatFreedomModule'
+]
 
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
-  'copy:freedomjsForCopypasteFreedomChatMain'
-  'copy:loggingLibForCopypasteFreedomChatMainModule'
+  'copy:freedomjsForCopypasteFreedomChat'
+  'copy:loggingLibForCopypasteFreedomChat'
   'ts:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
   'ts:copypasteFreedomChatFreedomModule'
@@ -56,7 +59,7 @@ taskManager.add 'copypasteFreedomChat', [
 
 # Build all sample apps.
 taskManager.add 'samples', [
-#  'simpleFreedomChat'
+  'simpleFreedomChat'
   'copypasteFreedomChat'
 ]
 
@@ -117,11 +120,14 @@ module.exports = (grunt) ->
         ]
 
       # Copy the freedom output file to sample apps
-      #freedomjsForSimpleFreedomChat:
-      #  Rule.copyFreedomToDest 'freedom', 'build/src/samples/simple-freedom-chat/'
-      freedomjsForCopypasteFreedomChatMain:
+      freedomjsForSimpleFreedomChat:
+        Rule.copyFreedomToDest 'freedom', 'build/src/samples/simple-freedom-chat/'
+      loggingLibForSimpleFreedomChat:
+        Rule.copyFreedomLib 'loggingprovider', 'build/src/samples/simple-freedom-chat/lib/'
+
+      freedomjsForCopypasteFreedomChat:
         Rule.copyFreedomToDest 'freedom', 'build/src/samples/copypaste-freedom-chat/'
-      loggingLibForCopypasteFreedomChatMainModule:
+      loggingLibForCopypasteFreedomChat:
         Rule.copyFreedomLib 'loggingprovider', 'build/src/samples/copypaste-freedom-chat/lib/'
 
       # Copies relevant build tools into the tools directory. Should only be run
@@ -193,8 +199,30 @@ module.exports = (grunt) ->
           declaration: false
           module: 'commonjs'
           fast: 'always'
-      #simpleFreedomChatMain:
-      #simpleFreedomChatFreedomModule:
+      simpleFreedomChatMain:
+        src: ['src/samples/simple-freedom-chat/main.ts']
+        outDir: 'build/src/'
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: true
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
+      simpleFreedomChatFreedomModule:
+        src: ['src/samples/simple-freedom-chat/freedom-module.ts']
+        outDir: 'build/src/'
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: true
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
 
     jasmine:
       handler: Rule.jasmineSpec 'handler'
