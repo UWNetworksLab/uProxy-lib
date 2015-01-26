@@ -75,6 +75,7 @@ module.exports = (grunt) ->
       loggingProviderSpecDecl: Rule.typescriptSpecDecl 'loggingprovider'
 
       webrtc: Rule.typescriptSrc 'webrtc'
+      webrtcSpecDecl: Rule.typescriptSpecDecl 'webrtc'
 
       # freedom/typings only contains specs and declarations.
       freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
@@ -101,6 +102,17 @@ module.exports = (grunt) ->
         ]
         options:
           specs: 'build/logging/*.spec.js'
+      webrtc:
+        src: [
+          'build/webrtc/mocks.js'
+          'build/handler/queue.js'
+          'build/logging/logging.js'
+          'build/webrtc/datachannel.js'
+          'build/webrtc/peerconnection.js'
+          require.resolve('es6-promise/dist/promise-1.0.0')
+        ]
+        options:
+          specs: 'build/webrtc/*.spec.js'
 
     clean: ['build/', 'dist/', '.tscache/']
 
@@ -169,6 +181,7 @@ module.exports = (grunt) ->
     'handler'
     'base'
     'ts:webrtc'
+    'ts:webrtcSpecDecl'
     'copy:webrtc'
   ]
 
