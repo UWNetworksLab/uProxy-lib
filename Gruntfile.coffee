@@ -177,7 +177,6 @@ module.exports = (grunt) ->
 
   taskManager.add 'webrtc', [
     'logging'
-    'crypto'
     'handler'
     'base'
     'ts:webrtc'
