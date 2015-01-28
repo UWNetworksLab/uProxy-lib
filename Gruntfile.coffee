@@ -33,6 +33,7 @@ taskManager.add 'dev', [
 
 # Makes the distribution build.
 taskManager.add 'dist', [
+  'dev',
   'copy:dist'
 ]
 
@@ -113,7 +114,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: 'build/src/',
-              src: ['**/*.html', '**/*.css',  '**/*.js',
+              src: ['**/*.html', '**/*.css',  '**/*.js', '**/*.json',
                     '!**/*.spec.js', '!**/*.spec.static.js'],
               dest: 'build/dist/',
               onlyIf: 'modified'
