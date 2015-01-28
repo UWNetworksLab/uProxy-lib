@@ -168,12 +168,10 @@ module.exports = (grunt) ->
         outDir: 'build/'
         baseDir: 'src'
         options:
-          #sourceRoot: 'build/'
-          mapRoot: '../'
           target: 'es5'
           comments: true
           noImplicitAny: true
-          sourceMap: true
+          sourceMap: false
           declaration: true
           module: 'commonjs'
           fast: 'always'
@@ -185,7 +183,7 @@ module.exports = (grunt) ->
           target: 'es5'
           comments: true
           noImplicitAny: true
-          sourceMap: true
+          sourceMap: false
           declaration: false
           module: 'commonjs'
           fast: 'always'
@@ -197,7 +195,7 @@ module.exports = (grunt) ->
           target: 'es5'
           comments: true
           noImplicitAny: true
-          sourceMap: true
+          sourceMap: false
           declaration: false
           module: 'commonjs'
           fast: 'always'
@@ -209,7 +207,7 @@ module.exports = (grunt) ->
           target: 'es5'
           comments: true
           noImplicitAny: true
-          sourceMap: true
+          sourceMap: false
           declaration: false
           module: 'commonjs'
           fast: 'always'
@@ -221,7 +219,7 @@ module.exports = (grunt) ->
           target: 'es5'
           comments: true
           noImplicitAny: true
-          sourceMap: true
+          sourceMap: false
           declaration: false
           module: 'commonjs'
           fast: 'always'
