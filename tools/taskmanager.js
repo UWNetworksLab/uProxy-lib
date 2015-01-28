@@ -119,4 +119,3 @@ var Manager = (function () {
     return Manager;
 })();
 exports.Manager = Manager; // class Manager
-//# sourceMappingURL=taskmanager.js.map

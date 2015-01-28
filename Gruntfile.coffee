@@ -85,9 +85,10 @@ taskManager.add 'default', ['dev', 'unit_tests', 'dist']
 
 
 #-------------------------------------------------------------------------
-#
-#-------------------------------------------------------------------------
-Rule = require './tools/common-grunt-rules'
+Rules = require './tools/common-grunt-rules'
+devBuildDir = 'build/dev'
+Rule = new Rules.Rule({devBuildDir: devBuildDir});
+
 path = require 'path'
 
 module.exports = (grunt) ->
@@ -103,7 +104,7 @@ module.exports = (grunt) ->
               expand: true,
               cwd: 'src/',
               src: ['**/*.html', '**/*.css', '**/*.json'],  # , '**/*.js'
-              dest: 'build/src/',
+              dest: devBuildDir,
               onlyIf: 'modified'
           }
         ]
@@ -113,7 +114,7 @@ module.exports = (grunt) ->
           {
               nonull: true,
               expand: true,
-              cwd: 'build/src/',
+              cwd: devBuildDir,
               src: ['**/*.html', '**/*.css',  '**/*.js', '**/*.json',
                     '!**/*.spec.js', '!**/*.spec.static.js'],
               dest: 'build/dist/',
@@ -123,14 +124,14 @@ module.exports = (grunt) ->
 
       # Copy the freedom output file to sample apps
       freedomjsForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'freedom', 'build/src/samples/simple-freedom-chat/'
+        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/simple-freedom-chat/')
       loggingLibForSimpleFreedomChat:
-        Rule.copyFreedomLib 'loggingprovider', 'build/src/samples/simple-freedom-chat/lib/'
+        Rule.copySomeFreedomLib 'loggingprovider', path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
 
       freedomjsForCopypasteFreedomChat:
-        Rule.copyFreedomToDest 'freedom', 'build/src/samples/copypaste-freedom-chat/'
+        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/copypaste-freedom-chat/')
       loggingLibForCopypasteFreedomChat:
-        Rule.copyFreedomLib 'loggingprovider', 'build/src/samples/copypaste-freedom-chat/lib/'
+        Rule.copySomeFreedomLib 'loggingprovider',  path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
 
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
@@ -141,7 +142,7 @@ module.exports = (grunt) ->
         files: [{
           nonull: true,
           expand: true
-          cwd: 'build/src/build-tools/'
+          cwd: path.join(devBuildDir, 'build-tools')
           src: ['**/*.js'
                 '!**/*.map'
                 '!**/*.spec.js'
@@ -151,21 +152,34 @@ module.exports = (grunt) ->
         }]
 
     tsd:
+      # The dev target will install the `.d.ts` files using the version numbers
+      # in 'third_party/tsd.json'.
       dev:
         options:
-          # execute a command
           command: 'reinstall'
-          # optional: always get from HEAD
+          config: 'third_party/tsd.json'
+          save: true
+          overwrite: true
+      # The updateDeps rule will update the 'third_party/tsd.json' with the
+      # latest dependencies from DepfinitelyTyped, as well as install them in
+      # 'third_party/typings'.
+      updateDeps:
+        options:
+          command: 'reinstall'
           latest: true
-          # optional: specify config file
           config: 'third_party/tsd.json'
 
     # Typescript rules
     ts:
       # Compile everything into the development build directory.
       dev:
-        src: ['src/**/*.ts', '!src/**/*.d.ts', '!src/samples/**']
-        outDir: 'build/'
+        src: [
+          'src/**/*.ts',
+          '!src/**/*.d.ts',
+          '!src/samples/**/*.ts',
+          '!src/**/*.dynamic.spec.ts',
+        ]
+        outDir: 'build/dev/'
         baseDir: 'src'
         options:
           target: 'es5'
@@ -177,7 +191,7 @@ module.exports = (grunt) ->
           fast: 'always'
       copypasteFreedomChatMain:
         src: ['src/samples/copypaste-freedom-chat/main.ts']
-        outDir: 'build/src/'
+        outDir: devBuildDir
         baseDir: 'src'
         options:
           target: 'es5'
@@ -189,7 +203,7 @@ module.exports = (grunt) ->
           fast: 'always'
       copypasteFreedomChatFreedomModule:
         src: ['src/samples/copypaste-freedom-chat/freedom-module.ts']
-        outDir: 'build/src/'
+        outDir: devBuildDir
         baseDir: 'src'
         options:
           target: 'es5'
@@ -201,7 +215,7 @@ module.exports = (grunt) ->
           fast: 'always'
       simpleFreedomChatMain:
         src: ['src/samples/simple-freedom-chat/main.ts']
-        outDir: 'build/src/'
+        outDir: devBuildDir
         baseDir: 'src'
         options:
           target: 'es5'
@@ -213,7 +227,7 @@ module.exports = (grunt) ->
           fast: 'always'
       simpleFreedomChatFreedomModule:
         src: ['src/samples/simple-freedom-chat/freedom-module.ts']
-        outDir: 'build/src/'
+        outDir: devBuildDir
         baseDir: 'src'
         options:
           target: 'es5'
@@ -248,10 +262,16 @@ module.exports = (grunt) ->
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
 
     # Compile everything into the development build directory.
-    clean: ['build/'
-            # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
-            '.tscache/'
-            'src/.baseDir.ts']
+    clean:
+      build:
+        [ 'build/'
+          # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
+          '.tscache/'
+          'src/.baseDir.ts' ]
+      #tsdSetup:
+      #  [ 'third_party/typings' ]
+      #nodeModules:
+      #  [ 'node_modules' ]
 
   #-------------------------------------------------------------------------
   grunt.initConfig config
