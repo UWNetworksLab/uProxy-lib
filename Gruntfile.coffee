@@ -115,8 +115,14 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: devBuildDir,
-              src: ['**/*.html', '**/*.css',  '**/*.js', '**/*.d.ts', '**/*.json',
-                    '!**/*.spec.js', '!**/*.spec.static.js'],
+              src: ['**/*.html',
+                    '**/*.css',
+                    '**/*.js',
+                    '**/*.json',
+                    '**/*.d.ts',
+                    '!**/*.spec.dynamic.js',
+                    '!**/*.spec.js',
+                    '!**/*.spec.static.js'],
               dest: 'build/dist/',
               onlyIf: 'modified'
           }
@@ -177,7 +183,7 @@ module.exports = (grunt) ->
           'src/**/*.ts',
           '!src/**/*.d.ts',
           '!src/samples/**/*.ts',
-          '!src/**/*.dynamic.spec.ts',
+          '!src/**/*.spec.dynamic.ts',
         ]
         outDir: 'build/dev/'
         baseDir: 'src'
