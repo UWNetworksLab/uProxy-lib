@@ -231,8 +231,7 @@ module.exports = (grunt) ->
       logging:
         Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
       loggingProvider:
-        Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
-      #  Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
+        Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
 
     browserify:
       # Browserify specs
@@ -250,7 +249,7 @@ module.exports = (grunt) ->
 
     # Compile everything into the development build directory.
     clean: ['build/'
-            # 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
+            # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
             '.tscache/'
             'src/.baseDir.ts']
 
