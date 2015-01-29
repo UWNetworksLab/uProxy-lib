@@ -12,16 +12,15 @@ This currently consists of:
  * `src/arraybuffers`: A few handy utilties, e.g. converting ArrayBuffers to strings.
  * `src/handler`: event queue handling tool that is useful for async buffer management, e.g. in networking.
  * `src/freedom`: experimental additions to freedom used by uproxy, e.g. wrapper for `webrtc` and typescript typings
-   * `src/freedom/coreproviders`: experimental additional core providers.
-   * `src/freedom/interfaces`: experiments with freedom interfaces, e.g. interface for experimental `webrtc`
-   * `src/freedom/samples`: freedom-sample apps, e.g. P2P chat between two peerconnections in a single chrome app.
+   * `src/freedom/mocks`: mocks for freedom
+   * `src/freedom/sample-code`: some small examples to test that the typescript typings files work.
    * `src/freedom/typings`: typescript declarations for freedom, its core-providers, and main APIs.
  * `src/logging`: handy logging library
  * `src/loggingprovider`: freedom logging provider
- * `src/taskmanager`: Smart grunt task management that avoid re-building the same components multiple times. This assumes that if a component was build once, then it never has to be build again in a single build run.
-   * Note: We include the compiled `taskmanager.js`, which has source `src/taskmanager/taskmanager.ts`, so that the Gruntfile can use it. There is a special rule to rebuild this version of taskmanager. Got to love circular dependencies right?
+ * `src/build-tools`: Helpers for the Gruntfule. Including smart grunt task management that avoid re-building the same components multiple times. This assumes that if a component was build once, then it never has to be build again in a single build run.
+   * Note: We include the compiled files in the `tools/` directory, which has source `src/build-tools/*.ts`, so that the Gruntfile can use it. There is a special target (tools) to rebuild the tools. Got to love circular dependencies right?
  * `src/webrtc`: utility wrapper for WebRtc Peer Connections & Data Channels
- * `third_party`: Some third party code we use. Mostly TypeScript declarations (e.g. jasmine, WebCrypto, WebRtc, Angular, etc), and some some utility code for providing a common interface to new APIs we use (e.g. the WebRtc adaptor).
+ * `third_party`: contains third party code, mostly references to external typescript declaration files for things like jasmine, node, etc.
 
 ## How to use logging
 
@@ -50,7 +49,6 @@ For a complete example, see: https://github.com/uProxy/uproxy-lib/tree/dev/src/f
 There are three sample apps for manual testing, with source code in:
  * `src/samples/copypaste-freedom-chat`
  * `src/samples/simple-freedom-chat`
- * `src/samples/simple-webrtc-chat`
 
 These are run by starting a webserver and viewing the html, e.g.
 
@@ -58,4 +56,4 @@ These are run by starting a webserver and viewing the html, e.g.
 python -m SimpleHTTPServer
 ```
 
-Then goto the relevant main.html file in the relevant sample directory of: `http://localhost:8000/dist/samples/` in your web-browser. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
+Then goto the relevant main.html file in the relevant sample directory of: `http://localhost:8000/build/dev/samples/` in your web-browser. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
