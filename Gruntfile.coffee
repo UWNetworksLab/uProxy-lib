@@ -86,21 +86,17 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      loggingProvider:
-        src: [
+      loggingProvider: Rule.jasmineSpec('loggingprovider',
+        [
           'build/logging/mocks.js'
           'build/loggingprovider/loggingprovider.js'
-        ]
-        options:
-          specs: 'build/loggingprovider/*.spec.js'
-      logging:
-        src: [
+        ])
+      logging: Rule.jasmineSpec('logging',
+        [
           'build/logging/mocks.js'
           'build/logging/logging.js',
           require.resolve('es6-promise/dist/promise-1.0.0')
-        ]
-        options:
-          specs: 'build/logging/*.spec.js'
+        ])
 
     clean: ['build/', 'dist/', '.tscache/']
 

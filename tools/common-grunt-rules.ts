@@ -2,6 +2,8 @@
 // and still used by commonjs-style require.
 module exports {
 
+  declare var require;
+
   // Compiles a module's source files, excluding tests and declarations.
   // The files must already be available under build/.
   export function typescriptSrc(name:string) {
@@ -83,7 +85,13 @@ module exports {
   }
 
   // Function to make jasmine spec assuming expected dir layout.
-  export function jasmineSpec(name:string) {
+  // If the user chooses not to follow the expected dir layout,
+  // they can pass in source files directly (spec assumption is
+  // fixed, however).
+  // This rule also expects grunt-template-jasmine-istanbul
+  // to be available to calculate code coverage.
+  export function jasmineSpec(name:string, srcFiles?:string[]) {
+
     var jasmine_helpers = [
         // Help Jasmine's PhantomJS understand promises.
         'node_modules/es6-promise/dist/promise-*.js',
@@ -91,15 +99,30 @@ module exports {
         '!node_modules/es6-promise/dist/promise-*.min.js',
         'node_modules/arraybuffer-slice/index.js'
       ];
-    return {
-      src: jasmine_helpers.concat([
+
+    // If user did not pass in source files, assume the expected
+    // dir layout.
+    if (!srcFiles) {
+      srcFiles = jasmine_helpers.concat([
         'build/' + name + '/**/*.js',
         '!build/' + name + '/**/*.spec.js'
-      ]),
+      ]);
+    }
+
+    return {
+      src: srcFiles,
       options: {
         specs: 'build/' + name + '/**/*.spec.js',
-        outfile: 'build/' + name + '/SpecRunner.html',
-        keepRunner: true
+        template: require('grunt-template-jasmine-istanbul'),
+        templateOptions: {
+          coverage: 'build/coverage/' + name + '/coverage.json',
+          report: {
+            type: 'html',
+            options: {
+              dir: 'build/coverage/' + name
+            }
+          }
+        }
       }
     };
   }

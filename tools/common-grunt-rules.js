@@ -9,7 +9,7 @@ var exports;
             src: [
                 'build/' + name + '/**/*.ts',
                 '!build/' + name + '/**/*.spec.ts',
-                '!build/' + name + '/**/*.d.ts',
+                '!build/' + name + '/**/*.d.ts'
             ],
             options: {
                 sourceRoot: 'build/',
@@ -23,6 +23,7 @@ var exports;
         };
     }
     exports.typescriptSrc = typescriptSrc;
+
     // Compiles a module's tests and declarations, in order to
     // help test that declarations match their implementation.
     // The files must already be available under build/.
@@ -30,7 +31,7 @@ var exports;
         return {
             src: [
                 'build/' + name + '/**/*.spec.ts',
-                'build/' + name + '/**/*.d.ts',
+                'build/' + name + '/**/*.d.ts'
             ],
             options: {
                 sourceRoot: 'build/',
@@ -44,6 +45,7 @@ var exports;
         };
     }
     exports.typescriptSpecDecl = typescriptSpecDecl;
+
     // Copies a module's directory from build/ to dist/.
     // Test-related files are excluded.
     // CONSIDER: rename to copyModuleToDest so you can understand it when only
@@ -54,13 +56,14 @@ var exports;
             cwd: 'build/',
             src: [
                 name + '/**',
-                '!' + name + '/**/*.spec.*',
+                '!' + name + '/**/*.spec.*'
             ],
             dest: 'dist/',
             onlyIf: 'modified'
         };
     }
     exports.copyModule = copyModule;
+
     // Copies build/* to a sample's directory under dist/.
     // The samples directory itself and TypeScript files are excluded.
     // TODO: copy dist/* instead
@@ -73,7 +76,7 @@ var exports;
                     src: [
                         '**',
                         '!samples/**',
-                        '!**/*.ts',
+                        '!**/*.ts'
                     ],
                     dest: 'dist/' + name + '/lib/',
                     onlyIf: 'modified'
@@ -82,25 +85,46 @@ var exports;
         };
     }
     exports.copySampleFiles = copySampleFiles;
+
     // Function to make jasmine spec assuming expected dir layout.
-    function jasmineSpec(name) {
+    // If the user chooses not to follow the expected dir layout,
+    // they can pass in source files directly (spec assumption is
+    // fixed, however).
+    // This rule also expects grunt-template-jasmine-istanbul
+    // to be available to calculate code coverage.
+    function jasmineSpec(name, srcFiles) {
         var jasmine_helpers = [
             'node_modules/es6-promise/dist/promise-*.js',
             '!node_modules/es6-promise/dist/promise-*amd.js',
             '!node_modules/es6-promise/dist/promise-*.min.js',
             'node_modules/arraybuffer-slice/index.js'
         ];
-        return {
-            src: jasmine_helpers.concat([
+
+        // If user did not pass in source files, assume the expected
+        // dir layout.
+        if (!srcFiles) {
+            srcFiles = jasmine_helpers.concat([
                 'build/' + name + '/**/*.js',
                 '!build/' + name + '/**/*.spec.js'
-            ]),
+            ]);
+        }
+
+        return {
+            src: srcFiles,
             options: {
                 specs: 'build/' + name + '/**/*.spec.js',
-                outfile: 'build/' + name + '/SpecRunner.html',
-                keepRunner: true
+                template: require('grunt-template-jasmine-istanbul'),
+                templateOptions: {
+                    coverage: 'build/coverage/' + name + '/coverage.json',
+                    report: {
+                        type: 'html',
+                        options: {
+                            dir: 'build/coverage/' + name
+                        }
+                    }
+                }
             }
         };
     }
     exports.jasmineSpec = jasmineSpec;
-})(exports || (exports = {})); // module Rules
+})(exports || (exports = {}));
