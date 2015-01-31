@@ -29,11 +29,11 @@ var Rule = (function () {
             src: [path.join(this.config.devBuildDir, filepath + '.js')],
             dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
             options: {
-                debug: true,
+                debug: false,
             }
         };
     };
-    // Grunt copy target creator: for copying freedom.js to
+    // Make a copy rule to copy the appropriate freedomjs file to the path
     Rule.prototype.copyFreedomToDest = function (freedomRuntimeName, destPath) {
         var freedomjsPath = require.resolve(freedomRuntimeName);
         var fileTarget = { files: [{
