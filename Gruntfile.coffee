@@ -1,15 +1,9 @@
-TaskManager = require './tools/taskmanager'
+TaskManager = require './build/tools/taskmanager'
 
 #-------------------------------------------------------------------------
 # The top level tasks. These are the highest level grunt-tasks defined in terms
 # of specific grunt rules below and given to grunt.initConfig
 taskManager = new TaskManager.Manager();
-
-# This rebuilds the tools directory. It should not often be needed.
-taskManager.add 'tools', [
-  'ts:dev'
-  'copy:tools'
-]
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base-dev', [
@@ -76,7 +70,7 @@ taskManager.add 'default', ['dev', 'unit_tests', 'dist']
 
 
 #-------------------------------------------------------------------------
-Rules = require './tools/common-grunt-rules'
+Rules = require './build/tools/common-grunt-rules'
 devBuildDir = 'build/dev'
 Rule = new Rules.Rule({devBuildDir: devBuildDir});
 
@@ -129,22 +123,6 @@ module.exports = (grunt) ->
         Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/copypaste-freedom-chat/')
       loggingLibForCopypasteFreedomChat:
         Rule.copySomeFreedomLib 'loggingprovider',  path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
-
-      # Copies relevant build tools into the tools directory. Should only be run
-      # updating our build tools and wanting to commit and update (or when you
-      # want to experimentally mess about with our build tools)
-      tools:
-        files: [{
-          nonull: true,
-          expand: true
-          cwd: path.join(devBuildDir, 'build-tools')
-          src: ['**/*.js'
-                '!**/*.map'
-                '!**/*.spec.js'
-                '!**/*.spec.static.js']
-          dest: 'tools/'
-          onlyIf: 'modified'
-        }]
 
     # Typescript rules
     ts:
@@ -238,7 +216,7 @@ module.exports = (grunt) ->
 
     clean:
       build:
-        [ 'build/'
+        [ 'build/dev', 'build/dist'
           # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
           '.tscache/'
           'src/.baseDir.ts' ]
