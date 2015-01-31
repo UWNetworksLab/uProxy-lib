@@ -35,12 +35,10 @@
     "grunt-contrib-watch": "~0.6.1",
     "grunt-browserify": "^3.0.1",
     "grunt-ts": "^2.0.1",
-    "grunt-tsd": "^0.1.0",
-    "tsify": "^0.7.1",
-    "typescript": "^1.3.0"
+    "tsd": "^0.5.7",
+    "typescript": "^1.4.1"
   },
   "scripts": {
-    "test": "grunt unit_tests",
-    "postinstall": "grunt setup"
+    "test": "grunt unit_tests"
   }
 }

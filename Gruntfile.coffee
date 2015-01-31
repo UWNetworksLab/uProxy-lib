@@ -5,13 +5,6 @@ TaskManager = require './tools/taskmanager'
 # of specific grunt rules below and given to grunt.initConfig
 taskManager = new TaskManager.Manager();
 
-# Setup makes sure the needed typescript definition files are in the right place
-# so that typescript compilation can find them using require and defines
-# references in the code.
-taskManager.add 'setup', [
-  'tsd:dev'
-]
-
 # This rebuilds the tools directory. It should not often be needed.
 taskManager.add 'tools', [
   'ts:dev'
@@ -28,7 +21,8 @@ taskManager.add 'base-dev', [
 # Makes the development build, includes sample apps.
 taskManager.add 'dev', [
   'base-dev'
-  'samples'
+  'simpleFreedomChat'
+  'copypasteFreedomChat'
 ]
 
 # Makes the distribution build.
@@ -59,12 +53,6 @@ taskManager.add 'copypasteFreedomChat', [
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
-# Build all sample apps.
-taskManager.add 'samples', [
-  'simpleFreedomChat'
-  'copypasteFreedomChat'
-]
-
 # Run unit tests
 taskManager.add 'unit_tests', [
   'dev'
@@ -79,6 +67,9 @@ taskManager.add 'unit_tests', [
   'browserify:loggingProviderSpec'
   'jasmine:loggingProvider'
 ]
+
+# Run unit tests
+taskManager.add 'test', ['unit_tests']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['dev', 'unit_tests', 'dist']
@@ -142,8 +133,6 @@ module.exports = (grunt) ->
       # Copies relevant build tools into the tools directory. Should only be run
       # updating our build tools and wanting to commit and update (or when you
       # want to experimentally mess about with our build tools)
-      #
-      # Assumes that `ts:dev` has happened.
       tools:
         files: [{
           nonull: true,
@@ -156,24 +145,6 @@ module.exports = (grunt) ->
           dest: 'tools/'
           onlyIf: 'modified'
         }]
-
-    tsd:
-      # The dev target will install the `.d.ts` files using the version numbers
-      # in 'third_party/tsd.json'.
-      dev:
-        options:
-          command: 'reinstall'
-          config: 'third_party/tsd.json'
-          save: true
-          overwrite: true
-      # The updateDeps rule will update the 'third_party/tsd.json' with the
-      # latest dependencies from DepfinitelyTyped, as well as install them in
-      # 'third_party/typings'.
-      updateDeps:
-        options:
-          command: 'reinstall'
-          latest: true
-          config: 'third_party/tsd.json'
 
     # Typescript rules
     ts:
@@ -290,7 +261,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
-  grunt.loadNpmTasks 'grunt-tsd'
 
   #-------------------------------------------------------------------------
   # Register the tasks
