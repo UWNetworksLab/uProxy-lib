@@ -219,10 +219,8 @@ module.exports = (grunt) ->
       handler: Rule.jasmineSpec 'handler'
       buildTools: Rule.jasmineSpec 'build-tools'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logging:
-        Rule.jasmineSpec('logging',['third_party/freedom/pre-spec-freedom.js'])
-      loggingProvider:
-        Rule.jasmineSpec('loggingprovider',['third_party/freedom/pre-spec-freedom.js'])
+      logging: Rule.jasmineSpec 'logging'
+      loggingProvider: Rule.jasmineSpec 'loggingprovider'
 
     browserify:
       # Browserify specs
@@ -238,17 +236,12 @@ module.exports = (grunt) ->
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
 
-    # Compile everything into the development build directory.
     clean:
       build:
         [ 'build/'
           # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
           '.tscache/'
           'src/.baseDir.ts' ]
-      #tsdSetup:
-      #  [ 'third_party/typings' ]
-      #nodeModules:
-      #  [ 'node_modules' ]
 
   #-------------------------------------------------------------------------
   grunt.initConfig config
