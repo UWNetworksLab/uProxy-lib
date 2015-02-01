@@ -19,9 +19,9 @@ function installDevDependencies ()
 {
   runCmd "cd $ROOT_DIR"
   runCmd "npm install"
-  runCmd "tsd reinstall --config ./third_party/tsd.json"
-  runCmd "tsc --module commonjs --outDir build/tools/ src/build-tools/taskmanager.ts"
-  runCmd "tsc --module commonjs --outDir build/tools/ src/build-tools/common-grunt-rules.ts"
+  runCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/taskmanager.ts"
+  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/common-grunt-rules.ts"
 }
 
 installDevDependencies
