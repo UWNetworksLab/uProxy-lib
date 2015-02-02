@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Make sure an error in this script stops it running where the error happened.
 set -e
 
 # Get the directory where this script is and set ROOT_DIR to that path. This
@@ -15,16 +17,25 @@ function runCmd ()
     $1
 }
 
+function buildTools ()
+{
+  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/taskmanager.ts"
+  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/common-grunt-rules.ts"
+}
+
 function installDevDependencies ()
 {
   runCmd "cd $ROOT_DIR"
   runCmd "npm install"
   runCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
-  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/taskmanager.ts"
-  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/common-grunt-rules.ts"
+  buildTools
 }
 
-installDevDependencies
+if [ "$1" == 'tools' ]; then
+  buildTools
+else
+  installDevDependencies
+fi
 
 echo
 echo "Successfully completed install of dev dependencies."

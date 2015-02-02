@@ -28,8 +28,7 @@ taskManager.add 'dist', [
 # Build the simple freedom chat sample app.
 taskManager.add 'simpleFreedomChat', [
   'base-dev'
-  'copy:freedomjsForSimpleFreedomChat'
-  'copy:loggingLibForSimpleFreedomChat'
+  'copy:freedomLibsForSimpleFreedomChat'
   'ts:simpleFreedomChatMain'
   'browserify:simpleFreedomChatMain'
   'ts:simpleFreedomChatFreedomModule'
@@ -39,8 +38,7 @@ taskManager.add 'simpleFreedomChat', [
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
-  'copy:freedomjsForCopypasteFreedomChat'
-  'copy:loggingLibForCopypasteFreedomChat'
+  'copy:freedomLibsForCopypasteFreedomChat'
   'ts:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
   'ts:copypasteFreedomChatFreedomModule'
@@ -114,15 +112,12 @@ module.exports = (grunt) ->
         ]
 
       # Copy the freedom output file to sample apps
-      freedomjsForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/simple-freedom-chat/')
-      loggingLibForSimpleFreedomChat:
-        Rule.copySomeFreedomLib 'loggingprovider', path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
-
-      freedomjsForCopypasteFreedomChat:
-        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/copypaste-freedom-chat/')
-      loggingLibForCopypasteFreedomChat:
-        Rule.copySomeFreedomLib 'loggingprovider',  path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
+      freedomLibsForSimpleFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
+      freedomLibsForCopypasteFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
 
     # Typescript rules
     ts:
