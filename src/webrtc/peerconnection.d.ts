@@ -8,12 +8,6 @@
 
 declare module WebRtc {
 
-  interface PeerConnectionConfig {
-    webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
-    peerName               ?:string;
-    initiateConnection     ?:boolean;
-  }
-
   enum SignalType {
     OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
   }
@@ -93,7 +87,20 @@ declare module WebRtc {
   }
 
   class PeerConnection implements PeerConnectionInterface<SignallingMessage> {
-    constructor(config:PeerConnectionConfig);
+
+    public static fromRtcPeerConnection(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection;
+
+    // Name is used in logging output and is useful for debugging when
+    // there's >1 peerconnection in the app.
+    public static fromRtcPeerConnectionWithName(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection,
+        name:string) : PeerConnection;
+
+    // Private constructor.
+    constructor(
+        pc:freedom_RTCPeerConnection.RTCPeerConnection,
+        name:string);
 
     public pcState :State;
     public dataChannels     :{[channelLabel:string] : DataChannel};

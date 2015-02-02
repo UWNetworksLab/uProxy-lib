@@ -1,4 +1,3 @@
-/// <reference path="../crypto/random.d.ts"/>
 /// <reference path='../handler/queue.d.ts' />
 /// <reference path="../third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='../freedom/typings/rtcdatachannel.d.ts' />
@@ -12,12 +11,6 @@
 //
 // This class assumes WebRTC is available; this is provided by freedom.js.
 module WebRtc {
-
-  export interface PeerConnectionConfig {
-    webrtcPcConfig         :freedom_RTCPeerConnection.RTCConfiguration;
-    peerName               ?:string;   // For debugging
-    initiateConnection     ?:boolean;  // defaults to false
-  }
 
   export enum SignalType {
     OFFER, ANSWER, CANDIDATE, NO_MORE_CANDIDATES
@@ -103,12 +96,6 @@ module WebRtc {
   //      3.1. completeConnection_ -> pc_.getStats
   //      3.3. [Fulfill onceConnected]
   export class PeerConnection {
-
-    // Name for debugging.
-    public peerName     :string;
-
-    // The WebRtc peer connection.
-    private pc_            :freedom_RTCPeerConnection.RTCPeerConnection;
     // All WebRtc data channels associated with this data peer.
     public dataChannels     :{[channelLabel:string] : DataChannel};
 
@@ -152,16 +139,24 @@ module WebRtc {
     // non-empty channel labels.
     private static CONTROL_CHANNEL_LABEL = '';
 
-    // if |createOffer| is true, the constructor will immidiately initiate
-    // negotiation.
-    constructor(private config_ :PeerConnectionConfig) {
-      if (config_.webrtcPcConfig === undefined) {
-        throw new Error('must specify peerconnection config');
-      }
+    // Number of automatically generated names generated so far.
+    private static automaticNameIndex = 0;
 
-      this.peerName = this.config_.peerName ||
-          'unnamed-pc-' + crypto.randomUint32();
+    public static fromRtcPeerConnection = (
+        pc:freedom_RTCPeerConnection.RTCPeerConnection) : PeerConnection => {
+      return new PeerConnection(pc, 'unnamed-' +
+          (++PeerConnection.automaticNameIndex));
+    }
 
+    public static fromRtcPeerConnectionWithName = (
+        pc:freedom_RTCPeerConnection.RTCPeerConnection,
+        name:string) : PeerConnection => {
+      return new PeerConnection(pc, name);
+    }
+
+    constructor(
+        private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
+        private peerName_:string) {
       this.onceConnecting = new Promise<void>((F,R) => {
           this.fulfillConnecting_ = F;
         });
@@ -179,11 +174,11 @@ module WebRtc {
 
       // Once connected, add to global listing. Helpful for debugging.
       this.onceConnected.then(() => {
-        peerConnections[this.peerName] = this;
+        peerConnections[this.peerName_] = this;
       });
       // Once disconnected, remove from global listing.
       this.onceDisconnected.then(() => {
-        delete peerConnections[this.peerName];
+        delete peerConnections[this.peerName_];
       });
 
       // New data channels from the peer.
@@ -203,7 +198,6 @@ module WebRtc {
 
       this.dataChannels = {};
 
-      this.pc_ = freedom['core.rtcpeerconnection'](this.config_.webrtcPcConfig);
       // Add basic event handlers.
       this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
         if(candidate.candidate) {
@@ -218,25 +212,18 @@ module WebRtc {
       });
       this.pc_.on('onnegotiationneeded', () => {
         this.negotiateConnection_().catch((e:Error) => {
-          log.error(this.peerName + ': negotiateConnection: ' + e.toString() +
+          log.error(this.peerName_ + ': negotiateConnection: ' + e.toString() +
               '; this.toString()= ' + this.toString());
         });
       });
       this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
       this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
       this.pc_.on('oniceconnectionstatechange', this.onIceConnectionStateChange_);
-
-      if(this.config_.initiateConnection) {
-        this.negotiateConnection().catch((e:Error) => {
-          log.error(this.peerName + ': negotiateConnection: ' + e.toString() +
-            '; this.toString()= ' + this.toString());
-        });
-      }
     }
 
     // Close the peer connection. This function is idempotent.
     public close = () : void => {
-      log.info(this.peerName + ': ' + 'close');
+      log.info(this.peerName_ + ': ' + 'close');
 
       // This may happen because calling close will invoke pc_.close, which
       // may call |onSignallingStateChange_| with |this.pc_.signalingState ===
@@ -259,7 +246,7 @@ module WebRtc {
     }
 
     private closeWithError_ = (s:string) : void => {
-      log.error(this.peerName + ': ' + s);
+      log.error(this.peerName_ + ': ' + s);
       if (this.pcState === State.CONNECTING) {
         this.rejectConnected_(new Error(s));
       }
@@ -300,7 +287,7 @@ module WebRtc {
         if (this.pcState !== State.CONNECTING &&
             this.pcState !== State.CONNECTED) {
           // Something unexpected happened, better close down properly.
-          this.closeWithError_(this.peerName + ': ' +
+          this.closeWithError_(this.peerName_ + ': ' +
               'Unexpected onSignallingStateChange in state: ' +
               State[this.pcState]);
           return;
@@ -349,9 +336,9 @@ module WebRtc {
     // our connection, or called when some WebRTC internal event requires
     // renegotiation of SDP headers.
     private negotiateConnection_ = () : Promise<void> => {
-      log.debug(this.peerName + ': ' + 'negotiateConnection_');
+      log.debug(this.peerName_ + ': ' + 'negotiateConnection_');
       if (this.pcState === State.DISCONNECTED) {
-        return Promise.reject(new Error(this.peerName + ': ' +
+        return Promise.reject(new Error(this.peerName_ + ': ' +
             'negotiateConnection_ called on ' +
             'DISCONNECTED state.'));
       }
@@ -368,13 +355,17 @@ module WebRtc {
         this.pcState = State.CONNECTING;
         this.fulfillConnecting_();
         this.pc_.createOffer()
-            .then(this.pc_.setLocalDescription)
-            .then(this.pc_.getLocalDescription)
             .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+              // Emit the offer signal before calling setLocalDescription, which
+              // initiates ICE candidate gathering. If we did the reverse then
+              // we may emit ICE candidate signals before the offer, confusing
+              // some clients:
+              //   https://github.com/uProxy/uproxy/issues/784
               this.signalForPeerQueue.handle({
                 type: SignalType.OFFER,
                 description: {type: d.type, sdp: d.sdp}
               });
+              this.pc_.setLocalDescription(d);
             })
             .catch((e) => {
               this.closeWithError_('Failed to set local description: ' +
@@ -407,7 +398,7 @@ module WebRtc {
 
     // Handle a signalling message from the remote peer.
     public handleSignalMessage = (signal :SignallingMessage) : void => {
-      log.debug(this.peerName + ': ' + 'handleSignalMessage: \n' +
+      log.debug(this.peerName_ + ': ' + 'handleSignalMessage: \n' +
           JSON.stringify(signal));
       // If we are offering and they are also offerring at the same time, pick
       // the one who has the lower hash value for their description: this is
@@ -422,12 +413,14 @@ module WebRtc {
             this.fulfillConnecting_();
             this.pc_.setRemoteDescription(signal.description)  // initial offer from peer
                 .then(this.pc_.createAnswer)
-                .then(this.pc_.setLocalDescription)
-                .then(this.pc_.getLocalDescription)
                 .then((d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+                  // As with the offer, we must emit the signal before
+                  // setting the local description to ensure that we send the
+                  // ANSWER before any ICE candidates.
                   this.signalForPeerQueue.handle(
                       {type: SignalType.ANSWER,
                        description: {type: d.type, sdp: d.sdp} });
+                  this.pc_.setLocalDescription(d);
                 })
                 .then(() => {
                   this.fromPeerCandidateQueue.setHandler(this.pc_.addIceCandidate);
@@ -458,17 +451,17 @@ module WebRtc {
           try {
             this.fromPeerCandidateQueue.handle(signal.candidate);
           } catch(e) {
-            log.error(this.peerName + ': ' + 'addIceCandidate: ' +
+            log.error(this.peerName_ + ': ' + 'addIceCandidate: ' +
                 JSON.stringify(signal.candidate) + ' (' +
                 typeof(signal.candidate) + '); Error: ' + e.toString());
           }
           break;
         case SignalType.NO_MORE_CANDIDATES:
-          log.debug(this.peerName + ': handleSignalMessage: noMoreCandidates');
+          log.debug(this.peerName_ + ': handleSignalMessage: noMoreCandidates');
           break;
 
       default:
-        log.error(this.peerName + ': ' +
+        log.error(this.peerName_ + ': ' +
             'handleSignalMessage got unexpected message: ' +
             JSON.stringify(signal) + ' (' + typeof(signal) + ')');
         break;
@@ -479,7 +472,7 @@ module WebRtc {
     public openDataChannel = (channelLabel:string,
                               options?:freedom_RTCPeerConnection.RTCDataChannelInit)
         : Promise<DataChannel> => {
-      log.debug(this.peerName + ': ' + 'openDataChannel: ' + channelLabel +
+      log.debug(this.peerName_ + ': ' + 'openDataChannel: ' + channelLabel +
           '; options=' + JSON.stringify(options));
 
       // Only the control data channel can have an empty channel label.
@@ -497,7 +490,7 @@ module WebRtc {
     // handled.
     private onPeerStartedDataChannel_ =
         (channelInfo:{channel:string}) : void => {
-        log.debug(this.peerName + ': onPeerStartedDataChannel');
+        log.debug(this.peerName_ + ': onPeerStartedDataChannel');
         this.addRtcDataChannel_(channelInfo.channel).then((dc:DataChannel) => {
           var label :string = dc.getLabel();
           if (label === PeerConnection.CONTROL_CHANNEL_LABEL) {
@@ -538,7 +531,7 @@ module WebRtc {
     // For debugging: prints the state of the peer connection including all
     // associated data channels.
     public toString = () : string => {
-      var s :string = this.peerName + ': { \n';
+      var s :string = this.peerName_ + ': { \n';
       var channelLabel :string;
       for (channelLabel in this.dataChannels) {
         s += '  ' + channelLabel + ': ' +
