@@ -86,7 +86,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*.html', '**/*.css', '**/*.json'],  # , '**/*.js'
+              src: ['**/*.html', '**/*.css', '**/*.json'],
               dest: devBuildDir,
               onlyIf: 'modified'
           }
@@ -103,6 +103,7 @@ module.exports = (grunt) ->
                     '**/*.js',
                     '**/*.json',
                     '**/*.d.ts',
+                    '!samples/**/*',
                     '!**/*.spec.dynamic.js',
                     '!**/*.spec.js',
                     '!**/*.spec.static.js'],
