@@ -7,6 +7,7 @@ taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base-dev', [
+  'copy:third_party'
   'copy:dev'
   'ts:dev'
   'browserify:loggingProvider'
@@ -88,6 +89,19 @@ module.exports = (grunt) ->
               cwd: 'src/',
               src: ['**/*.html', '**/*.css', '**/*.json'],
               dest: devBuildDir,
+              onlyIf: 'modified'
+          }
+        ]
+      # Copy |third_party| to dev: this is so that there is a common
+      # |build/third_party| location to reference typescript
+      # definitions for ambient contexts.
+      third_party:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              src: ['third_party/**/*'],
+              dest: 'build/',
               onlyIf: 'modified'
           }
         ]
