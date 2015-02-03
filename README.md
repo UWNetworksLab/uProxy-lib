@@ -80,4 +80,4 @@ Then goto the relevant main.html file in the relevant sample directory of: `http
 
 ## Development conventions
 
-All typescript reference inclusions should be to files in `build/third_party/typings`. This provides a single location so that created `.d.ts` files that define ambient contexts, which themselves may reference other `.d.ts` files, always have a common directory structure for finding other typings.
+We use |build/third_party| as a common location for references to all ambient JS definitions. This means that all typescript reference inclusions should be to files in `build/third_party/`. This provides a single location so that auto-generated `.d.ts` files for modules pulled in by require correctly reference other `.d.ts` files even when pulled in from a different repository. Basically, we assume a common directory structure for finding other typings.
