@@ -9,7 +9,7 @@ Distributed on NPM as [uproxy-lib](https://www.npmjs.org/package/uproxy-lib).
 Just run the install script:
 
 ```
-./install_dev_deps.sh
+./setup.sh
 ```
 
 This will install npm modules (in `node_modules`), install typescript definitions (in `third_party/typings`), and build the build-tools (into `build/tools`) (It also prints out the commands it runs so you can understand what it is doing if you need/want to).
@@ -29,7 +29,7 @@ grunt clean
 If you need to also start with just fresh development depndencies, you can also run:
 ```
 rm -r node_modules build
-./install_dev_deps.sh
+./setup.sh
 ```
 
 ## What is in this directory?
