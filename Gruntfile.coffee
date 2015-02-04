@@ -88,7 +88,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*', '~**/*.ts'],
+              src: ['**/*', '!**/*.ts'],
               dest: devBuildDir,
               onlyIf: 'modified'
           }
