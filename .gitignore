@@ -8,6 +8,7 @@ node_modules/*
 .grunt
 tmp/*
 build/*
+dist/*
 *.sublime-workspace
 .tscache
 src/.baseDir.ts

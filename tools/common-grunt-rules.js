@@ -22,12 +22,13 @@ var Rule = (function () {
                 keepRunner: true,
                 template: require('grunt-template-jasmine-istanbul'),
                 templateOptions: {
+                    files: ['**/*', '!node_modules/**'],
                     // Output location for coverage results
                     coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
                     report: {
                         type: 'html',
                         options: {
-                            dir: path.join(this.config.devBuildDir, name)
+                            dir: path.join(this.config.devBuildDir, name, 'coverage')
                         }
                     }
                 }
@@ -41,6 +42,17 @@ var Rule = (function () {
             dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
             options: {
                 debug: true,
+            }
+        };
+    };
+    // Grunt browserify target creator, instrumented for istanbul
+    Rule.prototype.browserifySpec = function (filepath) {
+        return {
+            src: [path.join(this.config.devBuildDir, filepath + '.spec.js')],
+            dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
+            options: {
+                debug: true,
+                transform: [['browserify-istanbul', { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
             }
         };
     };

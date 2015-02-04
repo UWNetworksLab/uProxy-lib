@@ -255,12 +255,12 @@ module.exports = (grunt) ->
 
     browserify:
       # Browserify specs
-      arraybuffersSpec: Rule.browserify 'arraybuffers/arraybuffers.spec'
-      handlerSpec: Rule.browserify 'handler/queue.spec'
-      buildToolsTaskmanagerSpec: Rule.browserify 'build-tools/taskmanager.spec'
-      loggingSpec: Rule.browserify 'logging/logging.spec'
+      arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
+      handlerSpec: Rule.browserifySpec 'handler/queue'
+      buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
+      loggingSpec: Rule.browserifySpec 'logging/logging'
       loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
-      loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
+      loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
