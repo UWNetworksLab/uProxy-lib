@@ -51,15 +51,12 @@ taskManager.add 'copypasteFreedomChat', [
 taskManager.add 'unit_tests', [
   'dev'
   'browserify:arraybuffersSpec'
-  'jasmine:arraybuffers'
   'browserify:handlerSpec'
-  'jasmine:handler'
   'browserify:buildToolsTaskmanagerSpec'
-  'jasmine:buildTools'
   'browserify:loggingSpec'
-  'jasmine:logging'
   'browserify:loggingProviderSpec'
-  'jasmine:loggingProvider'
+  'browserify:webrtcSpec'
+  'jasmine'
 ]
 
 # Run unit tests
@@ -204,7 +201,7 @@ module.exports = (grunt) ->
       loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
       loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
       loggingSpec: Rule.browserify 'logging/logging.spec'
-      webrtc: Rule.jasmineSpec 'webrtc/peerconnection.spec'
+      webrtcSpec: Rule.browserify 'webrtc/peerconnection.spec'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
