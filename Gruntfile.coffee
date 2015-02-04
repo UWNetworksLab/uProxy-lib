@@ -50,15 +50,12 @@ taskManager.add 'copypasteFreedomChat', [
 taskManager.add 'unit_tests', [
   'dev'
   'browserify:arraybuffersSpec'
-  'jasmine:arraybuffers'
   'browserify:handlerSpec'
-  'jasmine:handler'
   'browserify:buildToolsTaskmanagerSpec'
-  'jasmine:buildTools'
   'browserify:loggingSpec'
-  'jasmine:logging'
   'browserify:loggingProviderSpec'
-  'jasmine:loggingProvider'
+  'browserify:webrtcSpec'
+  'jasmine'
 ]
 
 # Run unit tests
@@ -87,7 +84,7 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*.html', '**/*.css', '**/*.json', '**/*.d.ts'],
+              src: ['**/*', '!**/*.ts'],
               dest: devBuildDir,
               onlyIf: 'modified'
           }
@@ -112,15 +109,9 @@ module.exports = (grunt) ->
               nonull: true,
               expand: true,
               cwd: devBuildDir,
-              src: ['**/*.html',
-                    '**/*.css',
-                    '**/*.js',
-                    '**/*.json',
-                    '**/*.d.ts',
-                    '!samples/**/*',
-                    '!**/*.spec.dynamic.js',
+              src: ['**/*',
                     '!**/*.spec.js',
-                    '!**/*.spec.static.js'],
+                    '!**/*.spec.*.js'],
               dest: 'build/dist/',
               onlyIf: 'modified'
           }
@@ -204,20 +195,22 @@ module.exports = (grunt) ->
           fast: 'always'
 
     jasmine:
-      handler: Rule.jasmineSpec 'handler'
-      buildTools: Rule.jasmineSpec 'build-tools'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
+      buildTools: Rule.jasmineSpec 'build-tools'
+      handler: Rule.jasmineSpec 'handler'
       logging: Rule.jasmineSpec 'logging'
       loggingProvider: Rule.jasmineSpec 'loggingprovider'
+      webrtc: Rule.jasmineSpec 'webrtc'
 
     browserify:
       # Browserify specs
       arraybuffersSpec: Rule.browserify 'arraybuffers/arraybuffers.spec'
-      handlerSpec: Rule.browserify 'handler/queue.spec'
       buildToolsTaskmanagerSpec: Rule.browserify 'build-tools/taskmanager.spec'
-      loggingSpec: Rule.browserify 'logging/logging.spec'
+      handlerSpec: Rule.browserify 'handler/queue.spec'
       loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
       loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
+      loggingSpec: Rule.browserify 'logging/logging.spec'
+      webrtcSpec: Rule.browserify 'webrtc/peerconnection.spec'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
