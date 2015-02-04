@@ -18,10 +18,7 @@ After this script runs successfully, it should print out: `Successfully complete
 
 If you just want to cleanup from a partial or broken build, you can run:
 ```
-rm -r build/dev
-rm -r build/dist
-rm -r .tscache
-rm src/.baseDir
+rm -r build/dev build/dist .tscache src/.baseDir
 ```
 or
 
@@ -31,8 +28,7 @@ grunt clean
 
 If you need to also start with just fresh development depndencies, you can also run:
 ```
-rm -r node_modules
-rm -r build
+rm -r node_modules build
 ./install_dev_deps.sh
 ```
 
