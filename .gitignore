@@ -10,4 +10,6 @@ tmp/*
 build/*
 *.sublime-workspace
 .tscache
-dist/
+src/.baseDir.ts
+third_party/typings
+.idea

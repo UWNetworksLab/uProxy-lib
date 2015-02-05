@@ -1,7 +1,13 @@
-/// <reference path='peerconnection.d.ts' />
+/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../third_party/typings/jasmine/jasmine.d.ts' />
+
 /// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
-/// <reference path='../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../third_party/typings/jasmine/jasmine.d.ts' />
+
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeSkeletonFreedomInModuleEnv();
+
+import PeerConnection = require('./peerconnection');
+import PeerConnectionClass = PeerConnection.PeerConnectionClass;
 
 describe('peerconnection', function() {
   var mockPeerConnection :freedom_RTCPeerConnection.RTCPeerConnection;
@@ -43,10 +49,10 @@ describe('peerconnection', function() {
     (<any>mockPeerConnection.setLocalDescription).and.returnValue(
         Promise.resolve());
 
-    var pc = new WebRtc.PeerConnection(mockPeerConnection, 'test');
+    var pc = new PeerConnectionClass(mockPeerConnection, 'test');
 
-    pc.signalForPeerQueue.setSyncNextHandler((signal:WebRtc.SignallingMessage) => {
-      expect(signal.type).toEqual(WebRtc.SignalType.OFFER);
+    pc.signalForPeerQueue.setSyncNextHandler((signal:PeerConnection.SignallingMessage) => {
+      expect(signal.type).toEqual(PeerConnection.SignalType.OFFER);
       expect(mockPeerConnection.setLocalDescription).not.toHaveBeenCalled();
       done();
     });
