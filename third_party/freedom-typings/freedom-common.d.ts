@@ -1,4 +1,4 @@
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 
 declare module freedom {
   // Common on/emit for message passing interfaces.
@@ -86,6 +86,17 @@ declare module freedom {
     };
   }
 
+  // A Freedom module sub is both a function and an object with members. The
+  // type |T| is the type of the module's stub interface.
+  interface FreedomModuleFactoryManager {
+    // This is the factory constructor for a new instance of a stub/channel to a
+    // module.
+    (...args:any[]) : any;
+    // This is the call to close a particular stub's channel and resources. It
+    // is assumed that the argument is a result of the factory constructor.
+    close : (freedomModuleStubInstance:any) => Promise<void>;
+  }
+
   interface FreedomInCoreEnvOptions {
     debug  ?:string;  // debug level
     logger ?:string;  // string to json for logging provider.
@@ -102,7 +113,8 @@ declare module freedom {
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
-    [moduleName:string] : Function;
+    // TODO: explore how to use FreedomModuleFactoryManager.
+    [moduleName:string] : any;
   }
 
   interface FreedomInModuleEnv {
@@ -118,7 +130,8 @@ declare module freedom {
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
-    [moduleName:string] : Function;
+    // TODO: explore how to use FreedomModuleFactoryManager.
+    [moduleName:string] : any;
   }
 }
 

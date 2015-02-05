@@ -1,7 +1,7 @@
-/// <reference path='../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../freedom/typings/rtcpeerconnection.d.ts' />
-/// <reference path='../freedom/typings/freedom-common.d.ts' />
-/// <reference path='../freedom/typings/freedom-module-env.d.ts' />
+/// <reference path='../../build/third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import ArrayBuffers = require('../arraybuffers/arraybuffers');
 import Logging = require('../logging/logging');
@@ -603,6 +603,6 @@ export function createPeerConnection(
   // Note: |peerConnection| will take responsibility for freeing memory and
   // closing down of |freedomRtcPc| once the underlying peer connection is
   // closed.
-  return new PeerConnectionClass(freedomRtcPc, name);
+  return new PeerConnectionClass(freedomRtcPc, debugPcName);
 }
 

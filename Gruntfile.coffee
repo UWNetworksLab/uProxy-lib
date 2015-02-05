@@ -7,6 +7,7 @@ taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base-dev', [
+  'copy:third_party'
   'copy:dev'
   'ts:dev'
   'browserify:loggingProvider'
@@ -28,8 +29,7 @@ taskManager.add 'dist', [
 # Build the simple freedom chat sample app.
 taskManager.add 'simpleFreedomChat', [
   'base-dev'
-  'copy:freedomjsForSimpleFreedomChat'
-  'copy:loggingLibForSimpleFreedomChat'
+  'copy:freedomLibsForSimpleFreedomChat'
   'ts:simpleFreedomChatMain'
   'browserify:simpleFreedomChatMain'
   'ts:simpleFreedomChatFreedomModule'
@@ -39,8 +39,7 @@ taskManager.add 'simpleFreedomChat', [
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
-  'copy:freedomjsForCopypasteFreedomChat'
-  'copy:loggingLibForCopypasteFreedomChat'
+  'copy:freedomLibsForCopypasteFreedomChat'
   'ts:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
   'ts:copypasteFreedomChatFreedomModule'
@@ -90,6 +89,19 @@ module.exports = (grunt) ->
               onlyIf: 'modified'
           }
         ]
+      # Copy |third_party| to dev: this is so that there is a common
+      # |build/third_party| location to reference typescript
+      # definitions for ambient contexts.
+      third_party:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              src: ['third_party/**/*'],
+              dest: 'build/',
+              onlyIf: 'modified'
+          }
+        ]
       # Copy releveant non-typescript files to distribution build.
       dist:
         files: [
@@ -106,15 +118,12 @@ module.exports = (grunt) ->
         ]
 
       # Copy the freedom output file to sample apps
-      freedomjsForSimpleFreedomChat:
-        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/simple-freedom-chat/')
-      loggingLibForSimpleFreedomChat:
-        Rule.copySomeFreedomLib 'loggingprovider', path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
-
-      freedomjsForCopypasteFreedomChat:
-        Rule.copyFreedomToDest 'freedom', path.join(devBuildDir, 'samples/copypaste-freedom-chat/')
-      loggingLibForCopypasteFreedomChat:
-        Rule.copySomeFreedomLib 'loggingprovider',  path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
+      freedomLibsForSimpleFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
+      freedomLibsForCopypasteFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
 
     # Typescript rules
     ts:
@@ -195,13 +204,13 @@ module.exports = (grunt) ->
 
     browserify:
       # Browserify specs
-      arraybuffersSpec: Rule.browserify 'arraybuffers/arraybuffers.spec'
-      buildToolsTaskmanagerSpec: Rule.browserify 'build-tools/taskmanager.spec'
-      handlerSpec: Rule.browserify 'handler/queue.spec'
+      arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
+      buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
+      handlerSpec: Rule.browserifySpec 'handler/queue'
       loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
-      loggingProviderSpec: Rule.browserify 'loggingprovider/loggingprovider.spec'
-      loggingSpec: Rule.browserify 'logging/logging.spec'
-      webrtcSpec: Rule.browserify 'webrtc/peerconnection.spec'
+      loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
+      loggingSpec: Rule.browserifySpec 'logging/logging'
+      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'

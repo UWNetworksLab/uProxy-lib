@@ -1,5 +1,5 @@
-/// <reference path='../../freedom/typings/freedom-module-env.d.ts' />
-/// <reference path="../../freedom/typings/rtcpeerconnection.d.ts" />
+/// <reference path='../../../build/third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../build/third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
 import Logging = require('../../logging/logging');
 

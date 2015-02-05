@@ -1,6 +1,6 @@
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
-/// <reference path="../typings/console.d.ts" />
-/// <reference path="../typings/freedom-common.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/freedom-typings/console.d.ts" />
+/// <reference path="../../../build/third_party/freedom-typings/freedom-common.d.ts" />
 
 import freedomTypes = require('freedom.types');
 
@@ -61,7 +61,7 @@ export function makeSkeletonFreedomInModuleEnv(
 
   var freeedomParentModuleThing_ = new SkeletonParentModuleThing();
   var freedomFn = () => { return freeedomParentModuleThing_; }
-  freedom = <any>freedomFn;
+  freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
 
   var core_ = new SkeletonFreedomCore();
   freedom['core'] = () => { return core_; }
