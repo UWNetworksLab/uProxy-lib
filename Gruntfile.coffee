@@ -210,7 +210,7 @@ module.exports = (grunt) ->
       loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       loggingSpec: Rule.browserifySpec 'logging/logging'
-      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection.spec'
+      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
       # Browserify for sample apps
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
