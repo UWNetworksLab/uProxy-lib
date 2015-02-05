@@ -1,4 +1,4 @@
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 
 declare module freedom {
   // Common on/emit for message passing interfaces.
@@ -7,9 +7,20 @@ declare module freedom {
     (eventType:string, handler:(eventData:T) => void) : void;
   }
 
+  // TODO: replace OnAndEmit with EventHandler and EventEmitter;
   interface OnAndEmit<T,T2> {
     on   :EventHandlerFn<T>;
     emit :EventDispatchFn<T2>;
+  }
+
+  interface EventHandler {
+    // Adds |f| as an event handler for all subsiquent events of type |t|.
+    on(t:string,f:Function) : void;
+    // Adds |f| as an event handler for only the next event of type |t|.
+    once(t:string,f:Function) : void;
+    // The |off| function removes the event event handling function |f| from
+    // both |on| and the |once| event handling.
+    off(t:string,f:Function) : void;
   }
 
   interface PortModule<T,T2> extends OnAndEmit<T,T2> {
@@ -23,6 +34,8 @@ declare module freedom {
     providePromises :(classFn?:Function) => void;
   }
 
+  // TODO(ldixon): find out what freedom calls this and make a better name.
+  // https://github.com/uProxy/uproxy/issues/853
   interface ParentModuleThing extends ModuleSelfConstructor, OnAndEmit<any,any>
     {}
 
@@ -73,6 +86,17 @@ declare module freedom {
     };
   }
 
+  // A Freedom module sub is both a function and an object with members. The
+  // type |T| is the type of the module's stub interface.
+  interface FreedomModuleFactoryManager {
+    // This is the factory constructor for a new instance of a stub/channel to a
+    // module.
+    (...args:any[]) : any;
+    // This is the call to close a particular stub's channel and resources. It
+    // is assumed that the argument is a result of the factory constructor.
+    close : (freedomModuleStubInstance:any) => Promise<void>;
+  }
+
   interface FreedomInCoreEnvOptions {
     debug  ?:string;  // debug level
     logger ?:string;  // string to json for logging provider.
@@ -89,27 +113,35 @@ declare module freedom {
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
-    [moduleName:string] : Function;
+    // TODO: explore how to use FreedomModuleFactoryManager.
+    [moduleName:string] : any;
   }
 
   interface FreedomInModuleEnv {
     // Represents the call to freedom(), which returns the parent module's
-    // freedom stub interface in an on/emit style.
+    // freedom stub interface in an on/emit style. This is a getter.
     (): ParentModuleThing;
 
     // Creates an interface to the freedom core provider which can be used to
     // create loggers and channels.
+    // Note: unlike other providers, core is a getter.
     core : () => Core;
 
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
-    [moduleName:string] : Function;
+    // TODO: explore how to use FreedomModuleFactoryManager.
+    [moduleName:string] : any;
   }
 }
 
-// This allows use of syntax: import freedomTypes = require('freedom.i');
-// which gives finer control to the naming prefix for types.
-declare module "freedom.i" {
+// By having both the freedom module declared above, and this quoted
+// declaration, it allows a typescript <reference ...> header to be used and
+// then for types to then be found by `freedom.TypeName` (e.g. in the other
+// freedom typing files), as well as a using the require style inclusion of the
+// importing the freedom types using a statement of the form |import
+// freedomTypes = require('freedom.types');| within normal typescript code, e.g.
+// see the jasmine freedom mock in mocks subdirectory of freedom.
+declare module "freedom.types" {
     export = freedom;
 }
