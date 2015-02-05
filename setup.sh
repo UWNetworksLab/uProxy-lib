@@ -38,7 +38,7 @@ function installDevDependencies ()
 runCmd "cd $ROOT_DIR"
 
 if [ "$1" == 'help' ]; then
-  echo "setup.sh [help|tools|clean]"
+  echo "Usage: setup.sh [help|tools|clean]"
 elif [ "$1" == 'tools' ]; then
   buildTools
 elif [ "$1" == 'clean' ]; then
