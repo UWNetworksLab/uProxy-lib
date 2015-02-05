@@ -126,9 +126,11 @@ module WebRtc {
     // |id| is the Freedom GUID for the underlying browser object.
     public static fromId = (id:string) : Promise<DataChannel> => {
       var channel :DataChannel = new DataChannel(id);
-      return channel.rtcDataChannel_.getLabel().then((label:string) => {
-        channel.label_ = label;
-        return channel;
+      return channel.rtcDataChannel_.setBinaryType('arraybuffer').then(() => {
+        return channel.rtcDataChannel_.getLabel().then((label:string) => {
+          channel.label_ = label;
+          return channel;
+        });
       });
     }
 

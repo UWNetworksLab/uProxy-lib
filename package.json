@@ -17,7 +17,7 @@
     }
   ],
   "peerDependencies": {
-    "freedom": "^0.6.18"
+    "freedom": "^0.6.19"
   },
   "devDependencies": {
     "freedom": "^0.6.18",
