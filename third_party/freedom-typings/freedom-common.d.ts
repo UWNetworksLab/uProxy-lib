@@ -109,12 +109,6 @@ declare module freedom {
     // freedom module.
     (manifestPath:string, options?:FreedomInCoreEnvOptions)
       : Promise<Function>;
-
-    // We use this specification so that you can reference freedom sub-modules by
-    // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
-    // this.
-    // TODO: explore how to use FreedomModuleFactoryManager.
-    [moduleName:string] : any;
   }
 
   interface FreedomInModuleEnv {
