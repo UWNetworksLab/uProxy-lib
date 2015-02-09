@@ -5,4 +5,4 @@ node_js:
 before_install:
  - npm install -g grunt-cli
 install:
- - ./setup.sh
+ - ./setup.sh install
