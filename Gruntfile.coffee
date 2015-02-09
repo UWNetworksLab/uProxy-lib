@@ -120,10 +120,10 @@ module.exports = (grunt) ->
       # Copy the freedom output file to sample apps
       freedomLibsForSimpleFreedomChat:
         Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
-          path.join(devBuildDir, 'samples/simple-freedom-chat/lib/')
+          'samples/simple-freedom-chat'
       freedomLibsForCopypasteFreedomChat:
         Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
-          path.join(devBuildDir, 'samples/copypaste-freedom-chat/lib/')
+          'samples/copypaste-freedom-chat/'
 
     # Typescript rules
     ts:
