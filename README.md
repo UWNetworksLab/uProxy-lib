@@ -15,7 +15,7 @@ Other paths in `build` such as `build/dev` are ignored when published via NPM (u
 Just run the install script:
 
 ```
-./setup.sh
+./setup.sh install
 ```
 
 This will install npm modules (in `node_modules`), install typescript definitions (in `build/third_party/typings`), and build the build-tools (into `build/tools`) (It also prints out the commands it runs so you can understand what it is doing if you need/want to).
@@ -27,16 +27,15 @@ If you just want to cleanup from a partial or broken build, you can run:
 rm -r build/dev build/dist .tscache src/.baseDir
 ```
 or
-
 ```
 grunt clean
 ```
 
-If you need to also start with just fresh development depndencies, you can also run:
+If you need to also start with just fresh development depndencies, you can run:
 ```
-rm -r node_modules build
-./setup.sh
+./setup.sh clean
 ```
+That will remove all build directories and installed dependencies, including NPM modules.
 
 ## What is in this directory?
 
@@ -72,7 +71,7 @@ These are run by starting a webserver and viewing the html files, e.g.
 python -m SimpleHTTPServer
 ```
 
-Then, in your web-browser, goto the relevant `main.html` file in the relevant sample directory of at `http://localhost:8000/build/dev/samples/`. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
+Then, in your web browser, goto the relevant `main.html` file in the relevant sample directory of at `http://localhost:8000/build/dev/samples/`. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
 
 ## Development conventions
 

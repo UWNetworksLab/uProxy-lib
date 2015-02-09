@@ -37,15 +37,18 @@ function installDevDependencies ()
 
 runCmd "cd $ROOT_DIR"
 
-if [ "$1" == 'help' ]; then
-  echo "Usage: setup.sh [help|tools|clean]"
+if [ "$1" == 'install' ]; then
+  installDevDependencies
 elif [ "$1" == 'tools' ]; then
   buildTools
 elif [ "$1" == 'clean' ]; then
   clean
 else
-  installDevDependencies
+  echo "Usage: setup.sh [install|tools|clean]"
+  echo "  install       Installs needed development dependencies into build/"
+  echo "  tools         Builds just the tools into build/tools"
+  echo "  clean         Removes all dependencies installed by this script."
+  echo
+  echo ""
+  exit 0
 fi
-
-echo
-echo "Successfully completed install of dev dependencies."
