@@ -46,7 +46,7 @@ export class Rule {
   // Grunt Jasmine target creator
   // Assumes that the each spec file is a fully browserified js file.
   public jasmineSpec(name:string, morefiles?:string[]) : JasmineRule {
-    if(!morefiles) { morefiles = []; }
+    if (!morefiles) { morefiles = []; }
     return {
       src: [
         require.resolve('arraybuffer-slice'),
@@ -56,9 +56,27 @@ export class Rule {
       options: {
         specs: [ path.join(this.config.devBuildDir, name, '/**/*.spec.static.js') ],
         outfile: path.join(this.config.devBuildDir, name, '/SpecRunner.html'),
-        keepRunner: true
+        keepRunner: true,
+        template: require('grunt-template-jasmine-istanbul'),
+        templateOptions: {
+          files: ['**/*', '!node_modules/**'],
+          // Output location for coverage results
+          coverage: path.join(this.config.devBuildDir, name, 'coverage/results.json'),
+          report: [
+            { type: 'html',
+              options: {
+                dir: path.join(this.config.devBuildDir, name, 'coverage')
+              }
+            },
+            { type: 'lcov',
+              options: {
+                dir: path.join(this.config.devBuildDir, name, 'coverage')
+              }
+            }
+          ]
+        }
       }
-    };
+    }
   }
 
   // Grunt browserify target creator
@@ -68,6 +86,19 @@ export class Rule {
       dest: path.join(this.config.devBuildDir, filepath + '.static.js'),
       options: {
         debug: false,
+      }
+    };
+  }
+
+  // Grunt browserify target creator, instrumented for istanbul
+  public browserifySpec(filepath:string) : BrowserifyRule {
+    return {
+      src: [ path.join(this.config.devBuildDir, filepath + '.spec.js') ],
+      dest: path.join(this.config.devBuildDir, filepath + '.spec.static.js'),
+      options: {
+        debug: true,
+        transform: [['browserify-istanbul',
+                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
       }
     };
   }
@@ -105,4 +136,5 @@ export class Rule {
       });
     return { files: filesForlibPaths };
   }
-}
+
+}  // class Rule
