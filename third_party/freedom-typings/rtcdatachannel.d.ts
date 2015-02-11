@@ -1,6 +1,6 @@
 // Typescript file for core.rtcdatachannel in:
 // https://github.com/freedomjs/freedom/blob/master/interface/core.rtcdatachannel.json
-/// <reference path="../../../third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
 /// <reference path='freedom-common.d.ts' />
 
 declare module freedom_RTCDataChannel {
@@ -12,8 +12,9 @@ declare module freedom_RTCDataChannel {
     binary        ?:Blob;  // Not yet supported in Chrome.
   }
 
-  class RTCDataChannel {
-    constructor(id:string);
+  // Constructed by |freedom['rtcdatachannel'](id)| where |id| is a string
+  // representing the channel id created by an |rtcpeerconnection| object.
+  interface RTCDataChannel {
     getLabel() : Promise<string>;
     getOrdered() : Promise<boolean>;
     getMaxPacketLifeTime() : Promise<number>;
