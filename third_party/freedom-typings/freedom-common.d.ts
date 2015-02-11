@@ -7,6 +7,11 @@ declare module freedom {
     (eventType:string, handler:(eventData:T) => void) : void;
   }
 
+  interface Error {
+    errcode :string;
+    message :string;
+  }
+
   // TODO: replace OnAndEmit with EventHandler and EventEmitter;
   interface OnAndEmit<T,T2> {
     on   :EventHandlerFn<T>;
