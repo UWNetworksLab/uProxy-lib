@@ -2,26 +2,26 @@
   "version": "v4",
   "repo": "borisyankov/DefinitelyTyped",
   "ref": "master",
-  "path": "typings",
-  "bundle": "typings/tsd.d.ts",
+  "path": "../build/third_party/typings",
+  "bundle": "third_party/typings/tsd.d.ts",
   "installed": {
     "es6-promise/es6-promise.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "675a63e4036624d24b06f1b173a92cbe7bb72ab7"
     },
     "webcrypto/WebCrypto.d.ts": {
-      "commit": "8e9ac731267b79e87a6219af2db5fa1f909730e4"
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     },
     "form-data/form-data.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     },
     "node/node.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     },
     "request/request.d.ts": {
-      "commit": "8abb240eea37beed10de955c59023d1cbd9c829f"
+      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     }
   }
 }

@@ -1,96 +1,231 @@
-TaskManager = require './tools/taskmanager'
-Rule = require './tools/common-grunt-rules'
+TaskManager = require './build/tools/taskmanager'
+
+#-------------------------------------------------------------------------
+# The top level tasks. These are the highest level grunt-tasks defined in terms
+# of specific grunt rules below and given to grunt.initConfig
+taskManager = new TaskManager.Manager();
+
+# Makes the base development build, excludes sample apps.
+taskManager.add 'base-dev', [
+  'copy:third_party'
+  'copy:dev'
+  'ts:dev'
+  'browserify:loggingProvider'
+]
+
+# Makes the development build, includes sample apps.
+taskManager.add 'dev', [
+  'base-dev'
+  'simpleFreedomChat'
+  'copypasteFreedomChat'
+]
+
+# Makes the distribution build.
+taskManager.add 'dist', [
+  'dev',
+  'copy:dist'
+]
+
+# Build the simple freedom chat sample app.
+taskManager.add 'simpleFreedomChat', [
+  'base-dev'
+  'copy:freedomLibsForSimpleFreedomChat'
+  'ts:simpleFreedomChatMain'
+  'browserify:simpleFreedomChatMain'
+  'ts:simpleFreedomChatFreedomModule'
+  'browserify:simpleFreedomChatFreedomModule'
+]
+
+# Build the copy/paste freedom chat sample app.
+taskManager.add 'copypasteFreedomChat', [
+  'base-dev'
+  'copy:freedomLibsForCopypasteFreedomChat'
+  'ts:copypasteFreedomChatMain'
+  'browserify:copypasteFreedomChatMain'
+  'ts:copypasteFreedomChatFreedomModule'
+  'browserify:copypasteFreedomChatFreedomModule'
+]
+
+# Run unit tests
+taskManager.add 'unit_tests', [
+  'dev'
+  'browserify:arraybuffersSpec'
+  'browserify:handlerSpec'
+  'browserify:buildToolsTaskmanagerSpec'
+  'browserify:loggingSpec'
+  'browserify:loggingProviderSpec'
+  'browserify:webrtcSpec'
+  'jasmine'
+]
+
+# Run unit tests
+taskManager.add 'test', ['unit_tests']
+
+# Default task, build dev, run tests, make the distribution build.
+taskManager.add 'default', ['dev', 'unit_tests', 'dist']
+
+
+#-------------------------------------------------------------------------
+Rules = require './build/tools/common-grunt-rules'
+devBuildDir = 'build/dev'
+Rule = new Rules.Rule({devBuildDir: devBuildDir});
 
 path = require 'path'
 
 module.exports = (grunt) ->
-  #-------------------------------------------------------------------------
-  grunt.initConfig
+  config =
     pkg: grunt.file.readJSON 'package.json'
 
-    # TODO: This must be factored out into common-grunt-rules.
-    symlink:
-      # Symlink each source file under src/ under build/.
-      build:
-        files: [
-          expand: true
-          cwd: 'src/'
-          src: ['**/*']
-          filter: 'isFile'
-          dest: 'build/'
-        ]
-      # Symlink each directory under third_party/ under build/third_party/.
-      thirdParty:
-        files: [
-          expand: true,
-          cwd: 'third_party/'
-          src: ['*']
-          filter: 'isDirectory'
-          dest: 'build/third_party/'
-        ]
-      # Symlink the Chrome and Firefox builds of Freedom under build/freedom/.
-      freedom:
-        files: [ {
-          expand: true
-          cwd: path.dirname(require.resolve('freedom/Gruntfile'))
-          src: ['freedom.js']
-          dest: 'build/freedom/'
-        } ]
-
     copy:
-      crypto: Rule.copyModule 'crypto'
-      taskmanager: Rule.copyModule 'taskmanager'
-      arraybuffers: Rule.copyModule 'arraybuffers'
-      handler: Rule.copyModule 'handler'
-      logging: Rule.copyModule 'logging'
-      webrtc: Rule.copyModule 'webrtc'
+      # Copy releveant non-typescript files to dev build.
+      dev:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              cwd: 'src/',
+              src: ['**/*', '!**/*.ts'],
+              dest: devBuildDir,
+              onlyIf: 'modified'
+          }
+        ]
+      # Copy |third_party| to dev: this is so that there is a common
+      # |build/third_party| location to reference typescript
+      # definitions for ambient contexts.
+      third_party:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              src: ['third_party/**/*'],
+              dest: 'build/',
+              onlyIf: 'modified'
+          }
+        ]
+      # Copy releveant non-typescript files to distribution build.
+      dist:
+        files: [
+          {
+              nonull: true,
+              expand: true,
+              cwd: devBuildDir,
+              src: ['**/*',
+                    '!**/*.spec.js',
+                    '!**/*.spec.*.js'],
+              dest: 'build/dist/',
+              onlyIf: 'modified'
+          }
+        ]
 
-      freedomTypings: Rule.copyModule 'freedom/typings'
+      # Copy the freedom output file to sample apps
+      freedomLibsForSimpleFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          'samples/simple-freedom-chat'
+      freedomLibsForCopypasteFreedomChat:
+        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
+          'samples/copypaste-freedom-chat/'
 
-      simpleFreedomChat: Rule.copyModule 'samples/simple-freedom-chat'
-      simpleFreedomChatLib: Rule.copySampleFiles 'samples/simple-freedom-chat'
-
-      copypasteFreedomChat: Rule.copyModule 'samples/copypaste-freedom-chat'
-      copypasteFreedomChatLib: Rule.copySampleFiles 'samples/copypaste-freedom-chat'
-
+    # Typescript rules
     ts:
-      # For bootstrapping of this Gruntfile
-      taskmanager: Rule.typescriptSrc 'taskmanager'
-      taskmanagerSpecDecl: Rule.typescriptSpecDecl 'taskmanager'
-
-      # The uProxy modules library
-      crypto: Rule.typescriptSrc 'crypto'
-
-      arraybuffers: Rule.typescriptSrc 'arraybuffers'
-      arraybuffersSpecDecl: Rule.typescriptSpecDecl 'arraybuffers'
-
-      handler: Rule.typescriptSrc 'handler'
-      handlerSpecDecl: Rule.typescriptSpecDecl 'handler'
-
-      logging: Rule.typescriptSrc 'logging'
-      loggingSpecDecl: Rule.typescriptSpecDecl 'logging'
-
-      webrtc: Rule.typescriptSrc 'webrtc'
-
-      # freedom/typings only contains specs and declarations.
-      freedomTypingsSpecDecl: Rule.typescriptSpecDecl 'freedom/typings'
-
-      simpleFreedomChat: Rule.typescriptSrc 'samples/simple-freedom-chat'
-      copypasteFreedomChat: Rule.typescriptSrc 'samples/copypaste-freedom-chat'
+      # Compile everything into the development build directory.
+      dev:
+        src: [
+          'src/**/*.ts',
+          '!src/**/*.d.ts',
+          '!src/samples/**/*.ts',
+          '!src/**/*.spec.dynamic.ts',
+        ]
+        outDir: 'build/dev/'
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: true
+          module: 'commonjs'
+          fast: 'always'
+      copypasteFreedomChatMain:
+        src: ['src/samples/copypaste-freedom-chat/main.ts']
+        outDir: devBuildDir
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
+      copypasteFreedomChatFreedomModule:
+        src: ['src/samples/copypaste-freedom-chat/freedom-module.ts']
+        outDir: devBuildDir
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
+      simpleFreedomChatMain:
+        src: ['src/samples/simple-freedom-chat/main.ts']
+        outDir: devBuildDir
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
+      simpleFreedomChatFreedomModule:
+        src: ['src/samples/simple-freedom-chat/freedom-module.ts']
+        outDir: devBuildDir
+        baseDir: 'src'
+        options:
+          target: 'es5'
+          comments: true
+          noImplicitAny: true
+          sourceMap: false
+          declaration: false
+          module: 'commonjs'
+          fast: 'always'
 
     jasmine:
-      handler: Rule.jasmineSpec 'handler'
-      taskmanager: Rule.jasmineSpec 'taskmanager'
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      logging:
-        src: [
-          'build/logging/mocks.js'
-          'build/logging/logging.js'
-        ]
-        options:
-          specs: 'build/logging/*.spec.js'
+      buildTools: Rule.jasmineSpec 'build-tools'
+      handler: Rule.jasmineSpec 'handler'
+      logging: Rule.jasmineSpec 'logging'
+      loggingProvider: Rule.jasmineSpec 'loggingprovider'
+      webrtc: Rule.jasmineSpec 'webrtc'
 
-    clean: ['build/', 'dist/', '.tscache/']
+    browserify:
+      # Browserify specs
+      arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
+      buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
+      handlerSpec: Rule.browserifySpec 'handler/queue'
+      loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
+      loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
+      loggingSpec: Rule.browserifySpec 'logging/logging'
+      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      # Browserify for sample apps
+      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
+      copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
+      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main'
+      simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
+
+    clean:
+      build:
+        [ 'build/dev', 'build/dist'
+          # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
+          '.tscache/'
+          'src/.baseDir.ts' ]
+
+  #-------------------------------------------------------------------------
+  grunt.initConfig config
 
   #-------------------------------------------------------------------------
   grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -98,110 +233,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
-
-  #-------------------------------------------------------------------------
-  # Define the tasks
-  taskManager = new TaskManager.Manager();
-
-  taskManager.add 'base', [
-    'symlink:build'
-    'symlink:thirdParty'
-    'symlink:freedom'
-  ]
-
-  taskManager.add 'taskmanager', [
-    'base'
-    'ts:taskmanager'
-    'ts:taskmanagerSpecDecl'
-    'copy:taskmanager'
-  ]
-
-  taskManager.add 'crypto', [
-    'base'
-    'ts:crypto'
-    'copy:crypto'
-  ]
-
-  taskManager.add 'arraybuffers', [
-    'base'
-    'ts:arraybuffers'
-    'ts:arraybuffersSpecDecl'
-    'copy:arraybuffers'
-  ]
-
-  taskManager.add 'handler', [
-    'base'
-    'ts:handler'
-    'ts:handlerSpecDecl'
-    'copy:handler'
-  ]
-
-  taskManager.add 'logging', [
-    'base'
-    'ts:logging'
-    'ts:loggingSpecDecl'
-    'copy:logging'
-  ]
-
-  taskManager.add 'webrtc', [
-    'logging'
-    'crypto'
-    'handler'
-    'base'
-    'ts:webrtc'
-    'copy:webrtc'
-  ]
-
-  taskManager.add 'freedom', [
-    'base'
-    'ts:freedomTypingsSpecDecl'
-    'copy:freedomTypings'
-  ]
-
-  taskManager.add 'simpleFreedomChat', [
-    'base'
-    'logging'
-    'freedom'
-    'webrtc'
-    'ts:simpleFreedomChat'
-    'copy:simpleFreedomChat'
-    'copy:simpleFreedomChatLib'
-  ]
-
-  taskManager.add 'copypasteFreedomChat', [
-    'base'
-    'logging'
-    'freedom'
-    'webrtc'
-    'ts:copypasteFreedomChat'
-    'copy:copypasteFreedomChat'
-    'copy:copypasteFreedomChatLib'
-  ]
-
-  taskManager.add 'samples', [
-    'simpleFreedomChat'
-    'copypasteFreedomChat'
-  ]
-
-  taskManager.add 'build', [
-    'arraybuffers'
-    'taskmanager'
-    'handler'
-    'logging'
-    'crypto'
-    'webrtc'
-    'freedom'
-    'samples'
-  ]
-
-  taskManager.add 'test', [
-    'build', 'jasmine'
-  ]
-
-  grunt.registerTask 'default', [
-    'build'
-  ]
 
   #-------------------------------------------------------------------------
   # Register the tasks
