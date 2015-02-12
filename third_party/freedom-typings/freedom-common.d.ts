@@ -113,7 +113,7 @@ declare module freedom {
     // |manifestPath| should be a path to a json string that specifies the
     // freedom module.
     (manifestPath:string, options?:FreedomInCoreEnvOptions)
-      : Promise<Function>;
+      : Promise<void>;
   }
 
   interface FreedomInModuleEnv {
