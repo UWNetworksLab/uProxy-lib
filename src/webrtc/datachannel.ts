@@ -272,7 +272,9 @@ export class DataChannelClass implements DataChannel {
 //     browser object.
 export function createFromFreedomId(id:string) : Promise<DataChannel> {
   var rtcDataChannel = freedom['core.rtcdatachannel'](id);
-  return rtcDataChannel.getLabel().then((label:string) => {
-    return new DataChannelClass(rtcDataChannel, label, id);
+  return rtcDataChannel.setBinaryType('arraybuffer').then(() => {
+    return rtcDataChannel.getLabel().then((label:string) => {
+      return new DataChannelClass(rtcDataChannel, label, id);
+    });
   });
 }
