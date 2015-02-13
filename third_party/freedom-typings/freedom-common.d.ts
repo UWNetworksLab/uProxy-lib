@@ -107,13 +107,15 @@ declare module freedom {
     logger ?:string;  // string to json for logging provider.
   }
 
+  interface ModuleFactoryConstructor { () : any; }
+
   interface FreedomInCoreEnv extends OnAndEmit<any,any> {
     // Represents the call to freedom when you create a root module. Returns a
     // promise to a factory constructor for the freedom module. The
     // |manifestPath| should be a path to a json string that specifies the
     // freedom module.
     (manifestPath:string, options?:FreedomInCoreEnvOptions)
-      : Promise<void>;
+      : Promise<ModuleFactoryConstructor>;
   }
 
   interface FreedomInModuleEnv {
