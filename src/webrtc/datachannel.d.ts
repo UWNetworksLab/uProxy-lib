@@ -39,6 +39,10 @@ declare module WebRtc {
     // undertlying network layer for ending.
     public send :(data:Data) => Promise<void>;
 
+    // Returns the number of bytes which have been passed to send() but
+    // which have not yet been transmitted to the network.
+    public getBufferedAmount :() => Promise<number>;
+
     // Closes this data channel.
     // A channel cannot be re-opened once this has been called.
     public close :() => void;

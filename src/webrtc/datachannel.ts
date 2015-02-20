@@ -248,6 +248,10 @@ module WebRtc {
       });
     }
 
+    public getBufferedAmount = () : Promise<number> => {
+      return this.rtcDataChannel_.getBufferedAmount();
+    }
+
     public close = () : void => {
       this.rtcDataChannel_.close();
     }
