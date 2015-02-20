@@ -107,7 +107,7 @@ module WebRtc {
       });
       this.onceOpened.then(() => {
         this.opennedSuccessfully_ = true;
-        this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
+        this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
       });
       this.onceClosed.then(() => {
           if(!this.opennedSuccessfully_) {
@@ -242,7 +242,14 @@ module WebRtc {
           setTimeout(this.conjestionControlSendHandler, 20);
         } else {
           if(!this.toPeerDataQueue_.isHandling()) {
-            this.toPeerDataQueue_.setHandler(this.handleSendDataToPeer_);
+            // This processes one block from the queue, which (in Chrome) is
+            // expected to be no larger than 4 KB.  We will then go through the
+            // whole loop again, including checking the buffered amount, before
+            // processing the next block.  This is inefficient because it
+            // introduces an extra IPC call per block; a more efficient
+            // implementation would check the available buffered amount, and
+            // then pull that many bytes off of the queue.
+            this.toPeerDataQueue_.setNextHandler(this.handleSendDataToPeer_);
           }
         }
       });
