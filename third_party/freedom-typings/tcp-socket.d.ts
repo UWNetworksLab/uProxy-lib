@@ -21,10 +21,10 @@
 
     interface SocketInfo {
       connected :boolean;
-      localAddress :string;
-      localPort :number;
-      peerAddress :string;
-      peerPort :number;
+      localAddress ?:string;
+      localPort ?:number;
+      peerAddress ?:string;
+      peerPort ?:number;
     }
 
     interface ConnectInfo {
