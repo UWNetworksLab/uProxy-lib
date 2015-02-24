@@ -9,7 +9,8 @@ taskManager = new TaskManager.Manager();
 taskManager.add 'base-dev', [
   'copy:third_party'
   'copy:dev'
-  'ts:dev'
+  'ts:devInModuleEnv'
+  'ts:devInCoreEnv'
   'browserify:loggingProvider'
 ]
 
@@ -30,9 +31,7 @@ taskManager.add 'dist', [
 taskManager.add 'simpleFreedomChat', [
   'base-dev'
   'copy:freedomLibsForSimpleFreedomChat'
-  'ts:simpleFreedomChatMain'
   'browserify:simpleFreedomChatMain'
-  'ts:simpleFreedomChatFreedomModule'
   'browserify:simpleFreedomChatFreedomModule'
 ]
 
@@ -40,15 +39,13 @@ taskManager.add 'simpleFreedomChat', [
 taskManager.add 'copypasteFreedomChat', [
   'base-dev'
   'copy:freedomLibsForCopypasteFreedomChat'
-  'ts:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatMain'
-  'ts:copypasteFreedomChatFreedomModule'
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
 # Run unit tests
 taskManager.add 'unit_tests', [
-  'dev'
+  'base-dev'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
@@ -127,13 +124,13 @@ module.exports = (grunt) ->
 
     # Typescript rules
     ts:
-      # Compile everything into the development build directory.
-      dev:
+      # Compile everything that can run in a module env into the development
+      # build directory.
+      devInModuleEnv:
         src: [
-          'src/**/*.ts',
-          '!src/**/*.d.ts',
-          '!src/samples/**/*.ts',
-          '!src/**/*.spec.dynamic.ts',
+          'src/**/*.ts'
+          '!src/**/*.core-env.ts'
+          '!src/**/*.core-env.spec.ts'
         ]
         outDir: 'build/dev/'
         baseDir: 'src'
@@ -145,52 +142,21 @@ module.exports = (grunt) ->
           declaration: true
           module: 'commonjs'
           fast: 'always'
-      copypasteFreedomChatMain:
-        src: ['src/samples/copypaste-freedom-chat/main.ts']
-        outDir: devBuildDir
+      # Compile everything that must run in the core env into the development
+      # build directory.
+      devInCoreEnv:
+        src: [
+          'src/**/*.core-env.ts'
+          'src/**/*.core-env.spec.ts'
+        ]
+        outDir: 'build/dev/'
         baseDir: 'src'
         options:
           target: 'es5'
           comments: true
           noImplicitAny: true
           sourceMap: false
-          declaration: false
-          module: 'commonjs'
-          fast: 'always'
-      copypasteFreedomChatFreedomModule:
-        src: ['src/samples/copypaste-freedom-chat/freedom-module.ts']
-        outDir: devBuildDir
-        baseDir: 'src'
-        options:
-          target: 'es5'
-          comments: true
-          noImplicitAny: true
-          sourceMap: false
-          declaration: false
-          module: 'commonjs'
-          fast: 'always'
-      simpleFreedomChatMain:
-        src: ['src/samples/simple-freedom-chat/main.ts']
-        outDir: devBuildDir
-        baseDir: 'src'
-        options:
-          target: 'es5'
-          comments: true
-          noImplicitAny: true
-          sourceMap: false
-          declaration: false
-          module: 'commonjs'
-          fast: 'always'
-      simpleFreedomChatFreedomModule:
-        src: ['src/samples/simple-freedom-chat/freedom-module.ts']
-        outDir: devBuildDir
-        baseDir: 'src'
-        options:
-          target: 'es5'
-          comments: true
-          noImplicitAny: true
-          sourceMap: false
-          declaration: false
+          declaration: true
           module: 'commonjs'
           fast: 'always'
 
@@ -212,9 +178,9 @@ module.exports = (grunt) ->
       loggingSpec: Rule.browserifySpec 'logging/logging'
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
       # Browserify for sample apps
-      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main'
+      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
-      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main'
+      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
 
     clean:
