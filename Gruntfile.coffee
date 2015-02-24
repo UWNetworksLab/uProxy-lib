@@ -61,13 +61,13 @@ taskManager.add 'test', ['unit_tests']
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['dev', 'unit_tests', 'dist']
 
+#-------------------------------------------------------------------------
+rules = require './build/tools/common-grunt-rules'
+path = require 'path'
 
 #-------------------------------------------------------------------------
-Rules = require './build/tools/common-grunt-rules'
 devBuildDir = 'build/dev'
-Rule = new Rules.Rule({devBuildDir: devBuildDir});
-
-path = require 'path'
+Rule = new rules.Rule({devBuildDir: devBuildDir});
 
 module.exports = (grunt) ->
   config =
@@ -169,15 +169,16 @@ module.exports = (grunt) ->
       webrtc: Rule.jasmineSpec 'webrtc'
 
     browserify:
+      # Browserify freedom-modules in the library
+      loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       handlerSpec: Rule.browserifySpec 'handler/queue'
-      loggingProvider: Rule.browserify 'loggingprovider/loggingprovider'
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       loggingSpec: Rule.browserifySpec 'logging/logging'
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
-      # Browserify for sample apps
+      # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
