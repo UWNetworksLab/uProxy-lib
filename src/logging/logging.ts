@@ -12,7 +12,15 @@ module Logging {
     for (var i = 0; i < args.length; i++) {
       var arg = args[i];
       if ('string' !== typeof(arg) && !(arg instanceof String)) {
-        arg = JSON.stringify(arg);
+        try {
+          arg = JSON.stringify(arg);
+        } catch (e) {
+          if (arg && typeof(arg.toString) === 'function') {
+            arg = arg.toString();
+          } else {
+            arg = e.message;
+          }
+        }
       }
 
       if (-1 !== msg.indexOf('%' + i)) {
