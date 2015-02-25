@@ -75,8 +75,7 @@ python -m SimpleHTTPServer
 
 Then, in your web browser, goto the relevant `main.html` file in the relevant sample directory of at `http://localhost:8000/build/dev/samples/`. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
 
-## Development conventions
+## Development conventions and build structure
 
-We use `build/third_party` as a common location for references to all ambient JS definitions. This means that all typescript reference inclusions should be to files in `build/third_party/`. This provides a single location so that auto-generated `.d.ts` files can correctly reference `.d.ts` files in third_party, and will continue to find them in the right place when uproxy-lib is used by other libraries. We assume a common directory structure for finding other typings. The directory structure looks like this:
-
+We use `build/third_party` as a common location for references to all ambient JS definitions. This means that all typescript reference inclusions should be to files in `build/third_party/`. This provides a single location so that auto-generated `.d.ts` files can correctly reference `.d.ts` files in third_party, and will continue to find them in the right place when uproxy-lib is used by other libraries. We assume a common directory structure for finding other typings. For more details see the [uProxy Build Setup doc](https://docs.google.com/document/d/1H3ac_gZFJfhUGyumCbAKhXSa-_UsusDmsAUqXe4h-JQ/edit#)
 
