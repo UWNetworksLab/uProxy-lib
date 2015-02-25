@@ -19,23 +19,25 @@ function runCmd ()
 
 function buildTools ()
 {
-  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/taskmanager.ts"
-  runCmd "node_modules/.bin/tsc --module commonjs --outDir build/tools/ src/build-tools/common-grunt-rules.ts"
+  runCmd "mkdir -p build/dev/uproxy-lib/build-tools/"
+  runCmd "ln -s $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/" || true
+  runCmd "./node_modules/.bin/tsc --module commonjs ./build/dev/uproxy-lib/build-tools/*.ts"
+  runCmd "mkdir -p ./build/tools/"
+  runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
 }
 
 function clean ()
 {
-  runCmd "rm -r node_modules build .tscache src/.baseDir.ts"
+  runCmd "rm -r cd $ROOT_DIR/node_modules cd $ROOT_DIR/build cd $ROOT_DIR/.tscache"
 }
 
 function installDevDependencies ()
 {
+  runCmd "cd $ROOT_DIR"
   runCmd "npm install"
   runCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
   buildTools
 }
-
-runCmd "cd $ROOT_DIR"
 
 if [ "$1" == 'install' ]; then
   installDevDependencies
