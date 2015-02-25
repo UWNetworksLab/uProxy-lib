@@ -135,10 +135,10 @@ module.exports = (grunt) ->
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
       libsForSimpleFreedomChat:
         Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/simple-freedom-chat'
+          'samples/simple-freedom-chat/lib'
       libsForCopypasteFreedomChat:
         Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/copypaste-freedom-chat/'
+          'samples/copypaste-freedom-chat/lib'
 
     # Typescript rules
     ts:
