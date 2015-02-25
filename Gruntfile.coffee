@@ -69,9 +69,11 @@ path = require 'path'
 #-------------------------------------------------------------------------
 devBuildDir = 'build/dev/uproxy-lib'
 thirdPartyBuildDir = 'build/third_party'
+localLibsDestPath = 'uproxy-lib'
 Rule = new rules.Rule({
   devBuildDir: devBuildDir,
-  thirdPartyBuildDir: thirdPartyBuildDir
+  thirdPartyBuildDir: thirdPartyBuildDir,
+  localLibsDestPath: localLibsDestPath
 });
 
 module.exports = (grunt) ->
@@ -135,10 +137,10 @@ module.exports = (grunt) ->
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
       libsForSimpleFreedomChat:
         Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/simple-freedom-chat/lib'
+          'samples/simple-freedom-chat/'
       libsForCopypasteFreedomChat:
         Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/copypaste-freedom-chat/lib'
+          'samples/copypaste-freedom-chat/'
 
     # Typescript rules
     ts:
