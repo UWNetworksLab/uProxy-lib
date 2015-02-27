@@ -7,7 +7,6 @@ taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base', [
-  'symlink:typescriptSrc'
   'copy:third_party'
   'copy:dev'
   'ts:devInModuleEnv'
@@ -72,8 +71,13 @@ devBuildPath = 'build/dev/uproxy-lib'
 thirdPartyBuildPath = 'build/third_party'
 localLibsDestPath = 'uproxy-lib'
 Rule = new rules.Rule({
+  # The path where code in this repository should be built in.
   devBuildPath: devBuildPath,
+  # The path from where third party libraries should be copied. e.g. as used by
+  # sample apps.
   thirdPartyBuildPath: thirdPartyBuildPath,
+  # The path to copy modules from this repository into. e.g. as used by sample
+  # apps.
   localLibsDestPath: localLibsDestPath
 });
 
@@ -81,28 +85,15 @@ module.exports = (grunt) ->
   config =
     pkg: grunt.file.readJSON 'package.json'
 
-    symlink:
-      # Sym-link typeScript sources from src/ to build/dev/uproxy-lib/
-      typescriptSrc:
-        files: [{
-          expand: true
-          overwrite: false
-          cwd: 'src'
-          src: ['**/*.ts']
-          dest: devBuildPath
-        }]
-
-    # Sym-links are prefered, but chrome apps require real files. So we copy all
-    # non-compiled files.
     copy:
-      # Copy releveant non-typescript files to dev build.
+      # Copy all src files into the directory for compiling and building.
       dev:
         files: [
           {
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*', '!**/*.ts'],
+              src: ['**/*'],
               dest: devBuildPath,
               onlyIf: 'modified'
           }
@@ -121,7 +112,7 @@ module.exports = (grunt) ->
               onlyIf: 'modified'
           }
         ]
-      # Copy releveant non-typescript files to distribution build.
+      # Copy releveant files to distribution directory.
       dist:
         files: [
           {
@@ -140,11 +131,16 @@ module.exports = (grunt) ->
       # Copy the freedom output file to sample apps
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
       libsForSimpleFreedomChat:
-        Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/simple-freedom-chat/'
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['loggingprovider']
+          localDestPath: 'samples/simple-freedom-chat/'
+
       libsForCopypasteFreedomChat:
-        Rule.copyLibs ['freedom'], ['loggingprovider'], [],
-          'samples/copypaste-freedom-chat/'
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['loggingprovider']
+          localDestPath: 'samples/copypaste-freedom-chat/'
 
     # Typescript rules
     ts:
@@ -206,8 +202,7 @@ module.exports = (grunt) ->
 
     clean:
       build:
-        [ 'build/dev', 'build/dist'
-          '.tscache/']
+        [ 'build/dev', 'build/dist', '.tscache/']
 
   #-------------------------------------------------------------------------
   grunt.initConfig config
