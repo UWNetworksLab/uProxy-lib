@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Make sure an error in this script stops it running where the error happened.
-set -e
-
 # Get the directory where this script is and set ROOT_DIR to that path. This
 # allows script to be run from different directories but always act on the
 # directory it is within.
@@ -10,6 +7,17 @@ ROOT_DIR="$(cd "$(dirname $0)"; pwd)";
 
 # A simple bash script to run commands to setup and install all dev dependencies
 # (including non-npm ones)
+function runAndAssertCmd ()
+{
+    echo "Running: $1"
+    echo
+    # We use set -e to make sure this will fail if the command returns an error
+    # code.
+    set -e && $1
+}
+
+# Just run the command, ignore errors (e.g. cp fails if a file already exists
+# with "set -e")
 function runCmd ()
 {
     echo "Running: $1"
@@ -21,8 +29,8 @@ function buildTools ()
 {
   runCmd "cd $ROOT_DIR"
   runCmd "mkdir -p build/dev/uproxy-lib/build-tools/"
-  runCmd "ln -f $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/" || true
-  runCmd "./node_modules/.bin/tsc --module commonjs ./build/dev/uproxy-lib/build-tools/*.ts"
+  runCmd "cp $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/"
+  runAndAssertCmd "./node_modules/.bin/tsc --module commonjs ./build/dev/uproxy-lib/build-tools/*.ts"
   runCmd "mkdir -p ./build/tools/"
   runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
 }
@@ -35,8 +43,8 @@ function clean ()
 function installDevDependencies ()
 {
   runCmd "cd $ROOT_DIR"
-  runCmd "npm install"
-  runCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  runAndAssertCmd "npm install"
+  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
   buildTools
 }
 
