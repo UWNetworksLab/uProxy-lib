@@ -219,8 +219,8 @@ export class DataChannelClass implements DataChannel {
     var chunks = arraybuffers.chunk(data.buffer, CHUNK_SIZE);
     var promises :Promise<void>[] = [];
     chunks.forEach((chunk) => {
-      promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
       this.toPeerDataBytes_ += chunk.byteLength;
+      promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
     });
     // CONSIDER: can we change the interface to support not having the dummy
     // extra return at the end?
