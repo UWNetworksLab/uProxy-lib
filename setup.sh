@@ -19,8 +19,9 @@ function runCmd ()
 
 function buildTools ()
 {
+  runCmd "cd $ROOT_DIR"
   runCmd "mkdir -p build/dev/uproxy-lib/build-tools/"
-  runCmd "ln -s $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/" || true
+  runCmd "ln -f $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/" || true
   runCmd "./node_modules/.bin/tsc --module commonjs ./build/dev/uproxy-lib/build-tools/*.ts"
   runCmd "mkdir -p ./build/tools/"
   runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
@@ -28,7 +29,7 @@ function buildTools ()
 
 function clean ()
 {
-  runCmd "rm -r cd $ROOT_DIR/node_modules cd $ROOT_DIR/build cd $ROOT_DIR/.tscache"
+  runCmd "rm -r $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
 }
 
 function installDevDependencies ()
