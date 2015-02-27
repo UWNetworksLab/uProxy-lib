@@ -6,9 +6,9 @@ declare module Logging {
   // var logger :Logging.Logger = new Logging.Log('my_tag');
   class Log {
     constructor(tag_:string);
-    debug(msg:string, args?:any[]) : void;
-    info(msg:string, args?:any[]) : void;
-    warn(msg:string, args?:any[]) : void;
-    error(msg:string, args?:any[]) : void;
+    debug(arg :Object, ...args :Object[]) :void;
+    info(arg :Object, ...args :Object[]) :void;
+    warn(arg :Object, ...args :Object[]) :void;
+    error(arg :Object, ...args :Object[]) :void;
   }
 }
