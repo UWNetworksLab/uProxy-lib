@@ -221,7 +221,6 @@ export class DataChannelClass implements DataChannel {
     chunks.forEach((chunk) => {
       this.toPeerDataBytes_ += chunk.byteLength;
       promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
-      this.toPeerDataBytes_ += chunk.byteLength;
     });
     // CONSIDER: can we change the interface to support not having the dummy
     // extra return at the end?
