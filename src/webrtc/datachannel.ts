@@ -88,6 +88,10 @@ export class DataChannelClass implements DataChannel {
   // The |toPeerDataQueue_| is chunked by the send call and conjection
   // controlled by the handler this class sets.
   private toPeerDataQueue_        :handler.Queue<Data,void>;
+  // This is the total number of bytes in all the ArrayBuffers in
+  // toPeerDataQueue_.
+  // TODO: Count bytes in strings as well.
+  private toPeerDataBytes_        :number;
 
   public onceOpened      :Promise<void>;
   public onceClosed      :Promise<void>;
@@ -105,6 +109,7 @@ export class DataChannelClass implements DataChannel {
               id:string) {
     this.dataFromPeerQueue = new handler.Queue<Data,void>();
     this.toPeerDataQueue_ = new handler.Queue<Data,void>();
+    this.toPeerDataBytes_ = 0;
 
     this.onceOpened = new Promise<void>((F,R) => {
       this.rejectOpened_ = R;
@@ -182,7 +187,10 @@ export class DataChannelClass implements DataChannel {
 
     var byteLength :number;
     if (typeof data.str === 'string') {
-      // JS strings are utf-16.
+      // This calculation is based on the idea that JS strings are utf-16,
+      // but since all strings are converted  to UTF-8 by the data channel
+      // this calculation is only an approximate upper bound on the actual
+      // message size.
       byteLength = data.str.length * 2;
     } else if (data.buffer) {
       byteLength = data.buffer.byteLength;
@@ -212,6 +220,7 @@ export class DataChannelClass implements DataChannel {
     var promises :Promise<void>[] = [];
     chunks.forEach((chunk) => {
       promises.push(this.toPeerDataQueue_.handle({buffer: chunk}));
+      this.toPeerDataBytes_ += chunk.byteLength;
     });
     // CONSIDER: can we change the interface to support not having the dummy
     // extra return at the end?
@@ -224,6 +233,7 @@ export class DataChannelClass implements DataChannel {
       if(typeof data.str === 'string') {
         this.rtcDataChannel_.send(data.str);
       } else if(data.buffer) {
+        this.toPeerDataBytes_ -= data.buffer.byteLength;
         this.rtcDataChannel_.sendBuffer(data.buffer);
       } else {
         // Data is good when it meets the type expected of the Data. If type-
@@ -271,7 +281,10 @@ export class DataChannelClass implements DataChannel {
   }
 
   public getBufferedAmount = () : Promise<number> => {
-    return this.rtcDataChannel_.getBufferedAmount();
+    return this.rtcDataChannel_.getBufferedAmount()
+        .then((browserBytes:number) : number => {
+          return browserBytes + this.toPeerDataBytes_;
+        }) ;
   }
 
   public toString = () : string => {
