@@ -1,6 +1,6 @@
 # uproxy-lib
 
-[![Build Status](https://travis-ci.org/uProxy/uproxy-lib.svg?branch=master)](https://travis-ci.org/uProxy/uproxy-lib) 
+[![Build Status](https://travis-ci.org/uProxy/uproxy-lib.svg?branch=master)](https://travis-ci.org/uProxy/uproxy-lib)
 [![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbd8/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbd8/builds/latest)
 [![devDependency Status](https://david-dm.org/uProxy/uproxy-lib/dev-status.svg)](https://david-dm.org/uProxy/uproxy-lib#info=devDependencies)
 
@@ -10,7 +10,7 @@ Distributed on NPM as [uproxy-lib](https://www.npmjs.org/package/uproxy-lib).
 
 When distributed as an NPM module, uproxy-lib uses semantic versioning and considers all files in `build/tools`, `build/dist` and `build/third_party` to be part of the uproxy-lib API. That means paths to these will only change on a major version increase (and will be stable w.r.t. minor and patch version increases).
 
-Other paths in `build` such as `build/dev` are ignored when published via NPM (using the `.npmignore` file).
+Other paths in `build` (such as `build/dev`) are ignored when published via NPM (see the `.npmignore` file).
 
 ## Setup
 
@@ -26,7 +26,7 @@ After this script runs successfully, it should print out: `Successfully complete
 
 If you just want to cleanup from a partial or broken build, you can run:
 ```
-rm -r build/dev build/dist .tscache src/.baseDir
+rm -r build/dev build/dist .tscache
 ```
 or
 ```
@@ -75,6 +75,7 @@ python -m SimpleHTTPServer
 
 Then, in your web browser, goto the relevant `main.html` file in the relevant sample directory of at `http://localhost:8000/build/dev/samples/`. Samples should be self-explanatory. Follow instructions and type stuff in text boxes. :)
 
-## Development conventions
+## Development conventions and build structure
 
-We use `build/third_party` as a common location for references to all ambient JS definitions. This means that all typescript reference inclusions should be to files in `build/third_party/`. This provides a single location so that auto-generated `.d.ts` files for modules pulled in by require correctly reference other `.d.ts` files even when pulled in from a different repository. Basically, we assume a common directory structure for finding other typings.
+We use `build/third_party` as a common location for references to all ambient JS definitions. This means that all typescript reference inclusions should be to files in `build/third_party/`. This provides a single location so that auto-generated `.d.ts` files can correctly reference `.d.ts` files in third_party, and will continue to find them in the right place when uproxy-lib is used by other libraries. We assume a common directory structure for finding other typings. For more details see the [uProxy Build Setup doc](https://docs.google.com/document/d/1H3ac_gZFJfhUGyumCbAKhXSa-_UsusDmsAUqXe4h-JQ/edit#)
+

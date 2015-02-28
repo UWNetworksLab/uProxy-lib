@@ -6,7 +6,7 @@ TaskManager = require './build/tools/taskmanager'
 taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
-taskManager.add 'base-dev', [
+taskManager.add 'base', [
   'copy:third_party'
   'copy:dev'
   'ts:devInModuleEnv'
@@ -14,38 +14,39 @@ taskManager.add 'base-dev', [
   'browserify:loggingProvider'
 ]
 
-# Makes the development build, includes sample apps.
-taskManager.add 'dev', [
-  'base-dev'
+# Makes all sample apps.
+taskManager.add 'samples', [
+  'base'
   'simpleFreedomChat'
   'copypasteFreedomChat'
 ]
 
 # Makes the distribution build.
 taskManager.add 'dist', [
-  'dev',
+  'base',
+  'samples',
   'copy:dist'
 ]
 
 # Build the simple freedom chat sample app.
 taskManager.add 'simpleFreedomChat', [
-  'base-dev'
-  'copy:freedomLibsForSimpleFreedomChat'
+  'base'
+  'copy:libsForSimpleFreedomChat'
   'browserify:simpleFreedomChatMain'
   'browserify:simpleFreedomChatFreedomModule'
 ]
 
 # Build the copy/paste freedom chat sample app.
 taskManager.add 'copypasteFreedomChat', [
-  'base-dev'
-  'copy:freedomLibsForCopypasteFreedomChat'
+  'base'
+  'copy:libsForCopypasteFreedomChat'
   'browserify:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
 # Run unit tests
 taskManager.add 'unit_tests', [
-  'base-dev'
+  'base'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
@@ -59,68 +60,87 @@ taskManager.add 'unit_tests', [
 taskManager.add 'test', ['unit_tests']
 
 # Default task, build dev, run tests, make the distribution build.
-taskManager.add 'default', ['dev', 'unit_tests', 'dist']
+taskManager.add 'default', ['base', 'unit_tests', 'dist']
 
 #-------------------------------------------------------------------------
 rules = require './build/tools/common-grunt-rules'
 path = require 'path'
 
 #-------------------------------------------------------------------------
-devBuildDir = 'build/dev'
-Rule = new rules.Rule({devBuildDir: devBuildDir});
+devBuildPath = 'build/dev/uproxy-lib'
+thirdPartyBuildPath = 'build/third_party'
+localLibsDestPath = 'uproxy-lib'
+Rule = new rules.Rule({
+  # The path where code in this repository should be built in.
+  devBuildPath: devBuildPath,
+  # The path from where third party libraries should be copied. e.g. as used by
+  # sample apps.
+  thirdPartyBuildPath: thirdPartyBuildPath,
+  # The path to copy modules from this repository into. e.g. as used by sample
+  # apps.
+  localLibsDestPath: localLibsDestPath
+});
 
 module.exports = (grunt) ->
   config =
     pkg: grunt.file.readJSON 'package.json'
 
     copy:
-      # Copy releveant non-typescript files to dev build.
+      # Copy all src files into the directory for compiling and building.
       dev:
         files: [
           {
               nonull: true,
               expand: true,
               cwd: 'src/',
-              src: ['**/*', '!**/*.ts'],
-              dest: devBuildDir,
+              src: ['**/*'],
+              dest: devBuildPath,
               onlyIf: 'modified'
           }
         ]
-      # Copy |third_party| to dev: this is so that there is a common
-      # |build/third_party| location to reference typescript
-      # definitions for ambient contexts.
+      # Copy |third_party| to build folder: this is so that there is a common
+      # |thirdPartyBuildPath| location to reference typescript definitions for
+      # ambient contexts.
       third_party:
         files: [
           {
               nonull: true,
               expand: true,
-              src: ['third_party/**/*'],
-              dest: 'build/',
+              cwd: 'third_party'
+              src: ['**/*'],
+              dest: thirdPartyBuildPath,
               onlyIf: 'modified'
           }
         ]
-      # Copy releveant non-typescript files to distribution build.
+      # Copy releveant files to distribution directory.
       dist:
         files: [
           {
               nonull: true,
               expand: true,
-              cwd: devBuildDir,
+              cwd: devBuildPath,
               src: ['**/*',
                     '!**/*.spec.js',
-                    '!**/*.spec.*.js'],
+                    '!**/*.ts',
+                    '**/*.d.ts'],
               dest: 'build/dist/',
               onlyIf: 'modified'
           }
         ]
 
       # Copy the freedom output file to sample apps
-      freedomLibsForSimpleFreedomChat:
-        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
-          'samples/simple-freedom-chat'
-      freedomLibsForCopypasteFreedomChat:
-        Rule.copyFreedomLibs 'freedom', ['loggingprovider'],
-          'samples/copypaste-freedom-chat/'
+      # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
+      libsForSimpleFreedomChat:
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['loggingprovider']
+          localDestPath: 'samples/simple-freedom-chat/'
+
+      libsForCopypasteFreedomChat:
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['loggingprovider']
+          localDestPath: 'samples/copypaste-freedom-chat/'
 
     # Typescript rules
     ts:
@@ -128,12 +148,10 @@ module.exports = (grunt) ->
       # build directory.
       devInModuleEnv:
         src: [
-          'src/**/*.ts'
-          '!src/**/*.core-env.ts'
-          '!src/**/*.core-env.spec.ts'
+          devBuildPath + '/**/*.ts'
+          '!' + devBuildPath + '/**/*.core-env.ts'
+          '!' + devBuildPath + '/**/*.core-env.spec.ts'
         ]
-        outDir: 'build/dev/'
-        baseDir: 'src'
         options:
           target: 'es5'
           comments: true
@@ -146,11 +164,9 @@ module.exports = (grunt) ->
       # build directory.
       devInCoreEnv:
         src: [
-          'src/**/*.core-env.ts'
-          'src/**/*.core-env.spec.ts'
+          devBuildPath + '/**/*.core-env.ts'
+          devBuildPath + '/**/*.core-env.spec.ts'
         ]
-        outDir: 'build/dev/'
-        baseDir: 'src'
         options:
           target: 'es5'
           comments: true
@@ -186,10 +202,7 @@ module.exports = (grunt) ->
 
     clean:
       build:
-        [ 'build/dev', 'build/dist'
-          # Note: 'src/.baseDir.ts' and '.tscache/' are created by grunt-ts.
-          '.tscache/'
-          'src/.baseDir.ts' ]
+        [ 'build/dev', 'build/dist', '.tscache/']
 
   #-------------------------------------------------------------------------
   grunt.initConfig config
