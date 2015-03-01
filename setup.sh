@@ -30,7 +30,7 @@ function buildTools ()
   runCmd "cd $ROOT_DIR"
   runCmd "mkdir -p build/dev/uproxy-lib/build-tools/"
   runCmd "cp $ROOT_DIR/src/build-tools/*.ts build/dev/uproxy-lib/build-tools/"
-  runAndAssertCmd "./node_modules/.bin/tsc --module commonjs ./build/dev/uproxy-lib/build-tools/*.ts"
+  runAndAssertCmd "./node_modules/.bin/tsc --module commonjs --noImplicitAny ./build/dev/uproxy-lib/build-tools/*.ts"
   runCmd "mkdir -p ./build/tools/"
   runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
 }
