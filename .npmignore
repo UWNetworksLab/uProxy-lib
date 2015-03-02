@@ -1,6 +1,4 @@
 *.sublime-workspace
-src
-build/dev
 .idea
 .grunt
 .tscache
