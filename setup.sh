@@ -13,7 +13,7 @@ function runAndAssertCmd ()
     echo
     # We use set -e to make sure this will fail if the command returns an error
     # code.
-    set -e && $1
+    set -e && eval $1
 }
 
 # Just run the command, ignore errors (e.g. cp fails if a file already exists
@@ -22,7 +22,7 @@ function runCmd ()
 {
     echo "Running: $1"
     echo
-    $1
+    eval $1
 }
 
 function buildTools ()
