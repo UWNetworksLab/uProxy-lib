@@ -39,6 +39,8 @@
       connect(hostname:string, port:number) : Promise<void>;
       secure() : Promise<void>;
       write(data:ArrayBuffer) : Promise<WriteInfo>;
+      pause() : Promise<void>;
+      resume() : Promise<void>;
       getInfo() : Promise<SocketInfo>;
       close() : Promise<void>;
       // TcpSockets have 3 types of events:
