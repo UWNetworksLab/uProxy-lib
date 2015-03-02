@@ -45,7 +45,6 @@ export interface CopyRule {
   files :CopyFilesDescription[];
 }
 
-
 export class Rule {
   constructor(public config :RuleConfig) {}
 
@@ -86,26 +85,26 @@ export class Rule {
   }
 
   // Grunt browserify target creator
-  public browserify(filepath:string) : BrowserifyRule {
+  public browserify(filepath:string, options = {
+        browserifyOptions: { standalone: 'browserified_exports' }
+      }) : BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.js')],
+      src: [ path.join(this.config.devBuildPath, filepath + '.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
-      options: {
-        debug: false,
-      }
+      options: options
     };
   }
 
   // Grunt browserify target creator, instrumented for istanbul
-  public browserifySpec(filepath:string) : BrowserifyRule {
+  public browserifySpec(filepath:string, options = {
+        transform: [['browserify-istanbul',
+                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]],
+        browserifyOptions: { standalone: 'browserified_exports' }
+      }) : BrowserifyRule {
     return {
       src: [ path.join(this.config.devBuildPath, filepath + '.spec.js') ],
       dest: path.join(this.config.devBuildPath, filepath + '.spec.static.js'),
-      options: {
-        debug: true,
-        transform: [['browserify-istanbul',
-                    { ignore: ['**/mocks/**', '**/*.spec.js'] }]]
-      }
+      options: options
     };
   }
 
@@ -137,12 +136,23 @@ export class Rule {
     // The file-set for npm module files (or npm module output) from each of
     // |npmLibNames| to the destination path.
     copyInfo.npmLibNames.map((npmName) => {
+      var npmModuleDirName :string;
+      if (path.dirname(npmName) === '.') {
+        // Note: |path.dirname(npmName)| gives '.' when |npmName| is just the
+        // npm module name.
+        npmModuleDirName = npmName;
+      } else {
+        npmModuleDirName = path.dirname(npmName);
+      }
+
       var absoluteNpmFilePath = require.resolve(npmName);
       allFilesForlibPaths.push({
           expand: false,
           nonull: true,
           src: [absoluteNpmFilePath],
-          dest: path.join(destPath,path.basename(absoluteNpmFilePath)),
+          dest: path.join(destPath,
+                          npmModuleDirName,
+                          path.basename(absoluteNpmFilePath)),
           onlyIf: 'modified'
         });
     });
