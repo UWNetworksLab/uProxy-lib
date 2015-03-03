@@ -54,9 +54,13 @@ export interface DataChannel {
   // undertlying network layer for ending.
   send(data:Data) : Promise<void>;
 
+  // Returns the number of bytes which have been passed to the browser but
+  // which have not yet been handed off to usrsctplib.
+  getBrowserBufferedAmount() : Promise<number>;
+
   // Returns the number of bytes which have been passed to send() but
-  // which have not yet been transmitted to the network.
-  getBufferedAmount() : Promise<number>;
+  // which have not yet been handed off to usrsctplib.
+  getTotalBufferedAmount() : Promise<number>;
 
   // Closes this data channel.
   // A channel cannot be re-opened once this has been called.
@@ -280,11 +284,15 @@ export class DataChannelClass implements DataChannel {
     this.rtcDataChannel_.close();
   }
 
-  public getBufferedAmount = () : Promise<number> => {
+  public getBrowserBufferedAmount = () : Promise<number> => {
+    return this.rtcDataChannel_.getBufferedAmount();
+  }
+
+  public getTotalBufferedAmount = () : Promise<number> => {
     return this.rtcDataChannel_.getBufferedAmount()
         .then((browserBytes:number) : number => {
           return browserBytes + this.toPeerDataBytes_;
-        }) ;
+        });
   }
 
   public toString = () : string => {
