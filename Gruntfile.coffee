@@ -7,10 +7,9 @@ taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base', [
-  'copy:third_party'
-  'copy:dev'
-  'ts:devInModuleEnv'
-  'ts:devInCoreEnv'
+  'copy:src'
+  'ts:srcInModuleEnv'
+  'ts:srcInCoreEnv'
   'browserify:loggingProvider'
 ]
 
@@ -87,7 +86,7 @@ module.exports = (grunt) ->
 
     copy:
       # Copy all src files into the directory for compiling and building.
-      dev:
+      src:
         files: [
           {
               nonull: true,
@@ -95,20 +94,6 @@ module.exports = (grunt) ->
               cwd: 'src/',
               src: ['**/*'],
               dest: devBuildPath,
-              onlyIf: 'modified'
-          }
-        ]
-      # Copy |third_party| to build folder: this is so that there is a common
-      # |thirdPartyBuildPath| location to reference typescript definitions for
-      # ambient contexts.
-      third_party:
-        files: [
-          {
-              nonull: true,
-              expand: true,
-              cwd: 'third_party'
-              src: ['**/*'],
-              dest: thirdPartyBuildPath,
               onlyIf: 'modified'
           }
         ]
@@ -146,9 +131,10 @@ module.exports = (grunt) ->
     ts:
       # Compile everything that can run in a module env into the development
       # build directory.
-      devInModuleEnv:
+      srcInModuleEnv:
         src: [
           devBuildPath + '/**/*.ts'
+          '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'
         ]
@@ -162,17 +148,18 @@ module.exports = (grunt) ->
           fast: 'always'
       # Compile everything that must run in the core env into the development
       # build directory.
-      devInCoreEnv:
+      srcInCoreEnv:
         src: [
           devBuildPath + '/**/*.core-env.ts'
           devBuildPath + '/**/*.core-env.spec.ts'
+          '!' + devBuildPath + '/**/*.d.ts'
         ]
         options:
           target: 'es5'
           comments: true
           noImplicitAny: true
           sourceMap: false
-          declaration: true
+          declaration: false
           module: 'commonjs'
           fast: 'always'
 
@@ -183,6 +170,12 @@ module.exports = (grunt) ->
       logging: Rule.jasmineSpec 'logging'
       loggingProvider: Rule.jasmineSpec 'loggingprovider'
       webrtc: Rule.jasmineSpec 'webrtc'
+      arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
+      buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
+      handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
+      loggingCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'logging')
+      loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
+      webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
 
     browserify:
       # Browserify freedom-modules in the library

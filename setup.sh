@@ -35,6 +35,13 @@ function buildTools ()
   runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
 }
 
+function thirdParty ()
+{
+  runAndAssertCmd "mkdir -p build/third_party"
+  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  runAndAssertCmd "cp -r third_party/* build/third_party/"
+}
+
 function clean ()
 {
   runCmd "rm -r $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
@@ -44,19 +51,22 @@ function installDevDependencies ()
 {
   runCmd "cd $ROOT_DIR"
   runAndAssertCmd "npm install"
-  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  thirdParty
   buildTools
 }
 
 if [ "$1" == 'install' ]; then
   installDevDependencies
+elif [ "$1" == 'third_party' ]; then
+  thirdParty
 elif [ "$1" == 'tools' ]; then
   buildTools
 elif [ "$1" == 'clean' ]; then
   clean
 else
-  echo "Usage: setup.sh [install|tools|clean]"
-  echo "  install       Installs needed development dependencies into build/"
+  echo "Usage: setup.sh [install|third_party|tools|clean]"
+  echo "  install       Installs all needed build files in build/"
+  echo "  third_party   Installs the subset of build files in build/third_party"
   echo "  tools         Builds just the tools into build/tools"
   echo "  clean         Removes all dependencies installed by this script."
   echo
