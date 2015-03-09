@@ -24,8 +24,8 @@ taskManager.add 'samples', [
 taskManager.add 'dist', [
   'base'
   'samples'
-  'unit_tests'
-  'coverage'
+  'unit_test_debug'
+  'unit_test_coverage'
   'copy:dist'
 ]
 
