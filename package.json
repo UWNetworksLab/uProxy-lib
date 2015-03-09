@@ -41,6 +41,6 @@
     "typescript": "^1.4.1"
   },
   "scripts": {
-    "test": "grunt unit_tests"
+    "test": "grunt unit_test_coverage"
   }
 }

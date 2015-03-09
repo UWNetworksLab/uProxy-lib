@@ -45,8 +45,8 @@ taskManager.add 'copypasteFreedomChat', [
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
-# Run unit tests
-taskManager.add 'unit_tests', [
+# Create unit test code
+taskManager.add 'browserify_specs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
@@ -54,6 +54,11 @@ taskManager.add 'unit_tests', [
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
   'browserify:webrtcSpec'
+]
+
+# Run unit tests
+taskManager.add 'unit_test_debug', [
+  'browserify_specs',
   'jasmine:arraybuffers'
   'jasmine:handler'
   'jasmine:buildTools'
@@ -64,14 +69,8 @@ taskManager.add 'unit_tests', [
 
 # Run unit tests to produce coverage; these are separate from unit_tests
 # because they make tests hard to debug and fix.
-taskManager.add 'coverage', [
-  'base'
-  'browserify:arraybuffersSpec'
-  'browserify:handlerSpec'
-  'browserify:buildToolsTaskmanagerSpec'
-  'browserify:loggingSpec'
-  'browserify:loggingProviderSpec'
-  'browserify:webrtcSpec'
+taskManager.add 'unit_test_coverage', [
+  'browserify_specs'
   'jasmine:arraybuffersCov'
   'jasmine:handlerCov'
   'jasmine:buildToolsCov'
@@ -81,7 +80,7 @@ taskManager.add 'coverage', [
 ]
 
 # Run unit tests
-taskManager.add 'test', ['unit_tests']
+taskManager.add 'test', ['unit_test_debug']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['base']
