@@ -22,8 +22,9 @@ taskManager.add 'samples', [
 
 # Makes the distribution build.
 taskManager.add 'dist', [
-  'base',
-  'samples',
+  'base'
+  'unit_tests'
+  'samples'
   'copy:dist'
 ]
 
@@ -52,14 +53,37 @@ taskManager.add 'unit_tests', [
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
   'browserify:webrtcSpec'
-  'jasmine'
+  'jasmine:arraybuffers'
+  'jasmine:handler'
+  'jasmine:buildTools'
+  'jasmine:logging'
+  'jasmine:loggingProvider'
+  'jasmine:webrtc'
+]
+
+# Run unit tests to produce coverage; these are separate from unit_tests
+# because they make tests hard to debug and fix.
+taskManager.add 'coverage', [
+  'base'
+  'browserify:arraybuffersSpec'
+  'browserify:handlerSpec'
+  'browserify:buildToolsTaskmanagerSpec'
+  'browserify:loggingSpec'
+  'browserify:loggingProviderSpec'
+  'browserify:webrtcSpec'
+  'jasmine:arraybuffersCov'
+  'jasmine:handlerCov'
+  'jasmine:buildToolsCov'
+  'jasmine:loggingCov'
+  'jasmine:loggingProviderCov'
+  'jasmine:webrtcCov'
 ]
 
 # Run unit tests
 taskManager.add 'test', ['unit_tests']
 
 # Default task, build dev, run tests, make the distribution build.
-taskManager.add 'default', ['base', 'unit_tests', 'dist']
+taskManager.add 'default', ['base']
 
 #-------------------------------------------------------------------------
 rules = require './build/tools/common-grunt-rules'
