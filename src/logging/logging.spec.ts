@@ -38,6 +38,7 @@ describe('Client logging shim using Freedom', () => {
 
   describe('Log messages', () => {
     var mockLoggerPromise :Promise<freedomTypes.Logger>;
+    var log :Logging.Log;
 
     beforeEach(() => {
       var mockLogger = jasmine.createSpyObj<freedomTypes.Logger>('tag',
@@ -45,12 +46,12 @@ describe('Client logging shim using Freedom', () => {
       mockLoggerPromise = Promise.resolve(mockLogger);
 
       spyOn(freedom.core(), 'getLogger').and.returnValue(mockLoggerPromise);
+
+      log = new Logging.Log('tag');
     });
 
     it('A new Logging.Log forwards all logging to the named freedom core logger.',
         (done) => {
-      var log = new Logging.Log('tag');
-
       log.error('test-error-string');
       log.debug('test-debug-string');
 
@@ -63,8 +64,6 @@ describe('Client logging shim using Freedom', () => {
     });
 
     it('Collapses array argument into flattened messages', (done) => {
-      var log = new Logging.Log('tag');
-
       log.info('%1 pinged %2 with id=%3', ['Bob', 'Alice', '123456']);
 
       mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
@@ -75,8 +74,6 @@ describe('Client logging shim using Freedom', () => {
     });
 
     it('Collpases arguments into flattened messages', (done) => {
-      var log = new Logging.Log('tag');
-
       log.info('%1 pinged %2 with id=%3', 'Bob', 'Alice', '123456');
       mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
         expect(mockLogger.info)
@@ -86,8 +83,6 @@ describe('Client logging shim using Freedom', () => {
     });
 
     it('Adds unspecified arguments to the end', (done) => {
-      var log = new Logging.Log('tag');
-
       log.info('%1', 'foo', 'bar');
       mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
         expect(mockLogger.info).toHaveBeenCalledWith('foo bar');
@@ -96,13 +91,25 @@ describe('Client logging shim using Freedom', () => {
     });
 
     it('stringify objects', (done) => {
-      var log = new Logging.Log('tag');
       var obj = { foo: 'bar' };
 
       log.info('%1', obj);
 
       mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
         expect(mockLogger.info).toHaveBeenCalledWith(JSON.stringify(obj));
+        done();
+      });
+    });
+
+    it('does not log below min log level', (done) => {
+      log.minLevel = Logging.LogLevel.warn;
+
+      log.info('This is a test');
+      log.warn('This is not a test');
+
+      mockLoggerPromise.then((mockLogger :freedomTypes.Logger) => {
+        expect(mockLogger.info).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalled();
         done();
       });
     });

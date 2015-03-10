@@ -37,13 +37,27 @@ function formatStringMessageWithArgs_(args :Object[])
   return msg;
 }
 
+export enum LogLevel {
+  debug,
+  info,
+  warn,
+  error
+}
+
 export class Log {
   private logger :Promise<freedomTypes.Logger>;
+  public minLevel :LogLevel = LogLevel.debug;
+
   constructor(private tag_:string) {
     this.logger = freedom.core().getLogger(this.tag_);
   }
 
-  private log_ = (level :string, arg :Object, args :Object[]) :void => {
+  private log_ = (level :LogLevel, arg :Object, args :Object[]) :void => {
+    // do no processing if we are under the minimum level for this logger
+    if (level < this.minLevel) {
+      return;
+    }
+
     // arg exists to make sure at least one argument is given, we want to treat
     // all the arguments as a single array however
     args.unshift(arg);
@@ -57,15 +71,15 @@ export class Log {
     var message = formatStringMessageWithArgs_(args);
 
     this.logger.then((logger :freedomTypes.Logger) => {
-      // essentially do logger[level](message) minus the type warning
+      // essentially do logger[LogLevel[level]](message) minus the type warning
       switch (level) {
-        case 'debug':
+        case LogLevel.debug:
           return logger.debug(message);
-        case 'info':
+        case LogLevel.info:
           return logger.info(message);
-        case 'warn':
+        case LogLevel.warn:
           return logger.warn(message);
-        case 'error':
+        case LogLevel.error:
           return logger.error(message);
       }
     });
@@ -73,18 +87,18 @@ export class Log {
 
   // Logs message in debug level.
   public debug = (arg :Object, ...args :Object[]) :void => {
-    this.log_('debug', arg, args);
+    this.log_(LogLevel.debug, arg, args);
   }
   // Logs message in info level.
   public info = (arg :Object, ...args :Object[]) :void => {
-    this.log_('info', arg, args);
+    this.log_(LogLevel.info, arg, args);
   }
   // Logs message in warn level.
   public warn = (arg :Object, ...args :Object[]) :void => {
-    this.log_('warn', arg, args);
+    this.log_(LogLevel.warn, arg, args);
   }
   // Logs message in error level.
   public error = (arg :Object, ...args :Object[]) :void => {
-    this.log_('error', arg, args);
+    this.log_(LogLevel.error, arg, args);
   }
 }
