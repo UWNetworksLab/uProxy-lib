@@ -130,7 +130,7 @@ declare module freedom {
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
     // TODO: explore how to use FreedomModuleFactoryManager.
-    [moduleName:string] : any;
+    [moduleName:string] : (...args:Object[]) => any;
   }
 }
 
