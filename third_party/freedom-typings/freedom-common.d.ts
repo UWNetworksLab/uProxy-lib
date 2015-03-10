@@ -93,13 +93,13 @@ declare module freedom {
 
   // A Freedom module sub is both a function and an object with members. The
   // type |T| is the type of the module's stub interface.
-  interface FreedomModuleFactoryManager {
+  interface FreedomModuleFactoryManager<T> {
     // This is the factory constructor for a new instance of a stub/channel to a
     // module.
-    (...args:any[]) : any;
+    (...args:any[]) : T;
     // This is the call to close a particular stub's channel and resources. It
     // is assumed that the argument is a result of the factory constructor.
-    close : (freedomModuleStubInstance:any) => Promise<void>;
+    close : (freedomModuleStubInstance:T) => Promise<void>;
   }
 
   interface FreedomInCoreEnvOptions {
@@ -113,7 +113,7 @@ declare module freedom {
     // |manifestPath| should be a path to a json string that specifies the
     // freedom module.
     (manifestPath:string, options?:FreedomInCoreEnvOptions)
-      : Promise<FreedomModuleFactoryManager>;
+      : Promise<FreedomModuleFactoryManager<any>>;
   }
 
   interface FreedomInModuleEnv {
@@ -124,13 +124,13 @@ declare module freedom {
     // Creates an interface to the freedom core provider which can be used to
     // create loggers and channels.
     // Note: unlike other providers, core is a getter.
-    core : () => Core;
+    core : FreedomModuleFactoryManager<Core>;
 
     // We use this specification so that you can reference freedom sub-modules by
     // an array-lookup of it's name. One day, maybe we'll have a nicer way to do
     // this.
     // TODO: explore how to use FreedomModuleFactoryManager.
-    [moduleName:string] : (...args:Object[]) => any;
+    [moduleName:string] : FreedomModuleFactoryManager<any>;
   }
 }
 
