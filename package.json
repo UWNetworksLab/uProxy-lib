@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "20.0.0",
+  "version": "20.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -35,12 +35,10 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-ts": "^3.0.0",
-    "karma": "~0.12.0",
-    "karma-jasmine": "~0.3.5",
     "tsd": "^0.5.7",
     "typescript": "^1.4.1"
   },
   "scripts": {
-    "test": "grunt unit_test_coverage"
+    "test": "grunt dist"
   }
 }

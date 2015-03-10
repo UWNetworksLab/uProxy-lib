@@ -24,8 +24,8 @@ taskManager.add 'samples', [
 taskManager.add 'dist', [
   'base'
   'samples'
-  'unit_test_debug'
-  'unit_test_coverage'
+  'unit_test'
+  'coverage'
   'copy:dist'
 ]
 
@@ -57,7 +57,7 @@ taskManager.add 'browserify_specs', [
 ]
 
 # Run unit tests
-taskManager.add 'unit_test_debug', [
+taskManager.add 'unit_test', [
   'browserify_specs',
   'jasmine:arraybuffers'
   'jasmine:handler'
@@ -67,9 +67,9 @@ taskManager.add 'unit_test_debug', [
   'jasmine:webrtc'
 ]
 
-# Run unit tests to produce coverage; these are separate from unit_tests
-# because they make tests hard to debug and fix.
-taskManager.add 'unit_test_coverage', [
+# Run unit tests to produce coverage; these are separate from unit_tests because
+# they make tests hard to debug and fix.
+taskManager.add 'coverage', [
   'browserify_specs'
   'jasmine:arraybuffersCov'
   'jasmine:handlerCov'
@@ -80,7 +80,7 @@ taskManager.add 'unit_test_coverage', [
 ]
 
 # Run unit tests
-taskManager.add 'test', ['unit_test_debug']
+taskManager.add 'test', ['unit_test']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['base']
@@ -163,13 +163,13 @@ module.exports = (grunt) ->
           '!' + devBuildPath + '/**/*.core-env.spec.ts'
         ]
         options:
-          target: 'es5'
           comments: true
+          declaration: true
+          fast: 'always'
+          module: 'commonjs'
           noImplicitAny: true
           sourceMap: false
-          declaration: true
-          module: 'commonjs'
-          fast: 'always'
+          target: 'es5'
       # Compile everything that must run in the core env into the development
       # build directory.
       srcInCoreEnv:
@@ -179,26 +179,26 @@ module.exports = (grunt) ->
           '!' + devBuildPath + '/**/*.d.ts'
         ]
         options:
-          target: 'es5'
           comments: true
+          declaration: false
+          fast: 'always'
+          module: 'commonjs'
           noImplicitAny: true
           sourceMap: false
-          declaration: false
-          module: 'commonjs'
-          fast: 'always'
+          target: 'es5'
 
     jasmine:
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
-      buildTools: Rule.jasmineSpec 'build-tools'
-      handler: Rule.jasmineSpec 'handler'
-      logging: Rule.jasmineSpec 'logging'
-      loggingProvider: Rule.jasmineSpec 'loggingprovider'
-      webrtc: Rule.jasmineSpec 'webrtc'
       arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
+      buildTools: Rule.jasmineSpec 'build-tools'
       buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
+      handler: Rule.jasmineSpec 'handler'
       handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
+      logging: Rule.jasmineSpec 'logging'
       loggingCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'logging')
+      loggingProvider: Rule.jasmineSpec 'loggingprovider'
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
+      webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
 
     browserify:
@@ -212,10 +212,10 @@ module.exports = (grunt) ->
       loggingSpec: Rule.browserifySpec 'logging/logging'
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
       # Browserify sample apps main freedom module and core environments
-      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
-      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
+      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
+      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
 
     clean:
       build:
@@ -225,12 +225,12 @@ module.exports = (grunt) ->
   grunt.initConfig config
 
   #-------------------------------------------------------------------------
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
 
   #-------------------------------------------------------------------------

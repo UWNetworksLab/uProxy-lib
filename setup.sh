@@ -37,6 +37,7 @@ function buildTools ()
 
 function thirdParty ()
 {
+  runCmd "cd $ROOT_DIR"
   runAndAssertCmd "mkdir -p build/third_party"
   runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
   runAndAssertCmd "cp -r third_party/* build/third_party/"
@@ -65,11 +66,15 @@ elif [ "$1" == 'clean' ]; then
   clean
 else
   echo "Usage: setup.sh [install|third_party|tools|clean]"
-  echo "  install       Installs all needed build files in build/"
-  echo "  third_party   Installs the subset of build files in build/third_party"
+  echo "  install       Runs npm install and creates all needed files to build with"
+  echo "                grunt"
+  echo "  third_party   Installs the all the files for `build/third_party` needed"
+  echo "                by our grunt build rules (This part of the `setup.sh install`"
+  echo "                process)"
   echo "  tools         Builds just the tools into build/tools"
+  echo "                (This part of the `setup.sh install` process)"
   echo "  clean         Removes all dependencies installed by this script."
   echo
-  echo ""
+  echo
   exit 0
 fi
