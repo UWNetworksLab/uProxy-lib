@@ -65,16 +65,17 @@ elif [ "$1" == 'tools' ]; then
 elif [ "$1" == 'clean' ]; then
   clean
 else
-  echo "Usage: setup.sh [install|third_party|tools|clean]"
-  echo "  install       Runs npm install and creates all needed files to build with"
-  echo "                grunt"
-  echo "  third_party   Installs the all the files for `build/third_party` needed"
-  echo "                by our grunt build rules (This part of the `setup.sh install`"
-  echo "                process)"
-  echo "  tools         Builds just the tools into build/tools"
-  echo "                (This part of the `setup.sh install` process)"
-  echo "  clean         Removes all dependencies installed by this script."
   echo
+  echo "Usage: setup.sh [install|third_party|tools|clean]"
+  echo
+  echo "  install      - Runs npm install and creates all needed files to build"
+  echo "                 with grunt"
+  echo "  third_party  - Installs all the files for 'build/third_party' needed"
+  echo "                 by our grunt build rules (This is part of the "
+  echo "                 'setup.sh install' process)"
+  echo "  tools        - Builds just the tools into build/tools (This part of "
+  echo "                 the 'setup.sh install' process)"
+  echo "  clean        - Removes all dependencies installed by this script."
   echo
   exit 0
 fi
