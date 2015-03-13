@@ -1,7 +1,7 @@
 /// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
 
-import Logging = require('../../logging/logging');
+import logging = require('../../logging/logging');
 
 import peerconnection = require('../../webrtc/peerconnection');
 import PeerConnection = peerconnection.PeerConnection;
@@ -11,9 +11,12 @@ import Data = peerconnection.Data;
 
 import Message = require('./message.types');
 
-freedom['loggingcontroller']().setConsoleFilter(['*:D']);
+export var loggingController = freedom['loggingcontroller']();
+loggingController.setConsoleFilter(['*:I']);
+loggingController.setBufferedLogFilter(['*:D']);
 
-var log :Logging.Log = new Logging.Log('freedomchat');
+export var moduleName = 'freedom-chat';
+export var log :logging.Log = new logging.Log(moduleName);
 
 var parentFreedomModule = freedom();
 

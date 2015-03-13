@@ -7,10 +7,9 @@ taskManager = new TaskManager.Manager();
 
 # Makes the base development build, excludes sample apps.
 taskManager.add 'base', [
-  'copy:third_party'
-  'copy:dev'
-  'ts:devInModuleEnv'
-  'ts:devInCoreEnv'
+  'copy:src'
+  'ts:srcInModuleEnv'
+  'ts:srcInCoreEnv'
   'browserify:loggingProvider'
 ]
 
@@ -23,8 +22,10 @@ taskManager.add 'samples', [
 
 # Makes the distribution build.
 taskManager.add 'dist', [
-  'base',
-  'samples',
+  'base'
+  'samples'
+  'unit_test'
+  'coverage'
   'copy:dist'
 ]
 
@@ -44,8 +45,8 @@ taskManager.add 'copypasteFreedomChat', [
   'browserify:copypasteFreedomChatFreedomModule'
 ]
 
-# Run unit tests
-taskManager.add 'unit_tests', [
+# Create unit test code
+taskManager.add 'browserify_specs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
@@ -53,14 +54,36 @@ taskManager.add 'unit_tests', [
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
   'browserify:webrtcSpec'
-  'jasmine'
 ]
 
 # Run unit tests
-taskManager.add 'test', ['unit_tests']
+taskManager.add 'unit_test', [
+  'browserify_specs',
+  'jasmine:arraybuffers'
+  'jasmine:handler'
+  'jasmine:buildTools'
+  'jasmine:logging'
+  'jasmine:loggingProvider'
+  'jasmine:webrtc'
+]
+
+# Run unit tests to produce coverage; these are separate from unit_tests because
+# they make tests hard to debug and fix.
+taskManager.add 'coverage', [
+  'browserify_specs'
+  'jasmine:arraybuffersCov'
+  'jasmine:handlerCov'
+  'jasmine:buildToolsCov'
+  'jasmine:loggingCov'
+  'jasmine:loggingProviderCov'
+  'jasmine:webrtcCov'
+]
+
+# Run unit tests
+taskManager.add 'test', ['unit_test']
 
 # Default task, build dev, run tests, make the distribution build.
-taskManager.add 'default', ['base', 'unit_tests', 'dist']
+taskManager.add 'default', ['base']
 
 #-------------------------------------------------------------------------
 rules = require './build/tools/common-grunt-rules'
@@ -87,7 +110,7 @@ module.exports = (grunt) ->
 
     copy:
       # Copy all src files into the directory for compiling and building.
-      dev:
+      src:
         files: [
           {
               nonull: true,
@@ -95,20 +118,6 @@ module.exports = (grunt) ->
               cwd: 'src/',
               src: ['**/*'],
               dest: devBuildPath,
-              onlyIf: 'modified'
-          }
-        ]
-      # Copy |third_party| to build folder: this is so that there is a common
-      # |thirdPartyBuildPath| location to reference typescript definitions for
-      # ambient contexts.
-      third_party:
-        files: [
-          {
-              nonull: true,
-              expand: true,
-              cwd: 'third_party'
-              src: ['**/*'],
-              dest: thirdPartyBuildPath,
               onlyIf: 'modified'
           }
         ]
@@ -146,43 +155,51 @@ module.exports = (grunt) ->
     ts:
       # Compile everything that can run in a module env into the development
       # build directory.
-      devInModuleEnv:
+      srcInModuleEnv:
         src: [
           devBuildPath + '/**/*.ts'
+          '!' + devBuildPath + '/**/*.d.ts'
           '!' + devBuildPath + '/**/*.core-env.ts'
           '!' + devBuildPath + '/**/*.core-env.spec.ts'
         ]
         options:
-          target: 'es5'
           comments: true
+          declaration: true
+          fast: 'always'
+          module: 'commonjs'
           noImplicitAny: true
           sourceMap: false
-          declaration: true
-          module: 'commonjs'
-          fast: 'always'
+          target: 'es5'
       # Compile everything that must run in the core env into the development
       # build directory.
-      devInCoreEnv:
+      srcInCoreEnv:
         src: [
           devBuildPath + '/**/*.core-env.ts'
           devBuildPath + '/**/*.core-env.spec.ts'
+          '!' + devBuildPath + '/**/*.d.ts'
         ]
         options:
-          target: 'es5'
           comments: true
+          declaration: false
+          fast: 'always'
+          module: 'commonjs'
           noImplicitAny: true
           sourceMap: false
-          declaration: true
-          module: 'commonjs'
-          fast: 'always'
+          target: 'es5'
 
     jasmine:
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
+      arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
       buildTools: Rule.jasmineSpec 'build-tools'
+      buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
       handler: Rule.jasmineSpec 'handler'
+      handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
       logging: Rule.jasmineSpec 'logging'
+      loggingCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'logging')
       loggingProvider: Rule.jasmineSpec 'loggingprovider'
+      loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
       webrtc: Rule.jasmineSpec 'webrtc'
+      webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
 
     browserify:
       # Browserify freedom-modules in the library
@@ -195,10 +212,10 @@ module.exports = (grunt) ->
       loggingSpec: Rule.browserifySpec 'logging/logging'
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
       # Browserify sample apps main freedom module and core environments
-      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
-      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
+      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
+      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
 
     clean:
       build:
@@ -208,12 +225,12 @@ module.exports = (grunt) ->
   grunt.initConfig config
 
   #-------------------------------------------------------------------------
+  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-ts'
 
   #-------------------------------------------------------------------------

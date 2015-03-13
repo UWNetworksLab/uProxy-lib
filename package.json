@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "20.0.2",
+  "version": "20.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -21,24 +21,24 @@
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
-    "browserify-istanbul": "^0.1.3",
-    "es6-promise": "^1.0.0",
+    "browserify-istanbul": "^0.2.0",
+    "es6-promise": "^2.0.0",
     "freedom": "^0.6.21",
     "grunt": "^0.4.5",
     "grunt-browserify": "^3.0.1",
     "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-coffee": "^0.12.0",
-    "grunt-contrib-copy": "^0.7.0",
+    "grunt-contrib-coffee": "^0.13.0",
+    "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-jasmine": "^0.8.0",
     "grunt-contrib-symlink": "^0.3.0",
-    "grunt-contrib-uglify": "^0.7.0",
+    "grunt-contrib-uglify": "^0.8.0",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-template-jasmine-istanbul": "^0.3.0",
-    "grunt-ts": "^2.0.1",
+    "grunt-ts": "^3.0.0",
     "tsd": "^0.5.7",
     "typescript": "^1.4.1"
   },
   "scripts": {
-    "test": "grunt unit_tests"
+    "test": "grunt dist"
   }
 }

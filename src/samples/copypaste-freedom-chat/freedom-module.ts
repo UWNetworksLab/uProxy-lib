@@ -9,16 +9,21 @@ import SignallingMessage = peerconnection.SignallingMessage;
 import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
-var log :logging.Log = new logging.Log('copypaste-socks');
+export var loggingController = freedom['loggingcontroller']();
+loggingController.setConsoleFilter(['*:I']);
+loggingController.setBufferedLogFilter(['*:D']);
+
+export var moduleName = 'copypaste-socks';
+export var log :logging.Log = new logging.Log(moduleName);
 
 var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
     iceServers: [{urls: ['stun:stun.l.google.com:19302']},
                  {urls: ['stun:stun1.l.google.com:19302']}]
 };
 
-var parentModule = freedom();
+export var parentModule = freedom();
 
-function connectDataChannel(d:DataChannel) {
+export function connectDataChannel(d:DataChannel) {
   d.dataFromPeerQueue.setSyncHandler((data:Data) => {
     parentModule.emit('messageFromPeer', data.str);
   });
@@ -30,7 +35,7 @@ function connectDataChannel(d:DataChannel) {
   });
 }
 
-function makePeerConnection() : PeerConnection<SignallingMessage> {
+export function makePeerConnection() : PeerConnection<SignallingMessage> {
   var pc :PeerConnection<SignallingMessage> =
       peerconnection.createPeerConnection(pcConfig);
 
@@ -39,9 +44,9 @@ function makePeerConnection() : PeerConnection<SignallingMessage> {
   });
 
   pc.onceConnected.then(() => {
-    log.info(name + ' connected');
+    log.info(moduleName + ' connected');
   }, (e:Error) => {
-    log.error('%1 failed to connect: %2', name, e.message);
+    log.error('%1 failed to connect: %2', moduleName, e.message);
   });
 
   pc.peerOpenedChannelQueue.setSyncHandler((d:DataChannel) => {
@@ -57,7 +62,7 @@ function makePeerConnection() : PeerConnection<SignallingMessage> {
   return pc;
 }
 
-var pc :PeerConnection<SignallingMessage>;
+export var pc :PeerConnection<SignallingMessage>;
 
 parentModule.on('start', () => {
   pc = makePeerConnection();

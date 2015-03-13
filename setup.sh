@@ -35,6 +35,14 @@ function buildTools ()
   runCmd "cp ./build/dev/uproxy-lib/build-tools/*.js ./build/tools/"
 }
 
+function thirdParty ()
+{
+  runCmd "cd $ROOT_DIR"
+  runAndAssertCmd "mkdir -p build/third_party"
+  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  runAndAssertCmd "cp -r third_party/* build/third_party/"
+}
+
 function clean ()
 {
   runCmd "rm -r $ROOT_DIR/node_modules $ROOT_DIR/build $ROOT_DIR/.tscache"
@@ -44,22 +52,30 @@ function installDevDependencies ()
 {
   runCmd "cd $ROOT_DIR"
   runAndAssertCmd "npm install"
-  runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
+  thirdParty
   buildTools
 }
 
 if [ "$1" == 'install' ]; then
   installDevDependencies
+elif [ "$1" == 'third_party' ]; then
+  thirdParty
 elif [ "$1" == 'tools' ]; then
   buildTools
 elif [ "$1" == 'clean' ]; then
   clean
 else
-  echo "Usage: setup.sh [install|tools|clean]"
-  echo "  install       Installs needed development dependencies into build/"
-  echo "  tools         Builds just the tools into build/tools"
-  echo "  clean         Removes all dependencies installed by this script."
   echo
-  echo ""
+  echo "Usage: setup.sh [install|third_party|tools|clean]"
+  echo
+  echo "  install      - Runs npm install and creates all needed files to build"
+  echo "                 with grunt"
+  echo "  third_party  - Installs all the files for 'build/third_party' needed"
+  echo "                 by our grunt build rules (This is part of the "
+  echo "                 'setup.sh install' process)"
+  echo "  tools        - Builds just the tools into build/tools (This part of "
+  echo "                 the 'setup.sh install' process)"
+  echo "  clean        - Removes all dependencies installed by this script."
+  echo
   exit 0
 fi

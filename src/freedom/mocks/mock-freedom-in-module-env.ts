@@ -33,6 +33,14 @@ export class MockFreedomCore implements freedomTypes.Core {
   }
 }
 
+function makeMockFreedomModuleFactory<T>(f:Function)
+    : freedomTypes.FreedomModuleFactoryManager<T> {
+  var factoryManager :freedomTypes.FreedomModuleFactoryManager<T>;
+  factoryManager = <freedomTypes.FreedomModuleFactoryManager<T>>f;
+  factoryManager.close = () => { return Promise.resolve<void>(); };
+  return factoryManager;
+}
+
 export class MockFreedomConsole implements freedom_Console.Console {
   public log(source:string, message:string) : Promise<void> {
     return Promise.resolve<void>();
@@ -63,11 +71,15 @@ export function makeMockFreedomInModuleEnv(
   var freedomFn = () => { return freeedomParentModuleThing_; }
   freedom = <freedomTypes.FreedomInModuleEnv>freedomFn;
 
+  freedom['THIS_IS_A_MOCK'] = makeMockFreedomModuleFactory(() => {});
+
   var core_ = new MockFreedomCore();
-  freedom['core'] = () => { return core_; }
+  freedom['core'] = makeMockFreedomModuleFactory<freedomTypes.Core>(
+      () => { return core_; });
 
   for(var providerName in providerFactories) {
-    freedom[providerName] = providerFactories[providerName];
+    freedom[providerName] =
+      makeMockFreedomModuleFactory(providerFactories[providerName]);
   }
 
   return freedom;
