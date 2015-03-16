@@ -238,13 +238,14 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     // Add basic event handlers.
     this.pc_.on('onicecandidate', (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
       if(candidate.candidate) {
-        this.signalForPeerQueue.handle({
+        this.emitSignalForPeer_({
           type: SignalType.CANDIDATE,
           candidate: candidate.candidate
         });
       } else {
-        this.signalForPeerQueue.handle(
-            {type: SignalType.NO_MORE_CANDIDATES});
+        this.emitSignalForPeer_({
+          type: SignalType.NO_MORE_CANDIDATES
+        });
       }
     });
     this.pc_.on('onnegotiationneeded', () => {
@@ -398,7 +399,7 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
             // we may emit ICE candidate signals before the offer, confusing
             // some clients:
             //   https://github.com/uProxy/uproxy/issues/784
-            this.signalForPeerQueue.handle({
+            this.emitSignalForPeer_({
               type: SignalType.OFFER,
               description: {type: d.type, sdp: d.sdp}
             });
@@ -447,9 +448,13 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
         // As with the offer, we must emit the signal before
         // setting the local description to ensure that we send the
         // ANSWER before any ICE candidates.
-        this.signalForPeerQueue.handle(
-            {type: SignalType.ANSWER,
-             description: {type: d.type, sdp: d.sdp} });
+        this.emitSignalForPeer_({
+          type: SignalType.ANSWER,
+          description: {
+            type: d.type,
+            sdp: d.sdp
+          }
+        });
         this.pc_.setLocalDescription(d);
       })
       .then(() => {
@@ -487,15 +492,25 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
     }
   }
 
+  // Adds a signalling message to this.signalForPeerQueue.
+  private emitSignalForPeer_ = (signal:SignallingMessage) : void => {
+    log.debug('%1: signalForPeer: %2',
+        this.peerName_,
+        JSON.stringify(signal));
+    this.signalForPeerQueue.handle(signal);
+  }
+
   // Handle a signalling message from the remote peer.
   public handleSignalMessage = (signal :SignallingMessage) : void => {
-    log.debug(this.peerName_ + ': ' + 'handleSignalMessage: \n' +
+    log.debug('%1: handleSignalMessage: %2',
+        this.peerName_,
         JSON.stringify(signal));
-    // If we are offering and they are also offerring at the same time, pick
+    // If we are offering and they are also offering at the same time, pick
     // the one who has the lower hash value for their description: this is
     // equivalent to having a special random id, but voids the need for an
-    // extra random number. TODO: instead of hash, we could use the IP/port
-    // candidate list which is guarenteed to be unique for 2 peers.
+    // extra random number.
+    // TODO: Instead of hash, we could use the IP/port candidate list which
+    //       is guaranteed to be unique for 2 peers.
     switch(signal.type) {
       case SignalType.OFFER:
         this.handleOfferSignalMessage_(signal.description);
@@ -509,15 +524,12 @@ export class PeerConnectionClass implements PeerConnection<SignallingMessage> {
         this.handleCandidateSignalMessage_(signal.candidate);
         break;
       case SignalType.NO_MORE_CANDIDATES:
-        log.debug(this.peerName_ + ': handleSignalMessage: noMoreCandidates');
         break;
-
     default:
-      log.error(this.peerName_ + ': ' +
-          'handleSignalMessage got unexpected message: ' +
-          JSON.stringify(signal) + ' (' + typeof(signal) + ')');
-      break;
-    }  // switch
+      log.error('%1: unexpected signalling message type %2',
+          this.peerName_,
+          signal.type);
+    }
   }
 
   // Open a new data channel with the peer.
