@@ -69,7 +69,7 @@ There are sample apps for manual testing, with source code in:
 
 These are run by starting a webserver and viewing the html files, e.g.
 
-````
+```
 python -m SimpleHTTPServer
 ```
 
