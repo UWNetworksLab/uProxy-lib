@@ -98,8 +98,9 @@ declare module freedom {
     // module.
     (...args:any[]) : T;
     // This is the call to close a particular stub's channel and resources. It
-    // is assumed that the argument is a result of the factory constructor.
-    close : (freedomModuleStubInstance:T) => Promise<void>;
+    // is assumed that the argument is a result of the factory constructor. If
+    // no argument is supplied, all stubs are closed.
+    close : (freedomModuleStubInstance?:T) => Promise<void>;
   }
 
   interface FreedomInCoreEnvOptions {
