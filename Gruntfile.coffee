@@ -54,6 +54,7 @@ taskManager.add 'browserify_specs', [
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
   'browserify:webrtcSpec'
+  'browserify:queueSpec'
 ]
 
 # Run unit tests
@@ -65,6 +66,7 @@ taskManager.add 'unit_test', [
   'jasmine:logging'
   'jasmine:loggingProvider'
   'jasmine:webrtc'
+  'jasmine:queue'
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
@@ -77,6 +79,7 @@ taskManager.add 'coverage', [
   'jasmine:loggingCov'
   'jasmine:loggingProviderCov'
   'jasmine:webrtcCov'
+  'jasmine:queueCov'
 ]
 
 # Run unit tests
@@ -200,6 +203,8 @@ module.exports = (grunt) ->
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
       webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
+      queue: Rule.jasmineSpec 'queue'
+      queueCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'queue')
 
     browserify:
       # Browserify freedom-modules in the library
@@ -211,6 +216,7 @@ module.exports = (grunt) ->
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       loggingSpec: Rule.browserifySpec 'logging/logging'
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      queueSpec: Rule.browserifySpec 'queue/queue'
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
