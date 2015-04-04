@@ -46,7 +46,7 @@ taskManager.add 'copypasteFreedomChat', [
 ]
 
 # Create unit test code
-taskManager.add 'browserify_specs', [
+taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
@@ -56,9 +56,20 @@ taskManager.add 'browserify_specs', [
   'browserify:webrtcSpec'
 ]
 
+# Create unit test code
+taskManager.add 'browserifyCovSpecs', [
+  'base'
+  'browserify:arraybuffersCovSpec'
+  'browserify:handlerCovSpec'
+  'browserify:buildToolsTaskmanagerCovSpec'
+  'browserify:loggingCovSpec'
+  'browserify:loggingProviderCovSpec'
+  'browserify:webrtcCovSpec'
+]
+
 # Run unit tests
 taskManager.add 'unit_test', [
-  'browserify_specs',
+  'browserifySpecs',
   'jasmine:arraybuffers'
   'jasmine:handler'
   'jasmine:buildTools'
@@ -70,7 +81,7 @@ taskManager.add 'unit_test', [
 # Run unit tests to produce coverage; these are separate from unit_tests because
 # they make tests hard to debug and fix.
 taskManager.add 'coverage', [
-  'browserify_specs'
+  'browserifyCovSpecs'
   'jasmine:arraybuffersCov'
   'jasmine:handlerCov'
   'jasmine:buildToolsCov'
@@ -206,11 +217,17 @@ module.exports = (grunt) ->
       loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
+      arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
+      buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
       handlerSpec: Rule.browserifySpec 'handler/queue'
+      handlerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'handler/queue')
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
+      loggingProviderCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'loggingprovider/loggingprovider')
       loggingSpec: Rule.browserifySpec 'logging/logging'
+      loggingCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'logging/logging')
       webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      webrtcCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
