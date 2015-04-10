@@ -53,7 +53,9 @@ taskManager.add 'browserifySpecs', [
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
-  'browserify:webrtcSpec'
+  'browserify:peerconnectionSpec'
+  'browserify:datachannelSpec'
+  'browserify:queueSpec'
 ]
 
 # Create unit test code
@@ -64,7 +66,9 @@ taskManager.add 'browserifyCovSpecs', [
   'browserify:buildToolsTaskmanagerCovSpec'
   'browserify:loggingCovSpec'
   'browserify:loggingProviderCovSpec'
-  'browserify:webrtcCovSpec'
+  'browserify:peerconnectionCovSpec'
+  'browserify:datachannelCovSpec'
+  'browserify:queueCovSpec'
 ]
 
 # Run unit tests
@@ -76,6 +80,7 @@ taskManager.add 'unit_test', [
   'jasmine:logging'
   'jasmine:loggingProvider'
   'jasmine:webrtc'
+  'jasmine:queue'
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
@@ -88,6 +93,7 @@ taskManager.add 'coverage', [
   'jasmine:loggingCov'
   'jasmine:loggingProviderCov'
   'jasmine:webrtcCov'
+  'jasmine:queueCov'
 ]
 
 # Run unit tests
@@ -211,6 +217,8 @@ module.exports = (grunt) ->
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
       webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
+      queue: Rule.jasmineSpec 'queue'
+      queueCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'queue')
 
     browserify:
       # Browserify freedom-modules in the library
@@ -226,8 +234,12 @@ module.exports = (grunt) ->
       loggingProviderCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'loggingprovider/loggingprovider')
       loggingSpec: Rule.browserifySpec 'logging/logging'
       loggingCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'logging/logging')
-      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
-      webrtcCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
+      peerconnectionSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      peerconnectionCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
+      datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
+      datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
+      queueSpec: Rule.browserifySpec 'queue/queue'
+      queueCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'queue/queue')
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
