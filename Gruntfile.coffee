@@ -53,7 +53,8 @@ taskManager.add 'browserify_specs', [
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
-  'browserify:webrtcSpec'
+  'browserify:peerconnectionSpec'
+  'browserify:datachannelSpec'
   'browserify:queueSpec'
 ]
 
@@ -215,7 +216,8 @@ module.exports = (grunt) ->
       handlerSpec: Rule.browserifySpec 'handler/queue'
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       loggingSpec: Rule.browserifySpec 'logging/logging'
-      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      peerconnectionSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
       queueSpec: Rule.browserifySpec 'queue/queue'
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
