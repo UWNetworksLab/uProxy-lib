@@ -3,9 +3,9 @@
 
 import logging = require('../../logging/logging');
 
+import signals = require('../../webrtc/signals');
 import peerconnection = require('../../webrtc/peerconnection');
 import PeerConnection = peerconnection.PeerConnection;
-import SignallingMessage = peerconnection.SignallingMessage;
 import DataChannel = peerconnection.DataChannel;
 import Data = peerconnection.Data;
 
@@ -30,7 +30,7 @@ function connectDataChannel(name:string, d:DataChannel) {
           d.toString());
     });
     d.dataFromPeerQueue.setSyncHandler((data:Data) => {
-      log.info(name + ': dataFromPeer: ' + JSON.stringify(data));
+      log.info('%1: dataFromPeer: %2', name, data);
       // Handle messages received on the datachannel(s).
       parentFreedomModule.emit('receive' + name, {
         message: data.str
@@ -49,7 +49,7 @@ function makePeerConnection(name:string) {
       urls: ['stun:stun.l.google.com:19302']},
       {urls: ['stun:stun1.l.google.com:19302']}]
   };
-  var pc :PeerConnection<SignallingMessage> =
+  var pc :PeerConnection<signals.Message> =
     peerconnection.createPeerConnection(pcConfig, name);
   pc.onceConnecting.then(() => { log.info(name + ': connecting...'); });
   pc.onceConnected.then(() => {
@@ -68,18 +68,18 @@ function makePeerConnection(name:string) {
   return pc;
 }
 
-var a :PeerConnection<SignallingMessage> = makePeerConnection('A');
-var b :PeerConnection<SignallingMessage> = makePeerConnection('B')
+var a :PeerConnection<signals.Message> = makePeerConnection('A');
+var b :PeerConnection<signals.Message> = makePeerConnection('B')
 
 // Connect the two signalling channels. Normally, these messages would be sent
 // over the internet.
-a.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
-  log.info('a: sending signal to b.');
-  b.handleSignalMessage(signal);
+a.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+  log.info('a: sending signalling message to b.');
+  b.handleSignalMessage(message);
 });
-b.signalForPeerQueue.setSyncHandler((signal:SignallingMessage) => {
-  log.info('b: sending signal to a.');
-  a.handleSignalMessage(signal);
+b.signalForPeerQueue.setSyncHandler((message:signals.Message) => {
+  log.info('b: sending signalling message to a.');
+  a.handleSignalMessage(message);
 });
 
 // Negotiate a peerconnection. Once negotiated, enable the UI and add
