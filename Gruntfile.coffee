@@ -46,37 +46,54 @@ taskManager.add 'copypasteFreedomChat', [
 ]
 
 # Create unit test code
-taskManager.add 'browserify_specs', [
+taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
   'browserify:loggingProviderSpec'
-  'browserify:webrtcSpec'
+  'browserify:peerconnectionSpec'
+  'browserify:datachannelSpec'
+  'browserify:queueSpec'
+]
+
+# Create unit test code
+taskManager.add 'browserifyCovSpecs', [
+  'base'
+  'browserify:arraybuffersCovSpec'
+  'browserify:handlerCovSpec'
+  'browserify:buildToolsTaskmanagerCovSpec'
+  'browserify:loggingCovSpec'
+  'browserify:loggingProviderCovSpec'
+  'browserify:peerconnectionCovSpec'
+  'browserify:datachannelCovSpec'
+  'browserify:queueCovSpec'
 ]
 
 # Run unit tests
 taskManager.add 'unit_test', [
-  'browserify_specs',
+  'browserifySpecs',
   'jasmine:arraybuffers'
   'jasmine:handler'
   'jasmine:buildTools'
   'jasmine:logging'
   'jasmine:loggingProvider'
   'jasmine:webrtc'
+  'jasmine:queue'
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
 # they make tests hard to debug and fix.
 taskManager.add 'coverage', [
-  'browserify_specs'
+  'browserifyCovSpecs'
   'jasmine:arraybuffersCov'
   'jasmine:handlerCov'
   'jasmine:buildToolsCov'
   'jasmine:loggingCov'
   'jasmine:loggingProviderCov'
   'jasmine:webrtcCov'
+  'jasmine:queueCov'
 ]
 
 # Run unit tests
@@ -200,17 +217,29 @@ module.exports = (grunt) ->
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
       webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
+      queue: Rule.jasmineSpec 'queue'
+      queueCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'queue')
 
     browserify:
       # Browserify freedom-modules in the library
       loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
+      arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
+      buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
       handlerSpec: Rule.browserifySpec 'handler/queue'
+      handlerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'handler/queue')
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
+      loggingProviderCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'loggingprovider/loggingprovider')
       loggingSpec: Rule.browserifySpec 'logging/logging'
-      webrtcSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      loggingCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'logging/logging')
+      peerconnectionSpec: Rule.browserifySpec 'webrtc/peerconnection'
+      peerconnectionCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
+      datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
+      datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
+      queueSpec: Rule.browserifySpec 'queue/queue'
+      queueCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'queue/queue')
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
