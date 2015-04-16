@@ -160,6 +160,8 @@ export class DataChannelClass implements DataChannel {
     this.onceOpened.then(() => {
       this.isOpen_ = true;
       this.conjestionControlSendHandler();
+    }, (e:Error) => {
+      log.error('failed to open: ', e.toString);
     });
     this.onceClosed.then(() => {
         if(!this.isOpen_) {

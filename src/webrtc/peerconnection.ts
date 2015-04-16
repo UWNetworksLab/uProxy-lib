@@ -501,8 +501,20 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       throw new Error('Channel label can not be an empty string.');
     }
 
-    return this.pc_.createDataChannel(channelLabel, options)
-        .then(this.addRtcDataChannel_);
+    var channelPromise = this.pc_.createDataChannel(channelLabel, options).then(
+        this.addRtcDataChannel_);
+
+    // Terminate the peerconnection if the channel fails to open
+    // because this indicates the peerconnection is in an unusable state:
+    //   https://github.com/uProxy/uproxy/issues/1289
+    channelPromise.then((channel:DataChannel) => {
+      channel.onceOpened.catch((e:Error) => {
+        this.closeWithError_('channel failed to open, terminating ' +
+            'peerconnection: ' + e.toString());
+      });
+    });
+
+    return channelPromise;
   }
 
   // When a peer creates a data channel, this function is called with the
