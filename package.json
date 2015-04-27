@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "25.0.2",
+  "version": "25.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -17,11 +17,13 @@
     }
   ],
   "peerDependencies": {
+    "circular-json": "^0.1.6",
     "freedom": "^0.6.21"
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "browserify-istanbul": "^0.2.0",
+    "circular-json": "^0.1.6",
     "es6-promise": "^2.0.0",
     "freedom": "^0.6.21",
     "grunt": "^0.4.5",
