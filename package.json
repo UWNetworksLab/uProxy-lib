@@ -38,7 +38,7 @@
     "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-ts": "^3.0.0",
     "tsd": "^0.5.7",
-    "typescript": "^1.4.1"
+    "typescript": "=1.4.1"
   },
   "scripts": {
     "test": "grunt dist"
