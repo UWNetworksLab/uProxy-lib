@@ -11,6 +11,7 @@ taskManager.add 'base', [
   'ts:srcInModuleEnv'
   'ts:srcInCoreEnv'
   'browserify:loggingProvider'
+  'browserify:echoFreedomModule'
 ]
 
 # Makes all sample apps.
@@ -18,6 +19,8 @@ taskManager.add 'samples', [
   'base'
   'simpleFreedomChat'
   'copypasteFreedomChat'
+  'echoServerChromeApp'
+  'echoServerFirefoxApp'
 ]
 
 # Makes the distribution build.
@@ -43,6 +46,17 @@ taskManager.add 'copypasteFreedomChat', [
   'copy:libsForCopypasteFreedomChat'
   'browserify:copypasteFreedomChatMain'
   'browserify:copypasteFreedomChatFreedomModule'
+]
+
+taskManager.add 'echoServerChromeApp', [
+  'base'
+  'copy:libsForEchoServerChromeApp'
+  'browserify:echoServerChromeApp'
+]
+
+taskManager.add 'echoServerFirefoxApp', [
+  'base'
+  'copy:libsForEchoServerFirefoxApp'
 ]
 
 # Create unit test code
@@ -188,6 +202,17 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['loggingprovider']
           localDestPath: 'samples/copypaste-freedom-chat/'
 
+      libsForEchoServerChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['echo', 'loggingprovider']
+          localDestPath: 'samples/echo-server-chromeapp/'
+      libsForEchoServerFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['echo', 'loggingprovider']
+          localDestPath: 'samples/echo-server-firefoxapp/data/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -252,6 +277,7 @@ module.exports = (grunt) ->
     browserify:
       # Browserify freedom-modules in the library
       loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
+      echoFreedomModule: Rule.browserify 'echo/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
@@ -274,6 +300,7 @@ module.exports = (grunt) ->
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
+      echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
