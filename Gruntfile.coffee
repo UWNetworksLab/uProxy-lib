@@ -24,7 +24,7 @@ taskManager.add 'samples', [
 taskManager.add 'dist', [
   'base'
   'samples'
-  'unit_test'
+  'test'
   'coverage'
   'copy:dist'
 ]
@@ -83,6 +83,22 @@ taskManager.add 'unit_test', [
   'jasmine:queue'
 ]
 
+taskManager.add 'tcpIntegrationTestModule', [
+  'base'
+  'copy:libsForIntegrationTcp'
+  'browserify:integrationTcpFreedomModule'
+  'browserify:integrationTcpSpec'
+]
+
+taskManager.add 'tcpIntegrationTest', [
+  'tcpIntegrationTestModule'
+  'jasmine_chromeapp:tcp'
+]
+
+taskManager.add 'integration_test', [
+  'tcpIntegrationTest'
+]
+
 # Run unit tests to produce coverage; these are separate from unit_tests because
 # they make tests hard to debug and fix.
 taskManager.add 'coverage', [
@@ -96,8 +112,7 @@ taskManager.add 'coverage', [
   'jasmine:queueCov'
 ]
 
-# Run unit tests
-taskManager.add 'test', ['unit_test']
+taskManager.add 'test', ['unit_test', 'integration_test']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['base']
@@ -105,6 +120,11 @@ taskManager.add 'default', ['base']
 #-------------------------------------------------------------------------
 rules = require './build/tools/common-grunt-rules'
 path = require 'path'
+
+browserifyIntegrationTest = (path) ->
+  Rule.browserifySpec(path, {
+    browserifyOptions: { standalone: 'browserified_exports' }
+  });
 
 #-------------------------------------------------------------------------
 devBuildPath = 'build/dev/uproxy-lib'
@@ -168,6 +188,13 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['loggingprovider']
           localDestPath: 'samples/copypaste-freedom-chat/'
 
+      # Integration Tests.
+      libsForIntegrationTcp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['loggingprovider']
+          localDestPath: 'integration-tests/tcp'
+
     # Typescript rules
     ts:
       # Compile everything that can run in a module env into the development
@@ -215,6 +242,8 @@ module.exports = (grunt) ->
       loggingCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'logging')
       loggingProvider: Rule.jasmineSpec 'loggingprovider'
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
+      net: Rule.jasmineSpec 'net'
+      netCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'net')
       webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
       queue: Rule.jasmineSpec 'queue'
@@ -245,6 +274,29 @@ module.exports = (grunt) ->
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
+      # Integration tests.
+      integrationTcpFreedomModule:
+        Rule.browserify 'integration-tests/tcp/freedom-module'
+      integrationTcpSpec:
+        browserifyIntegrationTest 'integration-tests/tcp/tcp.core-env'
+
+    jasmine_chromeapp:
+      tcp:
+        files: [
+          {
+            cwd: devBuildPath + '/integration-tests/tcp/',
+            src: ['**/*', '!jasmine_chromeapp/**/*']
+            dest: './',
+            expand: true
+          }
+        ]
+        scripts: [
+          'freedom-for-chrome/freedom-for-chrome.js'
+          'tcp.core-env.spec.static.js'
+        ]
+        options:
+          outDir: devBuildPath + '/integration-tests/tcp/jasmine_chromeapp/'
+          keepRunner: false
 
     clean:
       build:
@@ -260,6 +312,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jasmine'
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
+  grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
   grunt.loadNpmTasks 'grunt-ts'
 
   #-------------------------------------------------------------------------
