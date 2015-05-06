@@ -12,6 +12,8 @@ taskManager.add 'base', [
   'ts:srcInCoreEnv'
   'browserify:loggingProvider'
   'browserify:echoFreedomModule'
+  'browserify:simpleSocksFreedomModule'
+  'browserify:churnPipeFreedomModule'
 ]
 
 # Makes all sample apps.
@@ -21,6 +23,8 @@ taskManager.add 'samples', [
   'copypasteFreedomChat'
   'echoServerChromeApp'
   'echoServerFirefoxApp'
+  'simpleSocksChromeApp'
+  'simpleSocksFirefoxApp'
 ]
 
 # Makes the distribution build.
@@ -57,6 +61,17 @@ taskManager.add 'echoServerChromeApp', [
 taskManager.add 'echoServerFirefoxApp', [
   'base'
   'copy:libsForEchoServerFirefoxApp'
+]
+
+taskManager.add 'simpleSocksChromeApp', [
+  'base'
+  'copy:libsForSimpleSocksChromeApp'
+  'browserify:simpleSocksChromeApp'
+]
+
+taskManager.add 'simpleSocksFirefoxApp', [
+  'base'
+  'copy:libsForSimpleSocksFirefoxApp'
 ]
 
 # Create unit test code
@@ -109,8 +124,23 @@ taskManager.add 'tcpIntegrationTest', [
   'jasmine_chromeapp:tcp'
 ]
 
+taskManager.add 'socksEchoIntegrationTestModule', [
+  'base'
+  'copy:libsForIntegrationSocksEcho'
+  'browserify:integrationSocksEchoFreedomModule'
+  'browserify:integrationSocksEchoChurnSpec'
+  'browserify:integrationSocksEchoNochurnSpec'
+  'browserify:integrationSocksEchoSlowSpec'
+]
+
+taskManager.add 'socksEchoIntegrationTest', [
+  'socksEchoIntegrationTestModule'
+  'jasmine_chromeapp:socksEcho'
+]
+
 taskManager.add 'integration_test', [
   'tcpIntegrationTest'
+  'socksEchoIntegrationTest'
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
@@ -213,12 +243,34 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['echo', 'loggingprovider']
           localDestPath: 'samples/echo-server-firefoxapp/data/'
 
+      libsForSimpleSocksChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+          ]
+          localDestPath: 'samples/simple-socks-chromeapp/'
+      libsForSimpleSocksFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+          ]
+          localDestPath: 'samples/simple-socks-firefoxapp/data/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['loggingprovider']
           localDestPath: 'integration-tests/tcp'
+      libsForIntegrationSocksEcho:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          localDestPath: 'integration-tests/socks-echo'
 
     # Typescript rules
     ts:
@@ -261,6 +313,8 @@ module.exports = (grunt) ->
       arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
       buildTools: Rule.jasmineSpec 'build-tools'
       buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
+      churn: Rule.jasmineSpec 'churn'
+      churnCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'churn')
       handler: Rule.jasmineSpec 'handler'
       handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
       logging: Rule.jasmineSpec 'logging'
@@ -269,6 +323,20 @@ module.exports = (grunt) ->
       loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
       net: Rule.jasmineSpec 'net'
       netCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'net')
+      pool: Rule.jasmineSpec 'pool'
+      poolCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'pool')
+      rtcToNet: Rule.jasmineSpec 'rtc-to-net'
+      rtcToNetCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'rtc-to-net')
+      simpleTransformers: Rule.jasmineSpec 'simple-transformers'
+      simpleTransformersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'simple-transformers')
+
+      socksCommon: Rule.jasmineSpec('socks-common',
+          [path.join(thirdPartyBuildPath, 'ipaddr/ipaddr.js')]);
+      socksCommonCov: Rule.addCoverageToSpec(Rule.jasmineSpec('socks-common',
+          [path.join(thirdPartyBuildPath, 'ipaddr/ipaddr.js')]));
+
+      socksToRtc: Rule.jasmineSpec 'socks-to-rtc'
+      socksToRtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'socks-to-rtc')
       webrtc: Rule.jasmineSpec 'webrtc'
       webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
       queue: Rule.jasmineSpec 'queue'
@@ -278,11 +346,23 @@ module.exports = (grunt) ->
       # Browserify freedom-modules in the library
       loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
       echoFreedomModule: Rule.browserify 'echo/freedom-module'
+      churnPipeFreedomModule: Rule.browserify(
+          'churn-pipe/freedom-module',
+          {
+            # Emscripten, used to compile FTE and Rabbit to JS has unused
+            # require statements for `ws` and for `path` that need to be
+            # ignored.
+            ignore: ['ws', 'path']
+            browserifyOptions: { standalone: 'browserified_exports' }
+          })
+      simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
+      churnSpec: Rule.browserifySpec 'churn/churn'
+      churnCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/churn')
       handlerSpec: Rule.browserifySpec 'handler/queue'
       handlerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'handler/queue')
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
@@ -291,6 +371,18 @@ module.exports = (grunt) ->
       loggingCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'logging/logging')
       peerconnectionSpec: Rule.browserifySpec 'webrtc/peerconnection'
       peerconnectionCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
+      poolSpec: Rule.browserifySpec 'pool/pool'
+      poolCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'pool/pool')
+      rtcToNetSpec: Rule.browserifySpec 'rtc-to-net/rtc-to-net'
+      rtcToNetCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'rtc-to-net/rtc-to-net')
+      simpleTransformersCaesarSpec: Rule.browserifySpec 'simple-transformers/caesar'
+      simpleTransformersCaesarCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'simple-transformers/caesar')
+      socksCommonHeadersSpec: Rule.browserifySpec 'socks-common/socks-headers'
+      socksCommonHeadersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-common/socks-headers')
+      socksToRtcSpec: Rule.browserifySpec 'socks-to-rtc/socks-to-rtc'
+      socksToRtcCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-to-rtc/socks-to-rtc')
+      tcpSpec: Rule.browserifySpec 'net/tcp'
+      tcpCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'net/tcp')
       datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
       datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
       queueSpec: Rule.browserifySpec 'queue/queue'
@@ -301,11 +393,20 @@ module.exports = (grunt) ->
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
+      simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
       integrationTcpSpec:
         browserifyIntegrationTest 'integration-tests/tcp/tcp.core-env'
+      integrationSocksEchoFreedomModule:
+        Rule.browserify 'integration-tests/socks-echo/freedom-module'
+      integrationSocksEchoChurnSpec:
+        browserifyIntegrationTest 'integration-tests/socks-echo/churn.core-env'
+      integrationSocksEchoNochurnSpec:
+        browserifyIntegrationTest 'integration-tests/socks-echo/nochurn.core-env'
+      integrationSocksEchoSlowSpec:
+        browserifyIntegrationTest 'integration-tests/socks-echo/slow.core-env'
 
     jasmine_chromeapp:
       tcp:
@@ -324,6 +425,39 @@ module.exports = (grunt) ->
         options:
           outDir: devBuildPath + '/integration-tests/tcp/jasmine_chromeapp/'
           keepRunner: false
+      socksEcho:
+        files: [
+          {
+            cwd: devBuildPath + '/integration-tests/socks-echo/',
+            src: ['**/*', '!jasmine_chromeapp*/**']
+            dest: './',
+            expand: true
+          }
+        ]
+        scripts: [
+          'freedom-for-chrome/freedom-for-chrome.js'
+          'churn.core-env.spec.static.js'
+          'nochurn.core-env.spec.static.js'
+        ]
+        options:
+          outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp/'
+          keepRunner: false
+      socksEchoSlow:
+        files: [
+          {
+            cwd: devBuildPath + '/integration-tests/socks-echo/',
+            src: ['**/*', '!jasmine_chromeapp*/**']
+            dest: './',
+            expand: true
+          }
+        ]
+        scripts: [
+          'freedom-for-chrome/freedom-for-chrome.js'
+          'slow.core-env.spec.static.js'
+        ]
+        options:
+          outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp_slow/'
+          keepRunner: true
 
     clean:
       build:
