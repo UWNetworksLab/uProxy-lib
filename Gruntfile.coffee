@@ -25,6 +25,7 @@ taskManager.add 'samples', [
   'echoServerFirefoxApp'
   'simpleSocksChromeApp'
   'simpleSocksFirefoxApp'
+  'copyPasteSocksChromeApp'
 ]
 
 # Makes the distribution build.
@@ -72,6 +73,14 @@ taskManager.add 'simpleSocksChromeApp', [
 taskManager.add 'simpleSocksFirefoxApp', [
   'base'
   'copy:libsForSimpleSocksFirefoxApp'
+]
+
+taskManager.add 'copyPasteSocksChromeApp', [
+  'base'
+  'copy:libsForCopyPasteSocksChromeApp'
+  'vulcanize:copyPasteSocksChromeApp'
+  'browserify:copyPasteSocksFreedomModule'
+  'browserify:copyPasteSocksChromeApp'
 ]
 
 # Create unit test code
@@ -260,6 +269,20 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/simple-socks-firefoxapp/data/'
 
+      libsForCopyPasteSocksChromeApp:
+        Rule.copyLibs
+          npmLibNames: [
+            'freedom-for-chrome'
+          ]
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+            'i18n'
+            'bower/polymer'
+            'freedom-pgp-e2e'
+          ]
+          localDestPath: 'samples/copypaste-socks-chromeapp/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -356,6 +379,7 @@ module.exports = (grunt) ->
             browserifyOptions: { standalone: 'browserified_exports' }
           })
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
+      copyPasteSocksFreedomModule: Rule.browserify 'samples/copypaste-socks-chromeapp/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
@@ -394,6 +418,7 @@ module.exports = (grunt) ->
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
+      copyPasteSocksChromeApp: Rule.browserify 'samples/copypaste-socks-chromeapp/main.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
@@ -407,6 +432,18 @@ module.exports = (grunt) ->
         browserifyIntegrationTest 'integration-tests/socks-echo/nochurn.core-env'
       integrationSocksEchoSlowSpec:
         browserifyIntegrationTest 'integration-tests/socks-echo/slow.core-env'
+
+    vulcanize:
+      copyPasteSocksChromeApp:
+        options:
+          inline: true
+          csp: true
+        files: [
+          {
+            src: path.join(devBuildPath, 'samples/copypaste-socks-chromeapp/polymer-components/root.html')
+            dest: path.join(devBuildPath, 'samples/copypaste-socks-chromeapp/polymer-components/vulcanized.html')
+          }
+        ]
 
     jasmine_chromeapp:
       tcp:
@@ -475,6 +512,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
   grunt.loadNpmTasks 'grunt-ts'
+  grunt.loadNpmTasks 'grunt-vulcanize'
 
   #-------------------------------------------------------------------------
   # Register the tasks
