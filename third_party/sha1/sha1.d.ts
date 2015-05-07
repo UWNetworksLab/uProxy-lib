@@ -1,6 +1,6 @@
 // TypeScript definitions for crypto's sha1 module.
 
-declare module sha1 {
+declare module 'crypto/sha1' {
   /**
    * Computes the HMAC-SHA1 of some data, with the specified key.
    * Both key and data are interpreted as "binary strings" so to supply binary

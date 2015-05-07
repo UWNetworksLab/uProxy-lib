@@ -27,6 +27,8 @@ taskManager.add 'samples', [
   'simpleSocksFirefoxApp'
   'copyPasteSocksChromeApp'
   'simpleTurnChromeApp'
+  'simpleChurnChatChromeApp'
+  'copyPasteChurnChatChromeApp'
 ]
 
 # Makes the distribution build.
@@ -91,6 +93,20 @@ taskManager.add 'simpleTurnChromeApp', [
   'browserify:turnFrontendFreedomModule'
   'browserify:simpleTurnChromeApp'
   'copy:libsForSimpleTurnChromeApp'
+]
+
+taskManager.add 'simpleChurnChatChromeApp', [
+  'base'
+  'browserify:simpleChurnChatFreedomModule'
+  'browserify:simpleChurnChatChromeApp'
+  'copy:libsForSimpleChurnChatChromeApp'
+]
+
+taskManager.add 'copyPasteChurnChatChromeApp', [
+  'base'
+  'browserify:copyPasteChurnChatFreedomModule'
+  'browserify:copyPasteChurnChatChromeApp'
+  'copy:libsForCopyPasteChurnChatChromeApp'
 ]
 
 # Create unit test code
@@ -303,6 +319,20 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['turn-frontend', 'turn-backend', 'loggingprovider']
           localDestPath: 'samples/simple-turn-chromeapp/'
 
+      libsForSimpleChurnChatChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          localDestPath: 'samples/simple-churn-chat-chromeapp/'
+      libsForCopyPasteChurnChatChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+          ]
+          localDestPath: 'samples/copypaste-churn-chat-chromeapp/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -405,6 +435,8 @@ module.exports = (grunt) ->
       simpleTurnFreedomModule: Rule.browserify 'samples/simple-turn-chromeapp/freedom-module'
       turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
       turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
+      simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
+      copyPasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
@@ -449,6 +481,8 @@ module.exports = (grunt) ->
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
       copyPasteSocksChromeApp: Rule.browserify 'samples/copypaste-socks-chromeapp/main.core-env'
       simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
+      simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
+      copyPasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
