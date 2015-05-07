@@ -162,3 +162,13 @@ original form prior to delivering it to the remote WebRTC peer.
 For now, edit `src/simple-socks/freedom-module.ts` and set `false` to `true`
 in the call to the `SocksToRtc` and `RtcToNet` constructors. Rebuild the demo,
 reload, and you should now be using obfuscation.
+
+## Benchmarking
+
+ * Build everything and start Simple SOCKS (see above).
+ * Do these once:
+   * `bin/make-data.sh`
+   * `npm install -g wup`
+ * Run wup: `(cd data ; wup) &`
+ * Then, run the benchmark with `npm run benchmark`.
+ 
