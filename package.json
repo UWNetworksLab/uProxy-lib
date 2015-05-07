@@ -24,6 +24,7 @@
     "arraybuffer-slice": "^0.1.2",
     "browserify-istanbul": "^0.2.0",
     "circular-json": "^0.1.6",
+    "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "freedom": "^0.6.21",
     "freedom-for-chrome": "^0.4.13",

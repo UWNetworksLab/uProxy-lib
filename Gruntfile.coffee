@@ -26,6 +26,7 @@ taskManager.add 'samples', [
   'simpleSocksChromeApp'
   'simpleSocksFirefoxApp'
   'copyPasteSocksChromeApp'
+  'simpleTurnChromeApp'
 ]
 
 # Makes the distribution build.
@@ -83,6 +84,15 @@ taskManager.add 'copyPasteSocksChromeApp', [
   'browserify:copyPasteSocksChromeApp'
 ]
 
+taskManager.add 'simpleTurnChromeApp', [
+  'base'
+  'browserify:simpleTurnFreedomModule'
+  'browserify:turnBackendFreedomModule'
+  'browserify:turnFrontendFreedomModule'
+  'browserify:simpleTurnChromeApp'
+  'copy:libsForSimpleTurnChromeApp'
+]
+
 # Create unit test code
 taskManager.add 'browserifySpecs', [
   'base'
@@ -94,6 +104,8 @@ taskManager.add 'browserifySpecs', [
   'browserify:peerconnectionSpec'
   'browserify:datachannelSpec'
   'browserify:queueSpec'
+  'browserify:turnFrontEndMessagesSpec'
+  'browserify:turnFrontEndSpec'
 ]
 
 # Create unit test code
@@ -107,6 +119,8 @@ taskManager.add 'browserifyCovSpecs', [
   'browserify:peerconnectionCovSpec'
   'browserify:datachannelCovSpec'
   'browserify:queueCovSpec'
+  'browserify:turnFrontEndMessagesCovSpec'
+  'browserify:turnFrontEndCovSpec'
 ]
 
 # Run unit tests
@@ -283,6 +297,12 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/copypaste-socks-chromeapp/'
 
+      libsForSimpleTurnChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['turn-frontend', 'turn-backend', 'loggingprovider']
+          localDestPath: 'samples/simple-turn-chromeapp/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -352,6 +372,8 @@ module.exports = (grunt) ->
       rtcToNetCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'rtc-to-net')
       simpleTransformers: Rule.jasmineSpec 'simple-transformers'
       simpleTransformersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'simple-transformers')
+      turnFrontEndMessagesSpec: Rule.browserifySpec 'turn-frontend/messages'
+      turnFrontEndSpec: Rule.browserifySpec 'turn-frontend/turn-frontend'
 
       socksCommon: Rule.jasmineSpec('socks-common',
           [path.join(thirdPartyBuildPath, 'ipaddr/ipaddr.js')]);
@@ -380,6 +402,9 @@ module.exports = (grunt) ->
           })
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       copyPasteSocksFreedomModule: Rule.browserify 'samples/copypaste-socks-chromeapp/freedom-module'
+      simpleTurnFreedomModule: Rule.browserify 'samples/simple-turn-chromeapp/freedom-module'
+      turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
+      turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
@@ -407,6 +432,10 @@ module.exports = (grunt) ->
       socksToRtcCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-to-rtc/socks-to-rtc')
       tcpSpec: Rule.browserifySpec 'net/tcp'
       tcpCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'net/tcp')
+      turnFrontEndMessagesSpec: Rule.browserifySpec 'turn-frontend/messages'
+      turnFrontEndMessagesCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'turn-frontend/messages')
+      turnFrontEndSpec: Rule.browserifySpec 'turn-frontend/turn-frontend'
+      turnFrontEndCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'turn-frontend/turn-frontend')
       datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
       datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
       queueSpec: Rule.browserifySpec 'queue/queue'
@@ -419,6 +448,7 @@ module.exports = (grunt) ->
       echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
       copyPasteSocksChromeApp: Rule.browserify 'samples/copypaste-socks-chromeapp/main.core-env'
+      simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
