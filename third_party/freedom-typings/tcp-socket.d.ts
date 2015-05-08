@@ -44,10 +44,12 @@
       getInfo() : Promise<SocketInfo>;
       close() : Promise<void>;
       // TcpSockets have 3 types of events:
-      on(eventType:string, f:Function) : void;
       on(type:'onConnection', f:(i:ConnectInfo) => void) : void;
       on(type:'onData', f:(i:ReadInfo) => void) : void;
+      off(type:'onData', f:(i:ReadInfo) => void) : void;
       on(type:'onDisconnect', f:(i:DisconnectInfo) => void) : void;
+      on(eventType:string, f:(i:Object) => void) : void;
+      off(eventType:string, f:(i:Object) => void) : void;
     }
   }  // module TcpSockets
 // }
