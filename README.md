@@ -2,7 +2,7 @@
 [![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbd8/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbd8/builds/latest)
 [![devDependency Status](https://david-dm.org/uProxy/uproxy-lib/dev-status.svg)](https://david-dm.org/uProxy/uproxy-lib#info=devDependencies)
 
-SOCKS proxy and other utilities for (uProxy)[https://www.uproxy.org/].
+SOCKS proxy and other utilities for [uProxy](https://www.uproxy.org/).
 
 ## Setup
 
