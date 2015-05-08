@@ -1,60 +1,75 @@
 {
-  "intro": {
-    "message": "این برنامه نمونه وکالتی SOCKS بین دو کاربر را برقرار. تبادل پیام های سیگنالینگ اولیه دستی رخ می دهد (به عنوان مثال، از طریق ایمیل و یا چت)، در حالی که پس از آن با استفاده از وکالتی WebRTC فعال میکند."
+  "intro" : {
+    "message" : "این برنامه نمونه وکالتی SOCKS بین دو کاربر را برقرار. تبادل پیام های سیگنالینگ اولیه دستی رخ می دهد (به عنوان مثال، از طریق ایمیل و یا چت)، در حالی که پس از آن با استفاده از وکالتی WebRTC فعال میکند."
   },
-  "giveAccess": {
-    "message": "دسترسی"
+  "useCrypto" : {
+    "message" : "Use cryptography to sign/encrypt exchange?"
   },
-  "giveDescription": {
-    "message": "اجازه کسی برای به اشتراک گذاشتن اتصال اینترنت شما."
+  "userPublicKey" : {
+    "message" : "Your public key is: "
   },
-  "getAccess": {
-    "message": "دسترسی"
+  "friendPublicKey" : {
+    "message" : "Your friend's public key is: "
   },
-  "getDescription": {
-    "message": "مسدود شده عبور با استفاده از اتصال به اینترنت شخص دیگری."
+  "signed" : {
+    "message" : "Signaling message has valid signature!"
   },
-  "italian": {
-    "message": "Italiano"
+  "incorrectlySigned" : {
+    "message" : "Signaling message does not have valid signature!"
   },
-  "english": {
-    "message": "English"
+  "giveAccess" : {
+    "message" : "دسترسی"
   },
-  "arabic": {
-    "message": "العربية"
+  "giveDescription" : {
+    "message" : "اجازه کسی برای به اشتراک گذاشتن اتصال اینترنت شما."
   },
-  "farsi": {
-    "message": "فارسی"
+  "getAccess" : {
+    "message" : "دسترسی"
   },
-  "pasteAndGenerateReply": {
-    "message": "چسباندن متن دریافت شده از طرف دیگر زیر کلیک کنید و 'تولید پاسخ."
+  "getDescription" : {
+    "message" : "مسدود شده عبور با استفاده از اتصال به اینترنت شخص دیگری."
   },
-  "generateReply": {
-    "message": "تولید پاسخ"
+  "italian" : {
+    "message" : "Italiano"
   },
-  "copyPasteAndSend": {
-    "message": "کپی / چسباندن متن کامل بالا و ارسال آن به طرف دیگر."
+  "english" : {
+    "message" : "English"
   },
-  "warning": {
-    "message": "هشدار: ناظر که این پیام را می بیند ممکن است قادر به تعیین که شما با استفاده از یوپراکسی، بنابراین ارسال آن از طریق یک کانال خصوصی به شما اعتماد."
+  "arabic" : {
+    "message" : "العربية"
   },
-  "bytesSent": {
-    "message": " بایت به حزب از راه دور ارسال می شود."
+  "farsi" : {
+    "message" : "فارسی"
   },
-  "bytesReceived": {
-    "message": " بایت از حزب از راه دور دریافت کرد."
+  "pasteAndGenerateReply" : {
+    "message" : "چسباندن متن دریافت شده از طرف دیگر زیر کلیک کنید و 'تولید پاسخ."
   },
-  "generateHandshakeAndSend": {
-    "message": "دکمه زیر را برای تولید یک پیام دادن به ارسال به طرف دیگر کلیک کنید. این پیام می گوید طرف دیگر چگونه به شما کردهاید در شبکه می باشد. این اطلاعات می تواند به سرعت به پایان می رسد، بنابراین ادامه تنها زمانی که شما و طرف دیگر آماده هستند."
+  "generateReply" : {
+    "message" : "تولید پاسخ"
   },
-  "generate": {
-    "message": "تولید"
+  "copyPasteAndSend" : {
+    "message" : "کپی / چسباندن متن کامل بالا و ارسال آن به طرف دیگر."
   },
-  "pasteAndStartProxying": {
-    "message": "چسباندن متن دریافت شده از طرف دیگر زیر و کلیک کنید 'شروع وکالتی."
+  "warning" : {
+    "message" : "هشدار: ناظر که این پیام را می بیند ممکن است قادر به تعیین که شما با استفاده از یوپراکسی، بنابراین ارسال آن از طریق یک کانال خصوصی به شما اعتماد."
   },
-  "startProxying": {
-    "message": "شروع وکالتی"
+  "bytesSent" : {
+    "message" : " بایت به حزب از راه دور ارسال می شود."
+  },
+  "bytesReceived" : {
+    "message" : " بایت از حزب از راه دور دریافت کرد."
+  },
+  "generateHandshakeAndSend" : {
+    "message" : "دکمه زیر را برای تولید یک پیام دادن به ارسال به طرف دیگر کلیک کنید. این پیام می گوید طرف دیگر چگونه به شما کردهاید در شبکه می باشد. این اطلاعات می تواند به سرعت به پایان می رسد، بنابراین ادامه تنها زمانی که شما و طرف دیگر آماده هستند."
+  },
+  "generate" : {
+    "message" : "تولید"
+  },
+  "pasteAndStartProxying" : {
+    "message" : "چسباندن متن دریافت شده از طرف دیگر زیر و کلیک کنید 'شروع وکالتی."
+  },
+  "startProxying" : {
+    "message" : "شروع وکالتی"
   },
   "proxyingStateNotYetAttempted" : {
     "message" : "به اشتراک گذاری وضعیت: در حال انتظار برای ورودی کاربر"
