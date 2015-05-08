@@ -1,60 +1,75 @@
 {
-  "intro": {
-    "message": "هذه عينة التطبيق يحدد الجوارب إنشاء الوكلاء بين اثنين من المستخدمين. تبادل الرسائل الأولي يشير يحدث يدويا (على سبيل المثال، عبر البريد الإلكتروني أو الدردشة)، بينما يستخدم إنشاء الوكلاء لاحق متوافق مع WebRTC."
+  "intro" : {
+    "message" : "هذه عينة التطبيق يحدد الجوارب إنشاء الوكلاء بين اثنين من المستخدمين. تبادل الرسائل الأولي يشير يحدث يدويا (على سبيل المثال، عبر البريد الإلكتروني أو الدردشة)، بينما يستخدم إنشاء الوكلاء لاحق متوافق مع WebRTC."
   },
-  "giveAccess": {
-    "message": "منح حق الوصول"
+  "useCrypto" : {
+    "message" : "Use cryptography to sign/encrypt exchange?"
   },
-  "giveDescription": {
-    "message": "السماح لشخص لمشاركة اتصال الانترنت الخاص بك."
+  "userPublicKey" : {
+    "message" : "Your public key is: "
   },
-  "getAccess": {
-    "message": "الوصول"
+  "friendPublicKey" : {
+    "message" : "Your friend's public key is: "
   },
-  "getDescription": {
-    "message": "تجاوز الحجب عن طريق استخدام اتصال الإنترنت لشخص آخر."
+  "signed" : {
+    "message" : "Signaling message has valid signature!"
   },
-  "italian": {
-    "message": "Italiano"
+  "incorrectlySigned" : {
+    "message" : "Signaling message does not have valid signature!"
   },
-  "english": {
-    "message": "English"
+  "giveAccess" : {
+    "message" : "منح حق الوصول"
   },
-  "arabic": {
-    "message": "العربية"
+  "giveDescription" : {
+    "message" : "السماح لشخص لمشاركة اتصال الانترنت الخاص بك."
   },
-  "farsi": {
-    "message": "فارسی"
+  "getAccess" : {
+    "message" : "الوصول"
   },
-  "pasteAndGenerateReply": {
-    "message": "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'إنشاء الرد \"."
+  "getDescription" : {
+    "message" : "تجاوز الحجب عن طريق استخدام اتصال الإنترنت لشخص آخر."
   },
-  "generateReply": {
-    "message": "توليد الرد"
+  "italian" : {
+    "message" : "Italiano"
   },
-  "copyPasteAndSend": {
-    "message": "نسخ / لصق النص الكامل أعلاه وإرساله إلى الطرف الآخر."
+  "english" : {
+    "message" : "English"
   },
-  "warning": {
-    "message": "تحذير: مراقب الذي يرى هذه الرسالة قد تكون قادرة على تحديد ما إذا كنت تستخدم uProxy، حتى إرسالها عبر قناة خاصة تثق به."
+  "arabic" : {
+    "message" : "العربية"
   },
-  "bytesSent": {
-    "message": " وحدات البايت المرسلة إلى الطرف البعيد."
+  "farsi" : {
+    "message" : "فارسی"
   },
-  "bytesReceived": {
-    "message": " بايت الواردة من الطرف البعيد."
+  "pasteAndGenerateReply" : {
+    "message" : "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'إنشاء الرد \"."
   },
-  "generateHandshakeAndSend": {
-    "message": "انقر فوق الزر أدناه لإنشاء رسالة مصافحة لإرسالها إلى الطرف الآخر. هذه الرسالة بإعلام الطرف الآخر كيفية تحديد موقع لك على الشبكة. هذه المعلومات يمكن أن تنتهي بسرعة، لذلك تشرع إلا عند والطرف الآخر على استعداد."
+  "generateReply" : {
+    "message" : "توليد الرد"
   },
-  "generate": {
-    "message": "انتج"
+  "copyPasteAndSend" : {
+    "message" : "نسخ / لصق النص الكامل أعلاه وإرساله إلى الطرف الآخر."
   },
-  "pasteAndStartProxying": {
-    "message": "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'بدء إنشاء الوكلاء \"."
+  "warning" : {
+    "message" : "تحذير: مراقب الذي يرى هذه الرسالة قد تكون قادرة على تحديد ما إذا كنت تستخدم uProxy، حتى إرسالها عبر قناة خاصة تثق به."
   },
-  "startProxying": {
-    "message": "بدء إنشاء الوكلاء"
+  "bytesSent" : {
+    "message" : " وحدات البايت المرسلة إلى الطرف البعيد."
+  },
+  "bytesReceived" : {
+    "message" : " بايت الواردة من الطرف البعيد."
+  },
+  "generateHandshakeAndSend" : {
+    "message" : "انقر فوق الزر أدناه لإنشاء رسالة مصافحة لإرسالها إلى الطرف الآخر. هذه الرسالة بإعلام الطرف الآخر كيفية تحديد موقع لك على الشبكة. هذه المعلومات يمكن أن تنتهي بسرعة، لذلك تشرع إلا عند والطرف الآخر على استعداد."
+  },
+  "generate" : {
+    "message" : "انتج"
+  },
+  "pasteAndStartProxying" : {
+    "message" : "لصق النص الواردة من الطرف الآخر أدناه وانقر على 'بدء إنشاء الوكلاء \"."
+  },
+  "startProxying" : {
+    "message" : "بدء إنشاء الوكلاء"
   },
   "proxyingStateNotYetAttempted" : {
     "message" : "تقاسم الوضع: في انتظار إدخال المستخدم"
