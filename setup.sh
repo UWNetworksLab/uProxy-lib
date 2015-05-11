@@ -38,9 +38,12 @@ function buildTools ()
 function thirdParty ()
 {
   runCmd "cd $ROOT_DIR"
+  runAndAssertCmd "bower install --allow-root"
   runAndAssertCmd "mkdir -p build/third_party"
   runAndAssertCmd "node_modules/.bin/tsd reinstall --config ./third_party/tsd.json"
   runAndAssertCmd "cp -r third_party/* build/third_party/"
+  runAndAssertCmd "mkdir -p build/third_party/freedom-pgp-e2e"
+  runAndAssertCmd "cp -r node_modules/freedom-pgp-e2e/dist build/third_party/freedom-pgp-e2e/"
 }
 
 function clean ()

@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "25.1.0",
+  "version": "26.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -22,10 +22,15 @@
   },
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
+    "babar": "^0.0.3",
     "browserify-istanbul": "^0.2.0",
     "circular-json": "^0.1.6",
+    "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "freedom": "^0.6.21",
+    "freedom-for-chrome": "^0.4.13",
+    "freedom-for-firefox": "^0.6.8",
+    "freedom-pgp-e2e": "^0.3.1",
     "grunt": "^0.4.5",
     "grunt-browserify": "^3.0.1",
     "grunt-contrib-clean": "^0.6.0",
@@ -35,12 +40,18 @@
     "grunt-contrib-symlink": "^0.3.0",
     "grunt-contrib-uglify": "^0.8.0",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-template-jasmine-istanbul": "^0.3.0",
     "grunt-ts": "^3.0.0",
+    "grunt-vulcanize": "^0.6.0",
+    "ipaddr.js": "^0.1.3",
+    "request": "^2.53.0",
+    "socks5-http-client": "^0.1.6",
     "tsd": "^0.5.7",
-    "typescript": "^1.4.1"
+    "typescript": "=1.4.1",
+    "yargs": "^3.0.4"
   },
   "scripts": {
-    "test": "grunt dist"
+    "benchmark": "node bin/run-benchmark.js -n 1024 -v"
   }
 }
