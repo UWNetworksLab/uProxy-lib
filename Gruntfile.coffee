@@ -113,6 +113,7 @@ taskManager.add 'copyPasteChurnChatChromeApp', [
 taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
+  'browserify:bridgeSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
@@ -128,6 +129,7 @@ taskManager.add 'browserifySpecs', [
 taskManager.add 'browserifyCovSpecs', [
   'base'
   'browserify:arraybuffersCovSpec'
+  'browserify:bridgeCovSpec'
   'browserify:handlerCovSpec'
   'browserify:buildToolsTaskmanagerCovSpec'
   'browserify:loggingCovSpec'
@@ -143,6 +145,7 @@ taskManager.add 'browserifyCovSpecs', [
 taskManager.add 'unit_test', [
   'browserifySpecs',
   'jasmine:arraybuffers'
+  'jasmine:bridge'
   'jasmine:handler'
   'jasmine:buildTools'
   'jasmine:logging'
@@ -187,6 +190,7 @@ taskManager.add 'integration_test', [
 taskManager.add 'coverage', [
   'browserifyCovSpecs'
   'jasmine:arraybuffersCov'
+  'jasmine:bridgeCov'
   'jasmine:handlerCov'
   'jasmine:buildToolsCov'
   'jasmine:loggingCov'
@@ -195,7 +199,7 @@ taskManager.add 'coverage', [
   'jasmine:queueCov'
 ]
 
-taskManager.add 'test', ['unit_test', 'integration_test']
+taskManager.add 'test', ['unit_test']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['base']
@@ -384,6 +388,8 @@ module.exports = (grunt) ->
     jasmine:
       arraybuffers: Rule.jasmineSpec 'arraybuffers'
       arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
+      bridge: Rule.jasmineSpec 'bridge'
+      bridgeCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'bridge')
       buildTools: Rule.jasmineSpec 'build-tools'
       buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
       churn: Rule.jasmineSpec 'churn'
@@ -440,6 +446,8 @@ module.exports = (grunt) ->
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
+      bridgeSpec: Rule.browserifySpec 'bridge/bridge'
+      bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
       churnSpec: Rule.browserifySpec 'churn/churn'
