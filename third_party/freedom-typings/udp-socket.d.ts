@@ -2,6 +2,7 @@
 // https://github.com/freedomjs/freedom/blob/master/interface/core.js
 
 /// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path='freedom-common.d.ts' />
 
 //declare module freedom {
 
@@ -35,11 +36,11 @@
     }
 
     interface Socket {
-      bind:any;
-      sendTo:any;
-      destroy:any;
-      on:any;
-      getInfo:any;
+      bind:(address:string, port:number) => Promise<number>;
+      sendTo:freedom.Method3<ArrayBuffer,string,number,number>;
+      destroy:() => Promise<void>;
+      on:(name:string, listener:Function) => void;
+      getInfo:() => Promise<SocketInfo>;
     }
   }
 // }
