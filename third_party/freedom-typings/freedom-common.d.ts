@@ -134,6 +134,22 @@ declare module freedom {
     // TODO: explore how to use FreedomModuleFactoryManager.
     [moduleName:string] : FreedomModuleFactoryManager<any>;
   }
+
+  // This generic interface represents any freedom method. Its purpose is to extend
+  // the basic definition to include the reckless call method, which does not
+  // produce a reply message.
+  interface Method1<T,R> {
+    (a:T) : Promise<R>;
+    reckless :(a:T) => void;
+  }
+  interface Method2<T,U,R> {
+    (a:T, b:U) : Promise<R>;
+    reckless :(a:T, b:U) => void;
+  }
+  interface Method3<T,U,V,R> {
+    (a:T, b:U, c:V) : Promise<R>;
+    reckless :(a:T, b:U, c:V) => void;
+  }
 }
 
 // By having both the freedom module declared above, and this quoted
