@@ -199,7 +199,7 @@ taskManager.add 'coverage', [
   'jasmine:queueCov'
 ]
 
-taskManager.add 'test', ['unit_test', 'integration_test']
+taskManager.add 'test', ['unit_test']
 
 # Default task, build dev, run tests, make the distribution build.
 taskManager.add 'default', ['base']
