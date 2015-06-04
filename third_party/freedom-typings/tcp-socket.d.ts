@@ -40,8 +40,8 @@
       connect(hostname:string, port:number) : Promise<void>;
       secure() : Promise<void>;
       write: freedom.Method1<ArrayBuffer,WriteInfo>;
-      pause() : Promise<void>;
-      resume() : Promise<void>;
+      pause: freedom.Method0<void>;
+      resume: freedom.Method0<void>;
       getInfo() : Promise<SocketInfo>;
       close() : Promise<void>;
       // TcpSockets have 3 types of events:

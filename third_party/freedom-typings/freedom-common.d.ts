@@ -138,6 +138,10 @@ declare module freedom {
   // This generic interface represents any freedom method. Its purpose is to extend
   // the basic definition to include the reckless call method, which does not
   // produce a reply message.
+  interface Method0<R> {
+    () : Promise<R>;
+    reckless :() => void;
+  }
   interface Method1<T,R> {
     (a:T) : Promise<R>;
     reckless :(a:T) => void;
