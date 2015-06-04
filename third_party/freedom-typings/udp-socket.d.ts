@@ -27,7 +27,7 @@
     }
 
     interface Implementation {
-      bind(address:string, port:number, continuation:(result:number) => void)
+      bind(address:string, port:number, continuation:() => void)
           : void;
       sendTo(data:ArrayBuffer, address:string, port:number,
               continuation:(bytesWritten:number) => void) : void;
@@ -36,7 +36,7 @@
     }
 
     interface Socket {
-      bind:(address:string, port:number) => Promise<number>;
+      bind:(address:string, port:number) => Promise<void>;
       sendTo:freedom.Method3<ArrayBuffer,string,number,number>;
       destroy:() => Promise<void>;
       on:(name:string, listener:Function) => void;

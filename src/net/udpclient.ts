@@ -36,7 +36,11 @@ class UdpClient {
   public bind() : Promise<net.Endpoint> {
     // TODO: not sure what else this should be?
     return this.socket.bind('127.0.0.1', 0)
-        .then((endpoint:net.Endpoint) => {
+        .then(() => {
+          return this.socket.getInfo();
+        })
+        .then((info:freedom_UdpSocket.SocketInfo) => {
+          var endpoint = {address: info.localAddress, port: info.localPort};
           // Record the address and port on which our socket is listening.
           this.address_ = endpoint.address;
           this.port_ = endpoint.port;
