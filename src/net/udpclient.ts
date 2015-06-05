@@ -1,4 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/freedom-typings/udp-socket.d.ts' />
 
 import net = require('./net.types');
@@ -36,11 +37,20 @@ class UdpClient {
   public bind() : Promise<net.Endpoint> {
     // TODO: not sure what else this should be?
     return this.socket.bind('127.0.0.1', 0)
-        .then(() => {
-          return this.socket.getInfo();
+        .then((resultCode:number) => {
+          // Ensure the listen was successful.
+          if (resultCode != 0) {
+            return Promise.reject(new Error('listen failed on localhost' +
+                ' with result code ' + resultCode));
+          }
+          return Promise.resolve(resultCode);
         })
-        .then((info:freedom_UdpSocket.SocketInfo) => {
-          var endpoint = {address: info.localAddress, port: info.localPort};
+        .then(this.socket.getInfo)
+        .then((socketInfo:UdpLib.SocketInfo) => {
+          var endpoint = {
+            address: socketInfo.localAddress,
+            port: socketInfo.localPort
+          };
           // Record the address and port on which our socket is listening.
           this.address_ = endpoint.address;
           this.port_ = endpoint.port;
