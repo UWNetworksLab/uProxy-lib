@@ -2,6 +2,7 @@
 // https://github.com/freedomjs/freedom/blob/master/interface/core.js
 
 /// <reference path="../../../build/third_party/typings/es6-promise/es6-promise.d.ts" />
+/// <reference path='freedom-common.d.ts' />
 
 // The data types used by TcpSocket
 //declare module freedom {
@@ -38,9 +39,9 @@
       listen(address:string, port:number) : Promise<void>;
       connect(hostname:string, port:number) : Promise<void>;
       secure() : Promise<void>;
-      write(data:ArrayBuffer) : Promise<WriteInfo>;
-      pause() : Promise<void>;
-      resume() : Promise<void>;
+      write: freedom.Method1<ArrayBuffer,WriteInfo>;
+      pause: freedom.Method0<void>;
+      resume: freedom.Method0<void>;
       getInfo() : Promise<SocketInfo>;
       close() : Promise<void>;
       // TcpSockets have 3 types of events:

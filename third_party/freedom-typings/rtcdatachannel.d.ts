@@ -34,8 +34,8 @@ declare module freedom_RTCDataChannel {
     close() : Promise<void>;
     getBinaryType() : Promise<string>;
     setBinaryType(type:string) : Promise<void>;
-    send(message:string) : Promise<void>;
-    sendBuffer(message:ArrayBuffer) : Promise<void>;
+    send :freedom.Method1<string,void>;
+    sendBuffer :freedom.Method1<ArrayBuffer,void>;
   }
 
 }
