@@ -12,10 +12,15 @@ interface VerifyDecryptResult {
   signedBy :string[];
 }
 
+interface PublicKey {
+  key :string;
+  fingerprint :string;
+}
+
 interface PgpProvider {
   // Standard freedom crypto API
   setup(passphrase:string, userid:string) :Promise<void>;
-  exportKey() :Promise<string>;
+  exportKey() :Promise<PublicKey>;
   signEncrypt(data:ArrayBuffer, encryptKey?:string,
               sign?:boolean) :Promise<ArrayBuffer>;
   verifyDecrypt(data:ArrayBuffer,
