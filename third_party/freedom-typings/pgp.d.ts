@@ -3,18 +3,14 @@
 // This is the interface that a module that has logger as a dependency gets to
 // use.
 
-interface PgpKey {
-  uids :string[];
+interface PublicKey {
+  key :string;
+  fingerprint :string;
 }
 
 interface VerifyDecryptResult {
   data :ArrayBuffer;
   signedBy :string[];
-}
-
-interface PublicKey {
-  key :string;
-  fingerprint :string;
 }
 
 interface PgpProvider {
