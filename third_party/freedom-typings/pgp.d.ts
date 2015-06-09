@@ -3,8 +3,9 @@
 // This is the interface that a module that has logger as a dependency gets to
 // use.
 
-interface PgpKey {
-  uids :string[];
+interface PublicKey {
+  key :string;
+  fingerprint :string;
 }
 
 interface VerifyDecryptResult {
@@ -15,7 +16,7 @@ interface VerifyDecryptResult {
 interface PgpProvider {
   // Standard freedom crypto API
   setup(passphrase:string, userid:string) :Promise<void>;
-  exportKey() :Promise<string>;
+  exportKey() :Promise<PublicKey>;
   signEncrypt(data:ArrayBuffer, encryptKey?:string,
               sign?:boolean) :Promise<ArrayBuffer>;
   verifyDecrypt(data:ArrayBuffer,
