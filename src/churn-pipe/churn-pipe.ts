@@ -164,13 +164,34 @@ class Pipe {
 
     var mirrorSocket :freedom_UdpSocket.Socket = freedom['core.udpsocket']();
     this.mirrorSockets_[key] = mirrorSocket;
-    return mirrorSocket.bind('127.0.0.1', 0).then((resultCode:number)
+    // Bind to INADDR_ANY owing to restrictions on localhost candidates
+    // in Firefox:
+    //   https://github.com/uProxy/uproxy/issues/1597
+    // TODO: bind to an actual, non-localhost address (see the issue)
+    return mirrorSocket.bind('0.0.0.0', 0).then((resultCode:number)
         : freedom_UdpSocket.Socket => {
       if (resultCode != 0) {
         throw new Error('bindRemote failed with result code ' + resultCode);
       }
       mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
-        this.sendTo_(recvFromInfo.data, remoteEndpoint);
+        // Ignore packets that do not originate from the browser, for a
+        // theoretical security benefit.
+        if (!this.browserEndpoint_) {
+          log.warn('browser endpoint not set, mirror socket for %1 ignoring ' +
+              'incoming packet from %2', remoteEndpoint, {
+                address: recvFromInfo.address,
+                port: recvFromInfo.port
+              });
+        } else if (recvFromInfo.address !== this.browserEndpoint_.address ||
+            recvFromInfo.port !== this.browserEndpoint_.port) {
+          log.warn('mirror socket for %1 ignoring incoming packet from %2',
+              remoteEndpoint, {
+                address: recvFromInfo.address,
+                port: recvFromInfo.port
+              });
+        } else {
+          this.sendTo_(recvFromInfo.data, remoteEndpoint);
+        }
       });
       return mirrorSocket;
     });
