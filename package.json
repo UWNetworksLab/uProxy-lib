@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "27.2.4",
+  "version": "27.2.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
