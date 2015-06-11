@@ -177,7 +177,7 @@ var log :logging.Log = new logging.Log('churn');
       return (random.randomUint32() % 255) + 1;
     } catch (e) {
       // https://github.com/uProxy/uproxy/issues/1593
-      log.debug('crypto unavailable, using Math.random');
+      log.warn('crypto unavailable, using Math.random');
       return Math.floor((Math.random() * 255)) + 1;
     }
   }
@@ -309,7 +309,7 @@ var log :logging.Log = new logging.Log('churn');
           this.peerName, endpoint);
       });
       this.onceHaveCaesarKey_.then((key: number) => {
-        log.debug('%1: caesar key is %2', this.peerName, key);
+        log.info('%1: caesar key is %2', this.peerName, key);
       });
     }
 
@@ -336,7 +336,6 @@ var log :logging.Log = new logging.Log('churn');
         remoteEndpoint:net.Endpoint,
         natEndpoints:NatPair,
         key:number) : void => {
-      log.debug('%1: configuring pipes...', this.peerName);
       this.pipe_ = freedom['churnPipe']();
       this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
@@ -351,9 +350,15 @@ var log :logging.Log = new logging.Log('churn');
       //       'ciphertext_dfa': regex2dfa('^.*$'),
       //       'ciphertext_max_len': 1450
       //     }
-      this.pipe_.bindLocal(natEndpoints.internal);
-      this.pipe_.setBrowserEndpoint(webRtcEndpoint);
-      this.pipe_.bindRemote(remoteEndpoint).then(this.haveForwardingSocketEndpoint_);
+      this.pipe_.bindLocal(natEndpoints.internal).then(() => {
+        return this.pipe_.setBrowserEndpoint(webRtcEndpoint);
+      }).then(() => {
+        this.pipe_.bindRemote(remoteEndpoint).then((e: net.Endpoint) => {
+          log.info('%1: initial mirror socket for remote peer at %2 on %3',
+              this.peerName, remoteEndpoint, e);
+          this.haveForwardingSocketEndpoint_(e);
+        });
+      });
     }
 
     private configureObfuscatedConnection_ = () => {
