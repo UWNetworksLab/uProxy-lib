@@ -2,7 +2,7 @@
 [![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbd8/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbd8/builds/latest)
 [![devDependency Status](https://david-dm.org/uProxy/uproxy-lib/dev-status.svg)](https://david-dm.org/uProxy/uproxy-lib#info=devDependencies)
 
-SOCKS proxy and other utilities for [uProxy](https://www.uproxy.org/).
+Obfuscating, WebRTC-driven SOCKS proxy and other utilities for [uProxy](https://www.uproxy.org/).
 
 ## Setup
 
@@ -142,9 +142,7 @@ any dropped packets. For more options, e.g. to open more channels or send
 larger datagrams, see the
 [turnutils_uclient documentation](https://code.google.com/p/rfc5766-turn-server/wiki/turnutils_uclient).
 
-## Future Plans
-
-### Obfuscation
+## Obfuscation
 
 WebRTC data channels are secured with
 [DTLS](http://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security).
@@ -153,15 +151,12 @@ An observer of the network traffic passing between two connected hosts can
 see that DTLS is in use; from this, they may infer that data channels are in
 use. We wish to make it difficult for an observer to detect the use of uProxy.
 
-The SOCKS server can use the `churn` module to obfuscate its network traffic.
-`churn` configures WebRTC to pass its network traffic through a local network
-port which transforms the data prior to sending it over the internet; a
-port on the remote host is similarly configured to restoret the data to its
+The SOCKS server configures WebRTC to pass its network traffic through a local
+network port which transforms the data prior to sending it over the internet; a
+port on the remote host is similarly configured to restore the data to its
 original form prior to delivering it to the remote WebRTC peer.
 
-For now, edit `src/simple-socks/freedom-module.ts` and set `false` to `true`
-in the call to the `SocksToRtc` and `RtcToNet` constructors. Rebuild the demo,
-reload, and you should now be using obfuscation.
+We call this system "churn", and its code can be found in `src/churn/`.
 
 ## Benchmarking
 
