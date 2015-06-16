@@ -387,6 +387,12 @@ export class Connection {
   public receiveNext = () : Promise<ArrayBuffer> => {
     return new Promise((F,R) => {
       this.dataFromSocketQueue.setSyncNextHandler(F).catch(R);
+
+      this.onceClosed.then((reason:SocketCloseKind) => {
+        if (this.dataFromSocketQueue.getLength() === 0) {
+          R(new Error('Receive aborted due to socket close (' + reason + ')'));
+        }
+      });
     });
   }
 
