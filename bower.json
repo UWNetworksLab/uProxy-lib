@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "homepage": "https://github.com/uProxy/uproxy-networking",
   "dependencies": {
-    "polymer": "Polymer/polymer#~0.4.2"
+    "polymer": "^0.5.6",
+    "webcomponentsjs": "0.6.1"
   }
 }

@@ -78,12 +78,13 @@ taskManager.add 'simpleSocksFirefoxApp', [
   'copy:libsForSimpleSocksFirefoxApp'
 ]
 
-taskManager.add 'copyPasteSocksChromeApp', [
+taskManager.add 'copyPasteSocks', [
   'base'
   'browserify:copyPasteSocksFreedomModule'
   'browserify:copyPasteSocksMain'
   'vulcanize:copyPasteSocks'
   'copy:libsForCopyPasteSocksChromeApp'
+  'copy:libsForCopyPasteSocksFirefoxApp'
 ]
 
 taskManager.add 'simpleTurnChromeApp', [
@@ -316,6 +317,19 @@ module.exports = (grunt) ->
             'freedom-pgp-e2e'
           ]
           localDestPath: 'samples/copypaste-socks-chromeapp/'
+      libsForCopyPasteSocksFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: [
+            'freedom-for-firefox'
+          ]
+          pathsFromDevBuild: ['copypaste-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+            'i18n'
+            'bower'
+            'freedom-pgp-e2e'
+          ]
+          localDestPath: 'samples/copypaste-socks-firefoxapp/data'
 
       libsForSimpleTurnChromeApp:
         Rule.copyLibs
