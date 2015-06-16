@@ -1,4 +1,4 @@
-<link rel="import" href='../bower/polymer/polymer.html'>
+<link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
 <link rel="import" href='crypto.html'>
 <link rel="import" href='start.html'>
 <link rel="import" href='giver.html'>
@@ -19,11 +19,6 @@
       button:hover {
         background-color: #60D0F0;
         border: 1px solid #50C0E0;
-      }
-      :host {
-        position: absolute;
-        width: 450px; height: 525px;
-        border: none; margin: auto;
       }
       .centered {
         text-align: center;
@@ -46,13 +41,9 @@
 
     <copypaste-start id='start' hidden?='{{ model.givingOrGetting !== null }}'></copypaste-start>
 
-    <template if='{{ model.givingOrGetting === "giving" }}'>
-      <copypaste-giver id='giver'></copypaste-giver>
-    </template>
+    <copypaste-giver id='giver' hidden?='{{ model.givingOrGetting !== "giving" }}'></copypaste-giver>
 
-    <template if='{{ model.givingOrGetting === "getting" }}'>
-      <copypaste-getter id='getter'></copypaste-getter>
-    </template>
+    <copypaste-getter id='getter' hidden?='{{ model.givingOrGetting !== "getting" }}'></copypaste-getter>
   </template>
 
   <script src='../i18n-util.js'>

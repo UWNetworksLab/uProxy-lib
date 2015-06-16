@@ -1,18 +1,18 @@
-/// <reference path='../../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/pgp.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/pgp.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
-import arraybuffers = require('../../arraybuffers/arraybuffers');
-import rtc_to_net = require('../../rtc-to-net/rtc-to-net');
-import socks_to_rtc = require('../../socks-to-rtc/socks-to-rtc');
-import net = require('../../net/net.types');
-import tcp = require('../../net/tcp');
-import signals = require('../../webrtc/signals');
-import bridge = require('../../bridge/bridge');
+import arraybuffers = require('../arraybuffers/arraybuffers');
+import rtc_to_net = require('../rtc-to-net/rtc-to-net');
+import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
+import net = require('../net/net.types');
+import tcp = require('../net/tcp');
+import signals = require('../webrtc/signals');
+import bridge = require('../bridge/bridge');
 
-import logging = require('../../logging/logging');
-import loggingTypes = require('../../loggingprovider/loggingprovider.types');
+import logging = require('../logging/logging');
+import loggingTypes = require('../loggingprovider/loggingprovider.types');
 
 // Set each module to info, warn, error, or debug depending on which module
 // you're debugging. Since the proxy outputs quite a lot of messages, show only
@@ -98,8 +98,7 @@ function setupServer(endpoint:net.Endpoint) {
 
 setupServer(localhostControlEndpoints[0]);
 
-parentModule.on('giveSendBack', (data:ArrayBuffer) => {
-  log.info('giveSendBack: with arraybuf of ' + data.byteLength);
+parentModule.on('giveSendBack', (message:string) => {
   var conn:tcp.Connection = null;
   var all_conns = tcpServer.connections();
   if (all_conns.length < 1) {
@@ -107,14 +106,13 @@ parentModule.on('giveSendBack', (data:ArrayBuffer) => {
     return;
   }
   conn = all_conns[0];
-  conn.send(data);
+  conn.send(arraybuffers.stringToArrayBuffer(message));
   conn.close();
 })
 
 // Invokd from main.core-env.ts, upon 'gatherMessage', which comes
 // back with our connection ID and the SDP, as a utf-8 string.
-parentModule.on('getSendBack', (data:ArrayBuffer) => {
-  log.info('getSendBack: with arraybuf of ' + data.byteLength);
+parentModule.on('getSendBack', (message:string) => {
   var conn:tcp.Connection = null;
   var all_conns = tcpServer.connections();
   if (all_conns.length < 1) {
@@ -122,7 +120,7 @@ parentModule.on('getSendBack', (data:ArrayBuffer) => {
     return;
   }
   conn = all_conns[0];
-  conn.send(data);
+  conn.send(arraybuffers.stringToArrayBuffer(message));
   conn.dataFromSocketQueue.setNextHandler((buf:ArrayBuffer) => {
     var sdp = arraybuffers.arrayBufferToString(buf);
     log.info('got sdp ' + sdp);

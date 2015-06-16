@@ -1,6 +1,6 @@
 {
-  "name": "socks-rtc-net",
-  "description": "Sample socks over rtc to net Freedom manifest",
+  "name": "copypaste-socks",
+  "description": "SOCKS server with copy/paste-based signalling channel.",
   "app": {
     "script": [
       "freedom-module.static.js"
@@ -8,19 +8,19 @@
   },
   "dependencies": {
     "loggingcontroller": {
-      "url": "uproxy-lib/loggingprovider/freedom-module.json",
+      "url": "../loggingprovider/freedom-module.json",
       "api": "loggingcontroller"
     },
     "logginglistener": {
-      "url": "uproxy-lib/loggingprovider/freedom-module.json",
+      "url": "../loggingprovider/freedom-module.json",
       "api": "logginglistener"
     },
     "churnPipe": {
-      "url": "uproxy-lib/churn-pipe/freedom-module.json",
+      "url": "../churn-pipe/freedom-module.json",
       "api": "churnPipe"
     },
     "pgp": {
-      "url": "freedom-pgp-e2e/dist/pgpapi.json",
+      "url": "../../freedom-pgp-e2e/dist/pgpapi.json",
       "api": "crypto"
     }
   },
