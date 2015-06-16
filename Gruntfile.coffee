@@ -25,7 +25,7 @@ taskManager.add 'samples', [
   'echoServerFirefoxApp'
   'simpleSocksChromeApp'
   'simpleSocksFirefoxApp'
-  'copyPasteSocksChromeApp'
+  'copyPasteSocks'
   'simpleTurnChromeApp'
   'simpleChurnChatChromeApp'
   'copyPasteChurnChatChromeApp'
