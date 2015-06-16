@@ -80,10 +80,10 @@ taskManager.add 'simpleSocksFirefoxApp', [
 
 taskManager.add 'copyPasteSocksChromeApp', [
   'base'
-  'copy:libsForCopyPasteSocksChromeApp'
-  'vulcanize:copyPasteSocksChromeApp'
   'browserify:copyPasteSocksFreedomModule'
-  'browserify:copyPasteSocksChromeApp'
+  'browserify:copyPasteSocksMain'
+  'vulcanize:copyPasteSocks'
+  'copy:libsForCopyPasteSocksChromeApp'
 ]
 
 taskManager.add 'simpleTurnChromeApp', [
@@ -308,7 +308,7 @@ module.exports = (grunt) ->
           npmLibNames: [
             'freedom-for-chrome'
           ]
-          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['copypaste-socks', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
             'uproxy-obfuscators'
             'i18n'
@@ -437,7 +437,7 @@ module.exports = (grunt) ->
             browserifyOptions: { standalone: 'browserified_exports' }
           })
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
-      copyPasteSocksFreedomModule: Rule.browserify 'samples/copypaste-socks-chromeapp/freedom-module'
+      copyPasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'samples/simple-turn-chromeapp/freedom-module'
       turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
       turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
@@ -487,7 +487,7 @@ module.exports = (grunt) ->
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
-      copyPasteSocksChromeApp: Rule.browserify 'samples/copypaste-socks-chromeapp/main.core-env'
+      copyPasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
       simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
       simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
       copyPasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
@@ -506,14 +506,14 @@ module.exports = (grunt) ->
         browserifyIntegrationTest 'integration-tests/socks-echo/slow.core-env'
 
     vulcanize:
-      copyPasteSocksChromeApp:
+      copyPasteSocks:
         options:
           inline: true
           csp: true
         files: [
           {
-            src: path.join(devBuildPath, 'samples/copypaste-socks-chromeapp/polymer-components/root.html')
-            dest: path.join(devBuildPath, 'samples/copypaste-socks-chromeapp/polymer-components/vulcanized.html')
+            src: path.join(devBuildPath, 'copypaste-socks/polymer-components/root.html')
+            dest: path.join(devBuildPath, 'copypaste-socks/polymer-components/vulcanized.html')
           }
         ]
 
