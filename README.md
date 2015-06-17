@@ -33,8 +33,7 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 ## Demo apps
 
 After building, the apps can be found at `build/dev/uproxy-lib/samples/`. They
-are a mix of web apps and browser extensions (Chrome and Firefox, although
-[not every demo is currently packaged for Firefox](https://github.com/uProxy/uproxy/issues/419)).
+are a mix of web apps and browser extensions.
 
 To run web apps:
  * start a webserver, e.g. `python -m SimpleHTTPServer`
@@ -88,14 +87,6 @@ To see debugging output, open the background page.
 
 Distributed SOCKS proxy demo. This is essentially uProxy without any
 social network integration.
-
-### simple-churn-chat
-
-As simple-fredom-chat, except WebRTC traffic between the two peers is obfuscated.
-
-Wireshark may be used to verify that the traffic is obfuscated; the endpoints
-in use - along with a lot of debugging information - may be determined by
-examining the Javascript console.
 
 ### copypaste-freedom-chat
 
