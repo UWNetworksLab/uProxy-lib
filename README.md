@@ -19,7 +19,7 @@ First, to install required NPMs and configure the `build/` directory for TypeScr
 ```
 
 Then, to compile the TypeScript code and build the demo apps, execute:
-```bashs
+```bash
 grunt samples
 ```
 
