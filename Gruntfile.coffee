@@ -26,7 +26,7 @@ taskManager.add 'samples', [
   'simpleSocksChromeApp'
   'simpleSocksFirefoxApp'
   'copyPasteSocks'
-  'simpleTurnChromeApp'
+  'simpleTurn'
   'simpleChurnChatChromeApp'
   'copyPasteChurnChatChromeApp'
 ]
@@ -87,13 +87,14 @@ taskManager.add 'copyPasteSocks', [
   'copy:libsForCopyPasteSocksFirefoxApp'
 ]
 
-taskManager.add 'simpleTurnChromeApp', [
+taskManager.add 'simpleTurn', [
   'base'
   'browserify:simpleTurnFreedomModule'
   'browserify:turnBackendFreedomModule'
   'browserify:turnFrontendFreedomModule'
   'browserify:simpleTurnChromeApp'
   'copy:libsForSimpleTurnChromeApp'
+  'copy:libsForSimpleTurnFirefoxApp'
 ]
 
 taskManager.add 'simpleChurnChatChromeApp', [
@@ -334,8 +335,13 @@ module.exports = (grunt) ->
       libsForSimpleTurnChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['turn-frontend', 'turn-backend', 'loggingprovider']
+          pathsFromDevBuild: ['simple-turn', 'turn-frontend', 'turn-backend', 'loggingprovider']
           localDestPath: 'samples/simple-turn-chromeapp/'
+      libsForSimpleTurnFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['simple-turn', 'turn-frontend', 'turn-backend', 'loggingprovider']
+          localDestPath: 'samples/simple-turn-firefoxapp/data'
 
       libsForSimpleChurnChatChromeApp:
         Rule.copyLibs
@@ -452,7 +458,7 @@ module.exports = (grunt) ->
           })
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       copyPasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
-      simpleTurnFreedomModule: Rule.browserify 'samples/simple-turn-chromeapp/freedom-module'
+      simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
       turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
       simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
