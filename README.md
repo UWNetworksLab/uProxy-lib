@@ -50,7 +50,9 @@ To run Firefox add-ons:
 
 ### simple-freedom-chat
 
-Simplest possible, single-page, `src/peerconnection` demo.
+WebRTC-powered chat client, with both peers on the same page.
+
+This is the simplest possible demo and test of `src/peerconnection`.
 
 ### copypaste-freedom-chat
 
