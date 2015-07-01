@@ -74,7 +74,7 @@ function setupServer(endpoint:net.Endpoint) {
         doStart();
         setTimeout(() => {
           parentModule.emit('gatherMessage');
-        }, 500);
+        }, 2000);
 
         // Listen for the reply from the giver.
         conn.dataFromSocketQueue.setSyncNextHandler((buf:ArrayBuffer) => {
@@ -108,8 +108,8 @@ setupServer(localhostControlEndpoints[0]);
 
 function sendControlPortReply(message:string) {
   var connections = tcpServer.connections();
-  if (connections.length < 1) {
-    log.error('weird, no connection to send reply to');
+  if (connections.length !== 1) {
+    log.error('weird, there are multiple connections');
     return;
   }
   connections[0].send(arraybuffers.stringToArrayBuffer(message));
@@ -118,7 +118,7 @@ function sendControlPortReply(message:string) {
 parentModule.on('controlPortCallback', sendControlPortReply);
 
 var doStart = () => {
-  var localhostEndpoint:net.Endpoint = { address: '127.0.0.1', port: 9999 };
+  var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
   socksRtc = new socks_to_rtc.SocksToRtc();
 
