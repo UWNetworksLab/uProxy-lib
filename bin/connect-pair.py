@@ -21,7 +21,7 @@ time.sleep(3.0)
 offer_sdp = getter_sock.readline().rstrip()
 print "connecting to giver, sending " + offer_sdp
 giver_sock.write("GIVE " + offer_sdp + "\n")
-getter_sock.flush()
+giver_sock.flush()
 time.sleep(3.0)
 answer_sdp = giver_sock.readline().rstrip()
 print "from giver, got " + answer_sdp
