@@ -22,7 +22,7 @@ giverOpen = True
 while getterOpen and giverOpen:
   inready, outready, exceptready = select.select([getter, giver], [], [])
   for s in inready:
-    raw = s.recv(4096)
+    raw = s.recv(16384)
     if len(raw) < 1:
       if s == getter:
         getterOpen = False
