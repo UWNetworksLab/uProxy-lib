@@ -14,6 +14,7 @@ taskManager.add 'base', [
   'browserify:echoFreedomModule'
   'browserify:simpleSocksFreedomModule'
   'browserify:churnPipeFreedomModule'
+  'browserify:portControlFreedomModule'
 ]
 
 # Makes all sample apps.
@@ -366,7 +367,7 @@ module.exports = (grunt) ->
       libsForIntegrationSocksEcho:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider', 'port-control']
           localDestPath: 'integration-tests/socks-echo'
 
     # Typescript rules
@@ -456,6 +457,7 @@ module.exports = (grunt) ->
             ignore: ['ws', 'path']
             browserifyOptions: { standalone: 'browserified_exports' }
           })
+      portControlFreedomModule: Rule.browserify 'port-control/freedom-module'
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       copyPasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
