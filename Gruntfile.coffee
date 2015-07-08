@@ -29,6 +29,7 @@ taskManager.add 'samples', [
   'simpleTurn'
   'simpleChurnChatChromeApp'
   'copyPasteChurnChatChromeApp'
+  'adventure'
 ]
 
 # Makes the distribution build.
@@ -109,6 +110,26 @@ taskManager.add 'copyPasteChurnChatChromeApp', [
   'browserify:copyPasteChurnChatFreedomModule'
   'browserify:copyPasteChurnChatChromeApp'
   'copy:libsForCopyPasteChurnChatChromeApp'
+]
+
+taskManager.add 'adventureBase', [
+  'base'
+  'browserify:adventureFreedomModule'
+]
+
+taskManager.add 'adventureChromeApp', [
+  'adventureBase'
+  'copy:libsForAdventureChromeApp'
+]
+
+taskManager.add 'adventureFirefoxApp', [
+  'adventureBase'
+  'copy:libsForAdventureFirefoxApp'
+]
+
+taskManager.add 'adventure', [
+  'adventureChromeApp'
+  'adventureFirefoxApp'
 ]
 
 # Create unit test code
@@ -357,6 +378,23 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/copypaste-churn-chat-chromeapp/'
 
+      libsForAdventureChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+          ]
+          localDestPath: 'samples/adventure-chromeapp/'
+      libsForAdventureFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+          ]
+          localDestPath: 'samples/adventure-firefoxapp/data/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -463,6 +501,7 @@ module.exports = (grunt) ->
       turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
       simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
       copyPasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
+      adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
