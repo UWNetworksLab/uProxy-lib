@@ -122,6 +122,8 @@ taskManager.add 'browserifySpecs', [
   'browserify:loggingProviderSpec'
   'browserify:peerconnectionSpec'
   'browserify:datachannelSpec'
+  'browserify:poolSpec'
+  'browserify:tcpSpec'
   'browserify:queueSpec'
   'browserify:turnFrontEndMessagesSpec'
   'browserify:turnFrontEndSpec'
@@ -152,6 +154,8 @@ taskManager.add 'unit_test', [
   'jasmine:buildTools'
   'jasmine:logging'
   'jasmine:loggingProvider'
+  'jasmine:net'
+  'jasmine:pool'
   'jasmine:webrtc'
   'jasmine:queue'
 ]
@@ -197,6 +201,8 @@ taskManager.add 'coverage', [
   'jasmine:buildToolsCov'
   'jasmine:loggingCov'
   'jasmine:loggingProviderCov'
+  'jasmine:netCov'
+  'jasmine:poolCov'
   'jasmine:webrtcCov'
   'jasmine:queueCov'
 ]
