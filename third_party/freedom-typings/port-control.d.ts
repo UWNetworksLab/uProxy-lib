@@ -39,7 +39,7 @@ declare module freedom_PortControl {
         probeUpnpSupport(): Promise<boolean>;
         addMappingUpnp(intPort: number, extPort: number, lifetime: number): Promise<Mapping>;
         deleteMappingUpnp(extPort: number): Promise<boolean>;
-        
+
         getActiveMappings(): Promise<ActiveMappings>;
         getPrivateIps(): Promise<string[]>;
         close(): Promise<void>;

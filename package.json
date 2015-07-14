@@ -16,6 +16,9 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     }
   ],
+  "dependencies": {
+    "freedom-port-control": "^0.9.0"
+  },
   "peerDependencies": {
     "circular-json": "^0.1.6",
     "freedom": "^0.6.25"
@@ -31,7 +34,6 @@
     "freedom-for-chrome": "^0.4.19",
     "freedom-for-firefox": "^0.6.14",
     "freedom-pgp-e2e": "^0.4.0",
-    "freedom-port-control": "^0.9.0",
     "grunt": "^0.4.5",
     "grunt-browserify": "^3.0.1",
     "grunt-contrib-clean": "^0.6.0",
