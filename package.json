@@ -23,6 +23,7 @@
   "devDependencies": {
     "arraybuffer-slice": "^0.1.2",
     "babar": "^0.0.3",
+    "bower": "^1.4.1",
     "browserify-istanbul": "^0.2.0",
     "circular-json": "^0.1.6",
     "crypto": "^0.0.3",
