@@ -16,6 +16,8 @@
 //
 // import regex2dfa = require('regex2dfa');
 
+// TODO(bwiley): Remove hardcoded caesar parameter flow
+
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
@@ -253,9 +255,22 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private configurePipe_ = (key:number) : void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      this.pipe_.setTransformer('caesar',
+      /*this.pipe_.setTransformer('none',
           new Uint8Array([key]).buffer,
-          '{}');
+          '{}');*/
+      /*this.pipe_.setTransformer('caesar',
+          new Uint8Array([key]).buffer,
+          '{}');*/
+      /*this.pipe_.setTransformer('packetLengthNormalizer',
+          new Uint8Array([key]).buffer,
+          '{"targetLength": 1440}');*/
+      /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
+          new Uint8Array([key]).buffer,
+          '{"targetMinimum": 1000, "targetMaximum": 1440}');*/
+      var targetDistribution=this.makeSampleTargetLengthDistribution_();
+      this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({"targetDistribution": targetDistribution}));
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
@@ -268,6 +283,17 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //     }
 
       this.havePipe_();
+    }
+
+    private makeSampleTargetLengthDistribution_ = () : Array<number> => {
+      var result : Array<number> =[];
+      var prob = 1 / 1440;
+      var index=0;
+      while(index<1440) {
+        result.push(prob);
+      }
+
+      return result;
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
