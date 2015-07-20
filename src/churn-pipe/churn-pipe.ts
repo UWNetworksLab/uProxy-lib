@@ -16,6 +16,10 @@
 
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
+import PacketLengthShaper = require('../fancy-transformers/packetLengthShaper');
+import PacketLengthNormalizer = require('../fancy-transformers/packetLengthNormalizer');
+import PacketLengthUniformRandomizer = require('../fancy-transformers/packetLengthUniformRandomizer');
+import PacketLengthMultinomialRandomizer = require('../fancy-transformers/packetLengthMultinomialRandomizer');
 
 import logging = require('../logging/logging');
 
@@ -52,6 +56,8 @@ var makeTransformer_ = (
     config ?:string)
   : Transformer => {
   var transformer :Transformer;
+  log.info('Instantiating transformer %1', name)
+
   // TODO(ldixon): re-enable rabbit and FTE once we can figure out why they
   // don't load in freedom.
   /* if (name == 'rabbit') {
@@ -60,6 +66,12 @@ var makeTransformer_ = (
      transformer = Fte.Transformer();
      } else */ if (name == 'caesar') {
        transformer = new CaesarCipher();
+     } else if (name == 'packetLengthNormalizer') {
+       transformer = new PacketLengthNormalizer();
+     } else if (name == 'packetLengthUniformRandomizer') {
+       transformer = new PacketLengthUniformRandomizer();
+     } else if (name == 'packetLengthMultinomialRandomizer') {
+       transformer = new PacketLengthMultinomialRandomizer();
      } else if (name == 'none') {
        transformer = new PassThrough();
      } else {
@@ -198,7 +210,7 @@ class Pipe {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
       });
     });
-    
+
     this.publicPorts_[publicEndpoint.address][publicEndpoint.port] = portPromise;
     return portPromise;
   }
