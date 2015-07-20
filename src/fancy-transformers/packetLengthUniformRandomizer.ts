@@ -40,7 +40,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     log.info('Configured packet length normalizer %1 %2', this.targetMinimum_, this.targetMaximum_);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     //log.info('Transforming');
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }

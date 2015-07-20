@@ -43,27 +43,27 @@ class PacketLengthShaper implements Transformer {
     } // Otherwise use default value.
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, buffer.byteLength+2);
   }
 
-  public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer => {
+  public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer[] => {
 //    log.info('Transforming');
     if (buffer.byteLength + 2 == target) {
       log.info('case ==');
-      return this.append_(this.encodeLength_(buffer.byteLength), buffer)
+      return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
     } else if (buffer.byteLength + 2 > target) {
 //      log.info('case > %1 %2', buffer.byteLength+2, target);
-      return this.append_(this.encodeLength_(0), this.randomBytes_(target))
+      return [this.append_(this.encodeLength_(0), this.randomBytes_(target))];
     } else {
       var result=this.append_(this.encodeLength_(buffer.byteLength), this.append_(buffer, this.randomBytes_(target-buffer.byteLength-2)))
 //      log.info('-> %1', buffer.byteLength);
-      return result;
+      return [result];
     }
   }
 
-  public restore = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
     var parts = this.split_(buffer, 2);
     var lengthBytes = parts[0];
     var length = this.decodeLength_(lengthBytes);
@@ -71,9 +71,9 @@ class PacketLengthShaper implements Transformer {
     if(rest.byteLength > length) {
       parts=this.split_(rest, length);
 //      log.info('<- %1 %2', length, parts[0].byteLength);
-      return parts[0];
+      return [parts[0]];
     } else {
-      return rest;
+      return [rest];
     }
   }
 

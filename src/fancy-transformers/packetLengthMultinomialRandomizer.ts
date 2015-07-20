@@ -38,7 +38,7 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
     this.targetDistribution_=data['distribution'];
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }

@@ -38,7 +38,7 @@ class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
     log.info('Configured packet length normalizer %1', this.targetLength_);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
+  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, this.targetLength_);
   }
