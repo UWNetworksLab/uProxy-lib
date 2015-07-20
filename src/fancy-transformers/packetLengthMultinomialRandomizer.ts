@@ -31,6 +31,8 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
 
   /** Get the target distribution. */
   public configure = (json:string) : void => {
+    this.configure(json);
+
     var data=JSON.parse(json);
     // TODO(bwiley): Throw error on missing distribution parameter
     this.targetDistribution_=data['distribution'];

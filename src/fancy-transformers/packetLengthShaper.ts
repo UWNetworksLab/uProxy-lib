@@ -20,6 +20,8 @@ var log :logging.Log = new logging.Log('fancy-transformers');
  * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
  */
 class PacketLengthShaper implements Transformer {
+  private fragmentation_ : boolean = false;
+
   public constructor() {
     log.info('Constructed packet length shaper');
   }
@@ -33,7 +35,13 @@ class PacketLengthShaper implements Transformer {
   }
 
   /** Get the target length. */
-  public configure = (json:string) : void => {}
+  public configure = (json:string) : void => {
+    var config=JSON.parse(json);
+    // Optional parameter
+    if('fragmentation' in config) {
+      this.fragmentation_=config['fragmentation']
+    } // Otherwise use default value.
+  }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer => {
 //    log.info('Transforming');
