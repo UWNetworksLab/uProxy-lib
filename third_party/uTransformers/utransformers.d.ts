@@ -23,7 +23,7 @@ interface Transformer {
    * @param {ArrayBuffer} plaintext data need to be obfuscated.
    * @return {?ArrayBuffer} obfuscated data, or null if failed.
    */
-  transform(buffer:ArrayBuffer) : ArrayBuffer;
+  transform(buffer:ArrayBuffer) : ArrayBuffer[];
 
   /**
    * Restores data from obfuscated form to original form.
@@ -31,7 +31,7 @@ interface Transformer {
    * @param {ArrayBuffer} ciphertext obfuscated data.
    * @return {?ArrayBuffer} original data, or null if failed.
    */
-  restore(buffer:ArrayBuffer) : ArrayBuffer;
+  restore(buffer:ArrayBuffer) : ArrayBuffer[];
 
   /**
    * Dispose the transformer.
