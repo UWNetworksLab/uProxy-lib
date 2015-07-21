@@ -6,6 +6,8 @@
 /// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
 
 import logging = require('../logging/logging');
+import Defragmenter = require('./defragmenter');
+import Fragment = require('./fragment');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
@@ -21,6 +23,7 @@ var log :logging.Log = new logging.Log('fancy-transformers');
  */
 class PacketLengthShaper implements Transformer {
   private fragmentation_ : boolean = false;
+  private fragmentBuffer_ : Defragmenter = null;
 
   public constructor() {
     log.info('Constructed packet length shaper');
@@ -39,41 +42,68 @@ class PacketLengthShaper implements Transformer {
     var config=JSON.parse(json);
     // Optional parameter
     if('fragmentation' in config) {
-      this.fragmentation_=config['fragmentation']
+      this.fragmentation_=config['fragmentation'];
     } // Otherwise use default value.
+
+    if(this.fragmentation_) {
+      this.fragmentBuffer_=new Defragmenter();
+    }
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
 //    log.info('Transforming');
-    return this.shapePacketLength(buffer, buffer.byteLength+2);
+    throw new Error('PacketLengthShaper is abstract and should not be instantiated directly. Instead, use a subclass.');
   }
 
   public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer[] => {
-//    log.info('Transforming');
-    if (buffer.byteLength + 2 == target) {
-      log.info('case ==');
-      return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
-    } else if (buffer.byteLength + 2 > target) {
-//      log.info('case > %1 %2', buffer.byteLength+2, target);
-      return [this.append_(this.encodeLength_(0), this.randomBytes_(target))];
+    if(this.fragmentation_) {
+      if (buffer.byteLength + 4 == target) {
+        log.info('case ==');
+        return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
+      } else if (buffer.byteLength + 4 > target) {
+        var firstLength=target-4;
+        var restLength=buffer.byteLength-firstLength;
+        var parts = this.split_(buffer, firstLength);
+        var first = this.append_(this.encodeLength_(firstLength), parts[0]);
+        var rest = this.shapePacketLength(parts[1], restLength);
+        return [first].concat(rest);
+      } else { // buffer.bytelength + 4 < target
+        var result=this.append_(this.encodeLength_(buffer.byteLength), this.append_(buffer, this.randomBytes_(target-buffer.byteLength-2)))
+        return [result];
+      }
     } else {
-      var result=this.append_(this.encodeLength_(buffer.byteLength), this.append_(buffer, this.randomBytes_(target-buffer.byteLength-2)))
-//      log.info('-> %1', buffer.byteLength);
-      return [result];
+      if (buffer.byteLength + 2 == target) {
+        log.info('case ==');
+        return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
+      } else if (buffer.byteLength + 2 > target) {
+        return [this.append_(this.encodeLength_(0), this.randomBytes_(target))];
+      } else { // buffer.byteLength + 2 < target
+        var result=this.append_(this.encodeLength_(buffer.byteLength), this.append_(buffer, this.randomBytes_(target-buffer.byteLength-2)))
+        return [result];
+      }
     }
   }
 
   public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-    var parts = this.split_(buffer, 2);
-    var lengthBytes = parts[0];
-    var length = this.decodeLength_(lengthBytes);
-    var rest = parts[1];
-    if(rest.byteLength > length) {
-      parts=this.split_(rest, length);
-//      log.info('<- %1 %2', length, parts[0].byteLength);
-      return [parts[0]];
+    if(this.fragmentation_) {
+      var parts = this.split_(buffer, 2);
+      var lengthBytes = parts[0];
+      var length = this.decodeLength_(lengthBytes);
+      var rest = parts[1];
+
+      var fragment=Fragment.decodeFragment(rest, length);
     } else {
-      return [rest];
+      var parts = this.split_(buffer, 2);
+      var lengthBytes = parts[0];
+      var length = this.decodeLength_(lengthBytes);
+      var rest = parts[1];
+      if(rest.byteLength > length) {
+        parts=this.split_(rest, length);
+  //      log.info('<- %1 %2', length, parts[0].byteLength);
+        return [parts[0]];
+      } else {
+        return [rest];
+      }
     }
   }
 
