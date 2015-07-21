@@ -57,23 +57,31 @@ class PacketLengthShaper implements Transformer {
 
   public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer[] => {
     if(this.fragmentation_) {
-      if (buffer.byteLength + 4 == target) {
-        log.info('case ==');
-        return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
-      } else if (buffer.byteLength + 4 > target) {
-        var firstLength=target-4;
+      if (buffer.byteLength + 5 == target) { // One fragment with no padding
+        var id=Fragment.randomId();
+        var index=0;
+        var count=1;
+        var fragment=new Fragment(id, index, count);
+        var fragmentBuffer=fragment.encodeFragment();
+        return [this.append_(this.encodeLength_(fragmentBuffer.byteLength), fragmentBuffer)];
+      } else if (buffer.byteLength + 5 > target) {
+        var firstLength=target-5;
         var restLength=buffer.byteLength-firstLength;
         var parts = this.split_(buffer, firstLength);
-        var first = this.append_(this.encodeLength_(firstLength), parts[0]);
+        var first = this.shapePacketLength(parts[0], firstLength);
         var rest = this.shapePacketLength(parts[1], restLength);
         return [first].concat(rest);
-      } else { // buffer.bytelength + 4 < target
-        var result=this.append_(this.encodeLength_(buffer.byteLength), this.append_(buffer, this.randomBytes_(target-buffer.byteLength-2)))
+      } else { // buffer.bytelength + 4 < target, One fragment with padding
+        var id=Fragment.randomId();
+        var index=0;
+        var count=1;
+        var fragment=new Fragment(id, index, count);
+        var fragmentBuffer=fragment.encodeFragment();
+        var result=this.append_(this.encodeLength_(fragmentBuffer.byteLength), this.append_(fragmentBuffer, this.randomBytes_(target-fragmentBuffer.byteLength-2)))
         return [result];
       }
     } else {
       if (buffer.byteLength + 2 == target) {
-        log.info('case ==');
         return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
       } else if (buffer.byteLength + 2 > target) {
         return [this.append_(this.encodeLength_(0), this.randomBytes_(target))];
@@ -92,6 +100,12 @@ class PacketLengthShaper implements Transformer {
       var rest = parts[1];
 
       var fragment=Fragment.decodeFragment(rest, length);
+      this.fragmentBuffer_.addFragment(fragment);
+      if(this.fragmentBuffer_.completeCount() > 0) {
+        return this.fragmentBuffer_.getComplete();
+      } else {
+        return [];
+      }
     } else {
       var parts = this.split_(buffer, 2);
       var lengthBytes = parts[0];
