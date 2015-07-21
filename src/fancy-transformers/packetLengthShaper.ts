@@ -61,7 +61,7 @@ class PacketLengthShaper implements Transformer {
         var id=Fragment.randomId();
         var index=0;
         var count=1;
-        var fragment=new Fragment(id, index, count);
+        var fragment=new Fragment(id, index, count, buffer);
         var fragmentBuffer=fragment.encodeFragment();
         return [this.append_(this.encodeLength_(fragmentBuffer.byteLength), fragmentBuffer)];
       } else if (buffer.byteLength + 5 > target) {
@@ -70,12 +70,12 @@ class PacketLengthShaper implements Transformer {
         var parts = this.split_(buffer, firstLength);
         var first = this.shapePacketLength(parts[0], firstLength);
         var rest = this.shapePacketLength(parts[1], restLength);
-        return [first].concat(rest);
+        return first.concat(rest);
       } else { // buffer.bytelength + 4 < target, One fragment with padding
         var id=Fragment.randomId();
         var index=0;
         var count=1;
-        var fragment=new Fragment(id, index, count);
+        var fragment=new Fragment(id, index, count, buffer);
         var fragmentBuffer=fragment.encodeFragment();
         var result=this.append_(this.encodeLength_(fragmentBuffer.byteLength), this.append_(fragmentBuffer, this.randomBytes_(target-fragmentBuffer.byteLength-2)))
         return [result];
