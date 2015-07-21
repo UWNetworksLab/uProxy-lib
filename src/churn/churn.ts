@@ -255,9 +255,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private configurePipe_ = (key:number) : void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      /*this.pipe_.setTransformer('none',
+      this.pipe_.setTransformer('none',
           new Uint8Array([key]).buffer,
-          '{}');*/
+          '{}');
       /*this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');*/
@@ -267,10 +267,10 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
           new Uint8Array([key]).buffer,
           '{"targetMinimum": 1000, "targetMaximum": 1440}');*/
-      var targetDistribution=this.makeSampleTargetLengthDistribution_();
+      /*var targetDistribution=this.makeSampleTargetLengthDistribution_();
       this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
           new Uint8Array([key]).buffer,
-          JSON.stringify({"targetDistribution": targetDistribution}));
+          JSON.stringify({"targetDistribution": targetDistribution}));*/
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
