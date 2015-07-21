@@ -16,6 +16,7 @@ interface VerifyDecryptResult {
 interface PgpProvider {
   // Standard freedom crypto API
   setup(passphrase:string, userid:string) :Promise<void>;
+  clear() :Promise<void>;
   exportKey() :Promise<PublicKey>;
   signEncrypt(data:ArrayBuffer, encryptKey?:string,
               sign?:boolean) :Promise<ArrayBuffer>;
