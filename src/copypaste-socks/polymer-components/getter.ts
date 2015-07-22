@@ -24,7 +24,7 @@ Polymer({
     }
   },
   consumeInboundText: function() {
-    console.log("consumeInboundText: " + copypsate.model.inboundMessageNode);
+    console.log("consumeInboundText: " + copypaste.model.inboundText);
     copypaste.consumeInboundMessage();
     // Disable the form field, since it no longer makes sense to accept further
     // input in it.

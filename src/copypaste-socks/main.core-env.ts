@@ -17,6 +17,7 @@ module copypaste_module {
 
   export var onceReady :Promise<freedom_types.OnAndEmit<any,any>> =
       loadModule().then((copypaste:freedom_types.OnAndEmit<any,any>) => {
+        console.log("onceReady active.");
     copypaste.on('signalForPeer', (message:signals.Message) => {
       model.readyForStep2 = true;
 
@@ -119,6 +120,7 @@ module copypaste_module {
   // signalling messages. Enables/disables the corresponding form button, as
   // appropriate. Returns null if the field contents are malformed.
   export function parseInboundMessages(inboundMessageFieldValue:string) : void {
+    console.log("parseInboundMessages("+inboundMessageFieldValue+"):starting");
     // Base64-decode the pasted text.
     var signalsString :string = null;
     try {
@@ -151,8 +153,10 @@ module copypaste_module {
     // Enable/disable, as appropriate, the button for consuming the messages.
     if (null !== parsedSignals && parsedSignals.length > 0) {
       model.inputIsWellFormed = true;
+      console.log("Parsed " + parsedSignals.length + " signals");
     } else {
       // TODO: Notify the user that the pasted text is malformed.
+      console.log("Found no parsed signals in ", signalsString);
     }
 
     parsedInboundMessages = parsedSignals;
@@ -164,7 +168,9 @@ module copypaste_module {
   // or rtc-to-net module. Disables the form field.
   export function consumeInboundMessage() : void {
     // Forward the signalling messages to the Freedom app.
+    console.log("consumeInboundMessage: " + model.inboundText);
     onceReady.then(function(copypaste) {
+      console.log("consumeInboundMessage: onceReady!");
       for (var i = 0; i < parsedInboundMessages.length; i++) {
         copypaste.emit('handleSignalMessage', parsedInboundMessages[i]);
       }
