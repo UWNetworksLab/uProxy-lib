@@ -395,11 +395,13 @@ class Pipe {
    */
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
       : void => {
-    var transformedBuffer = this.transformer_.transform(buffer);
-    publicSocket.sendTo.reckless(
-      transformedBuffer,
-      to.address,
-      to.port);
+    var transformedBuffers = this.transformer_.transform(buffer);
+    for(var i=0; i<transformedBuffers.length; i++) {
+      publicSocket.sendTo.reckless(
+        transformedBuffers[i],
+        to.address,
+        to.port);
+    }
   }
 
   /**
@@ -415,13 +417,15 @@ class Pipe {
       return;
     }
     var transformedBuffer = recvFromInfo.data;
-    var buffer = this.transformer_.restore(transformedBuffer);
-    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      mirrorSocket.sendTo.reckless(
-          buffer,
-          iface,
-          browserPort);
-    });
+    var buffers = this.transformer_.restore(transformedBuffer);
+    for(var i=0; i<buffers.length; i++) {
+      this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+        mirrorSocket.sendTo.reckless(
+            buffers[i],
+            iface,
+            browserPort);
+      });
+    }
   }
 
   public on = (name:string, listener:(event:any) => void) : void => {
