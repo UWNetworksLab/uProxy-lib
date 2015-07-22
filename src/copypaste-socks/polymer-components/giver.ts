@@ -12,6 +12,7 @@ declare var i18nUtil :I18nUtil;
 Polymer({
   model: copypaste.model,
   parseInboundText: function() {
+    console.log("parseInboundText: " + copypaste.model.inboundText);
     if (copypaste.model.usingCrypto && !copypaste.model.inputDecrypted) {
       copypaste.verifyDecryptInboundMessage(copypaste.model.inboundText);
     } else {

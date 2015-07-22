@@ -1,6 +1,7 @@
 <link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
 <link rel="import" href='crypto.html'>
 <link rel="import" href='start.html'>
+<link rel="import" href='chat.html'>
 <link rel="import" href='giver.html'>
 <link rel="import" href='getter.html'>
 
@@ -44,6 +45,9 @@
     <copypaste-giver id='giver' hidden?='{{ model.givingOrGetting !== "giving" }}'></copypaste-giver>
 
     <copypaste-getter id='getter' hidden?='{{ model.givingOrGetting !== "getting" }}'></copypaste-getter>
+
+    <copypaste-chat id='chat' ></copypaste-chat>
+    <!-- hidden?='{{ model.givingOrGetting === null }}' -->
   </template>
 
   <script src='../i18n-util.js'>
