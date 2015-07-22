@@ -110,6 +110,8 @@ class Pipe {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
+  private packetCount_ = 0;
+
   // For each physical network interface, this provides a list of the open
   // public sockets on that interface.  Each socket corresponds to a port that
   // is intended to be publicly routable (possibly thanks to NAT), and is
@@ -399,8 +401,6 @@ class Pipe {
       : void => {
     var transformedBuffers = this.transformer_.transform(buffer);
     for(var i=0; i<transformedBuffers.length; i++) {
-      log.debug('Sending shaped packet %1 / %2', i, transformedBuffers.length);
-      log.debug('%1.sendTo(%2, %3, %4)', publicSocket, transformedBuffers[i], to.address, to.port);
       publicSocket.sendTo.reckless(
         transformedBuffers[i],
         to.address,
@@ -422,14 +422,14 @@ class Pipe {
     }
     var transformedBuffer = recvFromInfo.data;
     var buffers = this.transformer_.restore(transformedBuffer);
-    for(var i=0; i<buffers.length; i++) {
-      this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+      for(var i=0; i<buffers.length; i++) {
         mirrorSocket.sendTo.reckless(
             buffers[i],
             iface,
             browserPort);
-      });
-    }
+      }
+    });
   }
 
   public on = (name:string, listener:(event:any) => void) : void => {
