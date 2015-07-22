@@ -29,19 +29,25 @@ export class Dispatch {
     pc.peerOpenedChannelQueue.setHandler(this.dispatch);
   }
 
-  public register(pattern: string,
-                  closure: (dc:peerconnection.DataChannel)=>void) {
+  public register = (pattern: string,
+                     closure: (dc:peerconnection.DataChannel)=>void) => {
     var entry = new DispatchEntry(pattern, closure);
+    console.log("register(" + pattern + ", lambda()): adding to list of "
+                + this.entries_.length + " elements.");
     this.entries_.push(entry);
   }
 
-  public dispatch(chan:peerconnection.DataChannel) {
+  public dispatch = (chan:peerconnection.DataChannel) => {
     var name = chan.getLabel();
+    console.log("dispatch: checking label " + name);
     for (var d in this.entries_) {
+      console.log("dispatch: checking against regex " + d.pattern.toString());
       if (d.pattern.test(name)) {
+        console.log("dispatch: found it.");
         return Promise.resolve(d.closure(chan));
       }
     }
+    console.log(this.name_+ ": Failed ot find dispatcher for channel with name " + name);
     log.error(this.name_ + ": Failed to find a dispatcher for channel with " +
               "label " + name);
     return Promise.resolve();

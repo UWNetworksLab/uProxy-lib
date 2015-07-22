@@ -16,6 +16,7 @@ Polymer({
     copypaste.onceReady.then((copypasteModule) => { copypasteModule.emit('start', {}); });
   },
   parseInboundText: function() {
+    console.log("parseInboundText: " + copypaste.model.inboundText);
     if (copypaste.model.usingCrypto && !copypaste.model.inputDecrypted) {
       copypaste.verifyDecryptInboundMessage(copypaste.model.inboundText);
     } else {
@@ -23,6 +24,7 @@ Polymer({
     }
   },
   consumeInboundText: function() {
+    console.log("consumeInboundText: " + copypsate.model.inboundMessageNode);
     copypaste.consumeInboundMessage();
     // Disable the form field, since it no longer makes sense to accept further
     // input in it.

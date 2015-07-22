@@ -60,8 +60,8 @@ module SocksToRtc {
 
     // The connection to the peer that is acting as the endpoint for the proxy
     // connection.
-    private peerConnection_ :peerconnection.PeerConnection<Object>;
-    private dispatch_ :dispatch.Dispatch;
+    public peerConnection_ :peerconnection.PeerConnection<Object>;
+    public dispatch_ :dispatch.Dispatch;
 
     // This pool manages the PeerConnection's datachannels.
     private pool_ : Pool;

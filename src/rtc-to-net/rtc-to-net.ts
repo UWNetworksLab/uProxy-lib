@@ -136,7 +136,7 @@ import ProxyConfig = require('./proxyconfig');
 
     // The connection to the peer that is acting as a proxy client. Once
     // assigned, is never un-assigned. Use in this class to tell if started.
-    private peerConnection_ :peerconnection.PeerConnection<Object>;
+    public peerConnection_ :peerconnection.PeerConnection<Object>;
 
     // This pool manages the data channels for the PeerConnection.
     private pool_ :Pool;
@@ -151,7 +151,7 @@ import ProxyConfig = require('./proxyconfig');
     // removed.
     private sessions_ :{ [channelLabel:string] : Session } = {};
 
-    private dispatch_ :dispatch.Dispatch;
+    public dispatch_ :dispatch.Dispatch;
 
     // |userId_| is used to enforce user-wide resource limits.
     public constructor(private userId_?:string) {

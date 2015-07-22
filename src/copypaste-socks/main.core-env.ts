@@ -42,6 +42,10 @@ module copypaste_module {
       model.outboundMessageValue = ciphertext;
     });
 
+    copypaste.on('chatIncoming', (msg:string) => {
+       model.allChatText += 'them: ' + msg + '\n';
+    });
+
     copypaste.on('verifyDecryptResult', (result:VerifyDecryptResult) => {
       model.inputDecrypted = true;
       model.inputSigned = result.signedBy[0] == model.friendUserId;
@@ -76,6 +80,8 @@ module copypaste_module {
 
   // TODO: use actual interaction to define user-ids.
   export var model :copypaste_api.Model = {
+    allChatText : '',
+    inboundChatText : '',
     givingOrGetting : <string>null,
     usingCrypto : false,
     inputDecrypted : false,
@@ -173,6 +179,14 @@ module copypaste_module {
       copypaste.emit('verifyDecrypt', ciphertext);
     });
   };
+
+  export function sendChatMessage(message:string) :void {
+    console.log("sendChatmessage: " + message);
+    onceReady.then(function(copypaste) {
+      model.allChatText += "me: " + message + "\n";
+      copypaste.emit('sendMessage', message);
+    });
+  }
 
 }  // module copypaste_api
 
