@@ -353,6 +353,8 @@ class Pipe {
           // Drop the packet in that case.
           if (publicSocket) {
             this.sendTo_(publicSocket, recvFromInfo.data, remoteEndpoint);
+          } else {
+            log.warn('Dropping packet due to null public socket');
           }
         }
       });
@@ -397,6 +399,7 @@ class Pipe {
       : void => {
     var transformedBuffers = this.transformer_.transform(buffer);
     for(var i=0; i<transformedBuffers.length; i++) {
+      log.debug('Sending shaped packet %1 / %2', i, transformedBuffers.length);
       publicSocket.sendTo.reckless(
         transformedBuffers[i],
         to.address,
