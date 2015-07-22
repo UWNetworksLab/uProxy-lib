@@ -91,6 +91,7 @@ var doStart = () => {
     log.info('curl -x socks5h://%1:%2 www.example.com',
         endpoint.address, endpoint.port);
     socksRtc.dispatch_.register("chat",  (dc:peerconnection.DataChannel) => {
+      console.log("Got chat channel");
       chat = dc;
       chat.dataFromPeerQueue.setHandler((data:datachannel.Data) => {
         console.log(data);
@@ -103,6 +104,7 @@ var doStart = () => {
 }
 
 function setupChat(dc:peerconnection.DataChannel) {
+  console.log("setupchat: (before creation) chat is currently " + chat);
   chat = dc;
   chat.dataFromPeerQueue.setHandler((d:datachannel.Data) => {
     parentModule.emit('chatIncoming', d.str);
