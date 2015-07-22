@@ -400,6 +400,7 @@ class Pipe {
     var transformedBuffers = this.transformer_.transform(buffer);
     for(var i=0; i<transformedBuffers.length; i++) {
       log.debug('Sending shaped packet %1 / %2', i, transformedBuffers.length);
+      log.debug('%1.sendTo(%2, %3, %4)', publicSocket, transformedBuffers[i], to.address, to.port);
       publicSocket.sendTo.reckless(
         transformedBuffers[i],
         to.address,
