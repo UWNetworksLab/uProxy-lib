@@ -51,24 +51,31 @@ var split_ = (buffer:ArrayBuffer, firstLen:number) : Array<ArrayBuffer> => {
 }
 
 class Fragment {
-  public id : number;
+  public id : ArrayBuffer;
   public index : number;
   public count : number;
   public payload : ArrayBuffer;
 
-  public constructor(id:number, index:number, count:number, payload:ArrayBuffer) {
+  public constructor(id:ArrayBuffer, index:number, count:number, payload:ArrayBuffer) {
     this.id=id;
     this.index=index;
     this.count=count;
     this.payload=payload;
   }
 
-  static randomId = () : number => {
-    return Math.floor(Math.random()*255);
+  static randomId = () : ArrayBuffer => {
+    var bytes = new Uint8Array(32);
+    for (var i = 0; i < bytes.byteLength; i++) {
+      bytes[i] = Math.floor(Math.random()*255);
+    }
+    return bytes.buffer;
   }
 
   static decodeFragment = (buffer:ArrayBuffer, length:number) : Fragment => {
-    var fragmentId=0;
+//    log.debug('Decode fragment %1 %2', buffer.byteLength, length);
+    var parts=split_(buffer, 32);
+    var fragmentId=parts[0];
+    buffer=parts[1];
 
     var fragmentNumber=takeByte_(buffer);
     buffer=dropByte_(buffer);
@@ -76,23 +83,29 @@ class Fragment {
     var totalNumber=takeByte_(buffer);
     buffer=dropByte_(buffer);
 
+//    log.debug('Decoded fragment %1 %2 %3', fragmentId, fragmentNumber, totalNumber);
+
     var payload : ArrayBuffer=null;
 
     if(buffer.byteLength > length) {
-      var parts=split_(buffer, length);
+      parts=split_(buffer, length);
       payload=parts[0];
+//      log.debug('shortened payoad %1 %2 %3', buffer.byteLength, length, payload.byteLength);
     } else if (buffer.byteLength == length) {
       payload=buffer;
+//      log.debug('perect payoad %1 %2 %3', buffer.byteLength, length, payload.byteLength);
     } else { // buffer.byteLength < length
       throw new Error("Short buffer");
     }
 
     var fragment=new Fragment(fragmentId, fragmentNumber, totalNumber, payload);
+//    log.info("Decoding %1 %2 %3", fragment.id, fragment.index, fragment.count);
     return fragment;
   }
 
   public encodeFragment = () : ArrayBuffer => {
-    return this.assemble_([encodeByte_(this.id), encodeByte_(this.index), encodeByte_(this.count), this.payload]);
+//    log.info("Encoding %1 %2 %3", this.id, this.index, this.count);
+    return this.assemble_([this.id, encodeByte_(this.index), encodeByte_(this.count), this.payload]);
   }
 
   private assemble_ = (buffers:ArrayBuffer[]) : ArrayBuffer => {
@@ -107,6 +120,7 @@ class Fragment {
       var bytes=new Uint8Array(buffers[i]);
       for(var fromIndex=0; fromIndex<buffers[i].byteLength; fromIndex++) {
         result[toIndex]=bytes[fromIndex];
+        toIndex=toIndex+1;
       }
     }
 
