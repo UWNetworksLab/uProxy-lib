@@ -273,15 +273,18 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     private configurePipe_ = (key:number) : void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      this.pipe_.setTransformer('none',
+      /*this.pipe_.setTransformer('none',
           new Uint8Array([key]).buffer,
-          '{}');
+          '{}');*/
       /*this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');*/
       /*this.pipe_.setTransformer('packetLengthNormalizer',
           new Uint8Array([key]).buffer,
           '{"targetLength": 1440}');*/
+      this.pipe_.setTransformer('packetLengthNormalizer',
+          new Uint8Array([key]).buffer,
+          '{"targetLength": 1440, "fragmentation": true}');
       /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
           new Uint8Array([key]).buffer,
           '{"targetMinimum": 1000, "targetMaximum": 1440}');*/
