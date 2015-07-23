@@ -1,26 +1,28 @@
 import logging = require('../logging/logging');
+import arraybuffers = require('../arraybuffers/arraybuffers');
 import Fragment = require('./fragment');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
 class Defragmenter {
-  private tracker_ : {[index: number]: ArrayBuffer[]}={};
-  private counter_ : {[index: number]: number}={};
-  private complete_: number[]=[];
+  private tracker_ : {[index: string]: ArrayBuffer[]}={};
+  private counter_ : {[index: string]: number}={};
+  private complete_: string[]=[];
 
   public constructor() {}
 
   public addFragment(fragment:Fragment) {
-    if(fragment.id in this.tracker_) { // A fragment for an existing packet
-      var fragments : ArrayBuffer[]=this.tracker_[fragment.id];
+    var hexid=arraybuffers.arrayBufferToHexString(fragment.id);
+    if(hexid in this.tracker_) { // A fragment for an existing packet
+      var fragments : ArrayBuffer[]=this.tracker_[hexid];
       if(fragments[fragment.index]!=null) { // Duplicate fragment
-        log.info('Duplicate fragment %1: %2 / %3', fragment.id, fragment.index, fragment.count);
+        log.info('Duplicate fragment %1: %2 / %3', hexid, fragment.index, fragment.count);
       } else { // New fragment
         fragments[fragment.index]=fragment.payload;
-        this.tracker_[fragment.id]=fragments;
-        this.counter_[fragment.id]=this.counter_[fragment.id]-1;
-        if(this.counter_[fragment.id]==0) {
-          this.complete_.push(fragment.id);
+        this.tracker_[hexid]=fragments;
+        this.counter_[hexid]=this.counter_[hexid]-1;
+        if(this.counter_[hexid]==0) {
+          this.complete_.push(hexid);
         }
       }
     } else { // A fragment for a new packet
@@ -30,10 +32,10 @@ class Defragmenter {
       }
 
       fragments[fragment.index]=fragment.payload;
-      this.tracker_[fragment.id]=fragments;
-      this.counter_[fragment.id]=fragment.count-1;
-      if(this.counter_[fragment.id]==0) {
-        this.complete_.push(fragment.id);
+      this.tracker_[hexid]=fragments;
+      this.counter_[hexid]=fragment.count-1;
+      if(this.counter_[hexid]==0) {
+        this.complete_.push(hexid);
       }
     }
   }
@@ -46,8 +48,8 @@ class Defragmenter {
     if(this.complete_.length > 0) {
       var packets : ArrayBuffer[] = [];
       for(var i=0; i<this.complete_.length; i++) {
-        var id=this.complete_.pop();
-        var fragments=this.tracker_[id];
+        var hexid=this.complete_.pop();
+        var fragments=this.tracker_[hexid];
         if(fragments != null && fragments.length > 0) {
           var packet = this.assemble_(fragments);
           packets.push(packet);
@@ -72,6 +74,7 @@ class Defragmenter {
       var bytes=new Uint8Array(buffers[i]);
       for(var fromIndex=0; fromIndex<buffers[i].byteLength; fromIndex++) {
         bytes[toIndex]=bytes[fromIndex];
+        toIndex=toIndex+1;
       }
     }
 
