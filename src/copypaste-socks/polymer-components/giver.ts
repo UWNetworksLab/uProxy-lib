@@ -12,7 +12,7 @@ declare var i18nUtil :I18nUtil;
 Polymer({
   model: copypaste.model,
   parseInboundText: function() {
-    console.log("parseInboundText: " + copypaste.model.inboundText);
+    console.log("(giver) parseInboundText: " + copypaste.model.inboundText);
     if (copypaste.model.usingCrypto && !copypaste.model.inputDecrypted) {
       copypaste.verifyDecryptInboundMessage(copypaste.model.inboundText);
     } else {
@@ -20,7 +20,7 @@ Polymer({
     }
   },
   consumeInboundText: function() {
-    console.log("consumeInboundText: " + copypaste.model.inboundText);
+    console.log("(giver) consumeInboundText: " + copypaste.model.inboundText);
     copypaste.consumeInboundMessage();
     // Disable the form field, since it no longer makes sense to accept further
     // input in it.

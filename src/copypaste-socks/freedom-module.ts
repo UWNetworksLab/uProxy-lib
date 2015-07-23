@@ -94,6 +94,7 @@ var doStart = () => {
       console.log("Got chat channel");
       chat = dc;
       chat.dataFromPeerQueue.setHandler((data:datachannel.Data) => {
+        parentModule.emit('chatIncoming', data.str);
         console.log(data);
         return Promise.resolve<void>()
       })
@@ -150,9 +151,11 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       }, bridge.best('rtctonet', pcConfig));
 
       rtcNet.dispatch_.register("chat",  (dc:peerconnection.DataChannel) => {
+        console.log("rtcNet dispatcher got \"chat\"");
         chat = dc;
         chat.dataFromPeerQueue.setHandler((data:datachannel.Data) => {
-          console.log(data);
+          console.log("[chat from peer] ", data);
+          parentModule.emit('chatIncoming', data.str);
           return Promise.resolve<void>()
         })
       });

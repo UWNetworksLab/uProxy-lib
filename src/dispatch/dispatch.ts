@@ -39,17 +39,24 @@ export class Dispatch {
 
   public dispatch = (chan:peerconnection.DataChannel) => {
     var name = chan.getLabel();
-    console.log("dispatch: checking label " + name);
-    for (var d in this.entries_) {
+    console.log("dispatch: checking label " + name + " against " +
+                this.entries_.length + " entries");
+    for (var i = 0; i < this.entries_.length; i++) {
+      var d = this.entries_[i];
       console.log("dispatch: checking against regex " + d.pattern.toString());
+      try {
       if (d.pattern.test(name)) {
         console.log("dispatch: found it.");
-        return Promise.resolve(d.closure(chan));
+        d.closure(chan);
+        return Promise.resolve<void>();
+      }
+      } catch (e) {
+        console.log("dispatch: failed when checking: " + e);
       }
     }
     console.log(this.name_+ ": Failed ot find dispatcher for channel with name " + name);
     log.error(this.name_ + ": Failed to find a dispatcher for channel with " +
               "label " + name);
-    return Promise.resolve();
+    return Promise.resolve<void>();
   }
 };
