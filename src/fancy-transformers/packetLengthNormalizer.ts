@@ -31,7 +31,7 @@ class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
 
   /** Get the target length. */
   public configure = (json:string) : void => {
-    this.configure(json);
+    this.superConfigure(json);
 
     var dict = JSON.parse(json);
     this.setTargetLength_(dict['targetLength']);

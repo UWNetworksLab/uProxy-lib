@@ -8,6 +8,7 @@
 import logging = require('../logging/logging');
 import Defragmenter = require('./defragmenter');
 import Fragment = require('./fragment');
+import arraybuffers = require('../arraybuffers/arraybuffers');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
@@ -21,7 +22,7 @@ var log :logging.Log = new logging.Log('fancy-transformers');
  * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
  * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
  */
-class PacketLengthShaper implements Transformer {
+class PacketLengthShaper {
   private fragmentation_ : boolean = false;
   private fragmentBuffer_ : Defragmenter = null;
 
@@ -38,7 +39,7 @@ class PacketLengthShaper implements Transformer {
   }
 
   /** Get the target length. */
-  public configure = (json:string) : void => {
+  public superConfigure = (json:string) : void => {
     var config=JSON.parse(json);
     // Optional parameter
     if('fragmentation' in config) {
@@ -56,15 +57,19 @@ class PacketLengthShaper implements Transformer {
   }
 
   public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer[] => {
+//    log.debug("shapePacketLength %1", this.fragmentation_);
+//    log.debug("transform %1 %2", buffer.byteLength, arraybuffers.arrayBufferToHexString(buffer));
     if(this.fragmentation_) {
       if (buffer.byteLength + 5 == target) { // One fragment with no padding
+        log.debug("One fragment no padding");
         var id=Fragment.randomId();
         var index=0;
         var count=1;
         var fragment=new Fragment(id, index, count, buffer);
         var fragmentBuffer=fragment.encodeFragment();
-        return [this.append_(this.encodeLength_(fragmentBuffer.byteLength), fragmentBuffer)];
+        return [this.append_(this.encodeLength_(buffer.byteLength), fragmentBuffer)];
       } else if (buffer.byteLength + 5 > target) {
+        log.debug("Fragment");
         var firstLength=target-5;
         var restLength=buffer.byteLength-firstLength;
         var parts = this.split_(buffer, firstLength);
@@ -72,12 +77,14 @@ class PacketLengthShaper implements Transformer {
         var rest = this.shapePacketLength(parts[1], restLength);
         return first.concat(rest);
       } else { // buffer.bytelength + 4 < target, One fragment with padding
+//        log.debug("One fragment with padding");
         var id=Fragment.randomId();
         var index=0;
         var count=1;
         var fragment=new Fragment(id, index, count, buffer);
         var fragmentBuffer=fragment.encodeFragment();
-        var result=this.append_(this.encodeLength_(fragmentBuffer.byteLength), this.append_(fragmentBuffer, this.randomBytes_(target-fragmentBuffer.byteLength-2)))
+        var result=this.assemble_([this.encodeLength_(buffer.byteLength), fragmentBuffer, this.randomBytes_(target-fragmentBuffer.byteLength-5)]);
+//        log.debug('Encode fragment %1', fragmentBuffer.byteLength);
         return [result];
       }
     } else {
@@ -102,7 +109,9 @@ class PacketLengthShaper implements Transformer {
       var fragment=Fragment.decodeFragment(rest, length);
       this.fragmentBuffer_.addFragment(fragment);
       if(this.fragmentBuffer_.completeCount() > 0) {
-        return this.fragmentBuffer_.getComplete();
+        var complete=this.fragmentBuffer_.getComplete();
+//        log.debug("restore %1 %2", complete[0].byteLength, arraybuffers.arrayBufferToHexString(complete[0]));
+        return complete;
       } else {
         return [];
       }
@@ -187,6 +196,25 @@ class PacketLengthShaper implements Transformer {
     tmp.set(new Uint8Array(buffer1), 0);
     tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
     return tmp.buffer;
+  }
+
+  private assemble_ = (buffers:ArrayBuffer[]) : ArrayBuffer => {
+    var total=0;
+    for(var i=0; i<buffers.length; i++) {
+      total=total+buffers[i].byteLength;
+    }
+
+    var result = new Uint8Array(total);
+    var toIndex=0;
+    for(var i=0; i<buffers.length; i++) {
+      var bytes=new Uint8Array(buffers[i]);
+      for(var fromIndex=0; fromIndex<buffers[i].byteLength; fromIndex++) {
+        result[toIndex]=bytes[fromIndex];
+        toIndex=toIndex+1;
+      }
+    }
+
+    return result.buffer;
   }
 }
 

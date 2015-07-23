@@ -32,7 +32,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
 
   /** Get the target minimum and maximum lengths. */
   public configure = (json:string) : void => {
-    this.configure(json);
+    this.superConfigure(json);
 
     var dict = JSON.parse(json);
     this.setTargetMinimum_(dict['targetMinimum']);
