@@ -17,6 +17,9 @@
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
 import PacketLengthShaper = require('../fancy-transformers/packetLengthShaper');
+import PacketLengthPassthrough = require('../fancy-transformers/packetLengthPassthrough');
+import PacketLengthExtender = require('../fancy-transformers/packetLengthExtender');
+import PacketLengthShortener = require('../fancy-transformers/packetLengthShortener');
 import PacketLengthNormalizer = require('../fancy-transformers/packetLengthNormalizer');
 import PacketLengthUniformRandomizer = require('../fancy-transformers/packetLengthUniformRandomizer');
 import PacketLengthMultinomialRandomizer = require('../fancy-transformers/packetLengthMultinomialRandomizer');
@@ -66,6 +69,12 @@ var makeTransformer_ = (
      transformer = Fte.Transformer();
      } else */ if (name == 'caesar') {
        transformer = new CaesarCipher();
+     } else if (name == 'packetLengthPassthrough') {
+       transformer = new PacketLengthPassthrough();
+     } else if (name == 'packetLengthExtender') {
+       transformer = new PacketLengthExtender();
+     } else if (name == 'packetLengthShortener') {
+       transformer = new PacketLengthShortener();
      } else if (name == 'packetLengthNormalizer') {
        transformer = new PacketLengthNormalizer();
      } else if (name == 'packetLengthUniformRandomizer') {
