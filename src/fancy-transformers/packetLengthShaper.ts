@@ -58,35 +58,15 @@ class PacketLengthShaper {
 
   public shapePacketLength = (buffer:ArrayBuffer, target:number) : ArrayBuffer[] => {
 //    log.debug("shapePacketLength %1", this.fragmentation_);
-//    log.debug("transform %1 %2", buffer.byteLength, arraybuffers.arrayBufferToHexString(buffer));
+//    log.debug("transform %1 %2", buffer.byteLength, target);
     if(this.fragmentation_) {
-      if (buffer.byteLength + 5 == target) { // One fragment with no padding
-        log.debug("One fragment no padding");
-        var id=Fragment.randomId();
-        var index=0;
-        var count=1;
-        var fragment=new Fragment(id, index, count, buffer);
-        var fragmentBuffer=fragment.encodeFragment();
-        return [this.append_(this.encodeLength_(buffer.byteLength), fragmentBuffer)];
-      } else if (buffer.byteLength + 5 > target) {
-        log.debug("Fragment");
-        var firstLength=target-5;
-        var restLength=buffer.byteLength-firstLength;
-        var parts = this.split_(buffer, firstLength);
-        var first = this.shapePacketLength(parts[0], firstLength);
-        var rest = this.shapePacketLength(parts[1], restLength);
-        return first.concat(rest);
-      } else { // buffer.bytelength + 4 < target, One fragment with padding
-//        log.debug("One fragment with padding");
-        var id=Fragment.randomId();
-        var index=0;
-        var count=1;
-        var fragment=new Fragment(id, index, count, buffer);
-        var fragmentBuffer=fragment.encodeFragment();
-        var result=this.assemble_([this.encodeLength_(buffer.byteLength), fragmentBuffer, this.randomBytes_(target-fragmentBuffer.byteLength-5)]);
-//        log.debug('Encode fragment %1', fragmentBuffer.byteLength);
-        return [result];
+      var fragments=this.makeFragments_(buffer, target);
+      var results : ArrayBuffer[] = [];
+      for(var index=0; index<fragments.length; index++) {
+        var result=fragments[index].encodeFragment();
+        results.push(result);
       }
+      return results;
     } else {
       if (buffer.byteLength + 2 == target) {
         return [this.append_(this.encodeLength_(buffer.byteLength), buffer)];
@@ -99,18 +79,48 @@ class PacketLengthShaper {
     }
   }
 
-  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-    if(this.fragmentation_) {
-      var parts = this.split_(buffer, 2);
-      var lengthBytes = parts[0];
-      var length = this.decodeLength_(lengthBytes);
-      var rest = parts[1];
+  // TODO(bwiley): Support target lengths below the header length
+  private makeFragments_ = (buffer:ArrayBuffer, target:number) : Fragment[] => {
+    var headerLength=36;
+    if (buffer.byteLength + headerLength == target) { // One fragment with no padding
+//      log.debug("One fragment no padding");
+      var id=Fragment.randomId();
+      var index=0;
+      var count=1;
+      var fragment=new Fragment(buffer.byteLength, id, index, count, buffer, new ArrayBuffer(0));
+      return [fragment];
+    } else if (buffer.byteLength + headerLength > target) {
+      var firstLength=target-headerLength;
+      var restLength=buffer.byteLength-firstLength;
+//      log.debug("Fragment %1 %2", firstLength, restLength);
+      var parts = this.split_(buffer, firstLength);
+  //        log.debug("Parts %1 %2", parts[0].byteLength, parts[1].byteLength);
+      var first = this.makeFragments_(parts[0], firstLength+headerLength);
+      var rest = this.makeFragments_(parts[1], restLength+headerLength);
+  //        log.debug("Fragmented %1 %2 %3", first.length+rest.length, first[0].byteLength, rest[0].byteLength);
+      var fragments=first.concat(rest);
+      this.fixFragments_(fragments);
+      return fragments;
+    } else { // buffer.bytelength + headerLength < target, One fragment with padding
+//      log.debug("One fragment with padding");
+      var id=Fragment.randomId();
+      var index=0;
+      var count=1;
+      var padding=this.randomBytes_(target-(buffer.byteLength+headerLength))
+      var fragment=new Fragment(buffer.byteLength, id, index, count, buffer, padding);
+      return [fragment];
+    }
+  }
 
-      var fragment=Fragment.decodeFragment(rest, length);
+  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+//    log.debug("restore");
+    if(this.fragmentation_) {
+      var fragment=Fragment.decodeFragment(buffer);
       this.fragmentBuffer_.addFragment(fragment);
+//      log.debug('Added fragment %1 %2 %3', fragment.index, fragment.count, this.fragmentBuffer_.completeCount());
       if(this.fragmentBuffer_.completeCount() > 0) {
         var complete=this.fragmentBuffer_.getComplete();
-//        log.debug("restore %1 %2", complete[0].byteLength, arraybuffers.arrayBufferToHexString(complete[0]));
+//        log.debug("restored %1 %2", complete[0].byteLength, arraybuffers.arrayBufferToHexString(complete[0]));
         return complete;
       } else {
         return [];
@@ -215,6 +225,16 @@ class PacketLengthShaper {
     }
 
     return result.buffer;
+  }
+
+  private fixFragments_ = (fragments:Fragment[]) : void => {
+    var id=fragments[0].id;
+    var count=fragments.length;
+    for(var index=0; index<count; index++) {
+      fragments[index].id=id;
+      fragments[index].index=index;
+      fragments[index].count=count;
+    }
   }
 }
 
