@@ -321,6 +321,7 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
             'uproxy-obfuscators'
+            'freedom-port-control'
           ]
           localDestPath: 'samples/simple-socks-chromeapp/'
       libsForSimpleSocksFirefoxApp:
@@ -329,6 +330,7 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
             'uproxy-obfuscators'
+            'freedom-port-control'
           ]
           localDestPath: 'samples/simple-socks-firefoxapp/data/'
 
@@ -343,6 +345,7 @@ module.exports = (grunt) ->
             'i18n'
             'bower/polymer'
             'freedom-pgp-e2e'
+            'freedom-port-control'
           ]
           localDestPath: 'samples/copypaste-socks-chromeapp/'
       libsForCopyPasteSocksFirefoxApp:
@@ -356,6 +359,7 @@ module.exports = (grunt) ->
             'i18n'
             'bower'
             'freedom-pgp-e2e'
+            'freedom-port-control'
           ]
           localDestPath: 'samples/copypaste-socks-firefoxapp/data'
 
@@ -374,13 +378,17 @@ module.exports = (grunt) ->
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
           localDestPath: 'samples/simple-churn-chat-chromeapp/'
       libsForCopyPasteChurnChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
+            'uproxy-obfuscators',
+            'freedom-port-control'
           ]
           localDestPath: 'samples/copypaste-churn-chat-chromeapp/'
 
@@ -411,6 +419,7 @@ module.exports = (grunt) ->
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: ['freedom-port-control']
           localDestPath: 'integration-tests/socks-echo'
 
     # Typescript rules

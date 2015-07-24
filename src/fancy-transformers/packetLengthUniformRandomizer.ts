@@ -32,7 +32,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
 
   /** Get the target minimum and maximum lengths. */
   public configure = (json:string) : void => {
-    this.configure(json);
+    this.superConfigure(json);
 
     var dict = JSON.parse(json);
     this.setTargetMinimum_(dict['targetMinimum']);
@@ -41,15 +41,15 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-    //log.info('Transforming');
+//    log.info('Transforming');
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }
 
   private setTargetMinimum_ = (minimum:number) : void => {
-    if(minimum>=1) {
+    if(minimum>=37) {
       this.targetMinimum_=minimum;
     } else {
-      // throw error
+      throw new Error('Target packet length is too small %1 / %2', minimum, 37);
     }
   }
 
@@ -57,7 +57,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     if(maximum<=1440) {
       this.targetMaximum_=maximum;
     } else {
-      // throw error
+      throw new Error('Target packet length is too large %1 / %2', maximum, 1440);
     }
   }
 

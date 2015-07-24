@@ -17,6 +17,9 @@
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
 import PacketLengthShaper = require('../fancy-transformers/packetLengthShaper');
+import PacketLengthPassthrough = require('../fancy-transformers/packetLengthPassthrough');
+import PacketLengthExtender = require('../fancy-transformers/packetLengthExtender');
+import PacketLengthShortener = require('../fancy-transformers/packetLengthShortener');
 import PacketLengthNormalizer = require('../fancy-transformers/packetLengthNormalizer');
 import PacketLengthUniformRandomizer = require('../fancy-transformers/packetLengthUniformRandomizer');
 import PacketLengthMultinomialRandomizer = require('../fancy-transformers/packetLengthMultinomialRandomizer');
@@ -66,6 +69,12 @@ var makeTransformer_ = (
      transformer = Fte.Transformer();
      } else */ if (name == 'caesar') {
        transformer = new CaesarCipher();
+     } else if (name == 'packetLengthPassthrough') {
+       transformer = new PacketLengthPassthrough();
+     } else if (name == 'packetLengthExtender') {
+       transformer = new PacketLengthExtender();
+     } else if (name == 'packetLengthShortener') {
+       transformer = new PacketLengthShortener();
      } else if (name == 'packetLengthNormalizer') {
        transformer = new PacketLengthNormalizer();
      } else if (name == 'packetLengthUniformRandomizer') {
@@ -109,6 +118,8 @@ interface MirrorSet {
 class Pipe {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
+
+  private packetCount_ = 0;
 
   // For each physical network interface, this provides a list of the open
   // public sockets on that interface.  Each socket corresponds to a port that
@@ -399,7 +410,6 @@ class Pipe {
       : void => {
     var transformedBuffers = this.transformer_.transform(buffer);
     for(var i=0; i<transformedBuffers.length; i++) {
-      log.debug('Sending shaped packet %1 / %2', i, transformedBuffers.length);
       publicSocket.sendTo.reckless(
         transformedBuffers[i],
         to.address,
@@ -421,14 +431,14 @@ class Pipe {
     }
     var transformedBuffer = recvFromInfo.data;
     var buffers = this.transformer_.restore(transformedBuffer);
-    for(var i=0; i<buffers.length; i++) {
-      this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+    this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
+      for(var i=0; i<buffers.length; i++) {
         mirrorSocket.sendTo.reckless(
             buffers[i],
             iface,
             browserPort);
-      });
-    }
+      }
+    });
   }
 
   public on = (name:string, listener:(event:any) => void) : void => {

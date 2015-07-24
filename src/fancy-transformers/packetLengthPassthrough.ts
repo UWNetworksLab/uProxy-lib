@@ -20,40 +20,21 @@ var log :logging.Log = new logging.Log('fancy-transformers');
  * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
  * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
  */
-class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
-  /** Length to which packets should be normalized. */
-  private targetLength_ :number;
-
+class PacketLengthPassthrough extends PacketLengthShaper implements Transformer {
   public constructor() {
     super();
-    log.info('Constructed packet length normalizer');
+    log.info('Constructed packet length passthrough');
   }
 
-  /** Get the target length. */
+  /** Get the target minimum and maximum lengths. */
   public configure = (json:string) : void => {
     this.superConfigure(json);
-
-    var dict = JSON.parse(json);
-    this.setTargetLength_(dict['targetLength']);
-    log.info('Configured packet length normalizer %1', this.targetLength_);
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-//    log.info('Transforming');
-    return this.shapePacketLength(buffer, this.targetLength_);
-  }
-
-  /**
-   * Packet length normalizer requires just one parameter: the target length to
-   * which packets should be normalized. target should be a number in the range
-   * 1-1500 inclusive. All packets will be normalized to this length.
-   */
-  private setTargetLength_ = (target:number) : void => {
-    if (target < 1 || target > 1500) {
-      throw new Error('target packet length must be in the range 1-1500');
-    }
-    this.targetLength_ = target;
+    log.info('Transforming');
+    return this.shapePacketLength(buffer, buffer.byteLength+36);
   }
 }
 
-export = PacketLengthNormalizer;
+export = PacketLengthPassthrough;
