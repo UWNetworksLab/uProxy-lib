@@ -45,24 +45,24 @@ class Defragmenter {
   }
 
   public getComplete = () : ArrayBuffer[] => {
-    if(this.complete_.length > 0) {
-      var packets : ArrayBuffer[] = [];
-      for(var i=0; i<this.complete_.length; i++) {
-        var hexid=this.complete_.pop();
-        var fragments=this.tracker_[hexid];
-        if(fragments != null && fragments.length > 0) {
-          var packet = this.assemble_(fragments);
-          packets.push(packet);
-        }
-      }
+    var packets : ArrayBuffer[] = [];
 
-      return packets;
+    for(var i=0; i<this.complete_.length; i++) {
+      var hexid=this.complete_.pop();
+      var fragments=this.tracker_[hexid];
+      if(fragments != null && fragments.length > 0) {
+        var packet = this.assemble_(fragments);
+//        log.debug('pushing packet %1', packet.byteLength);
+        packets.push(packet);
+      }
     }
 
-    return null;
+    return packets;
   }
 
   private assemble_ = (buffers:ArrayBuffer[]) : ArrayBuffer => {
+//    log.debug('Assembling %1 fragments %2 %3', buffers.length, buffers[0].byteLength, buffers[1].byteLength);
+//    log.debug("First packet %1", arraybuffers.arrayBufferToHexString(buffers[0]));
     var total=0;
     for(var i=0; i<buffers.length; i++) {
       total=total+buffers[i].byteLength;
@@ -72,13 +72,15 @@ class Defragmenter {
     var toIndex=0;
     for(var i=0; i<buffers.length; i++) {
       var bytes=new Uint8Array(buffers[i]);
-      for(var fromIndex=0; fromIndex<buffers[i].byteLength; fromIndex++) {
-        bytes[toIndex]=bytes[fromIndex];
+      for(var fromIndex=0; fromIndex<bytes.length; fromIndex++) {
+        result[toIndex]=bytes[fromIndex];
         toIndex=toIndex+1;
       }
     }
 
-    return bytes.buffer;
+//    log.debug("assembled %1", arraybuffers.arrayBufferToHexString(result.buffer));
+
+    return result.buffer;
   }
 }
 
