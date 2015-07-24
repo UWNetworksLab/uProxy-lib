@@ -279,15 +279,24 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       /*this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');*/
+      /*this.pipe_.setTransformer('packetLengthExtender',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
+      /*this.pipe_.setTransformer('packetLengthShortener',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
       /*this.pipe_.setTransformer('packetLengthNormalizer',
           new Uint8Array([key]).buffer,
           '{"targetLength": 1440}');*/
-      this.pipe_.setTransformer('packetLengthNormalizer',
+      /*this.pipe_.setTransformer('packetLengthNormalizer',
           new Uint8Array([key]).buffer,
-          '{"targetLength": 1440, "fragmentation": true}');
-      /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
+          '{"targetLength": 1440, "fragmentation": true}');*/
+      this.pipe_.setTransformer('packetLengthUniformRandomizer',
           new Uint8Array([key]).buffer,
-          '{"targetMinimum": 1000, "targetMaximum": 1440}');*/
+          '{"targetMinimum": 37, "targetMaximum": 1440, "fragmentation": true}');
+      /*this.pipe_.setTransformer('packetLengthPassthrough',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
       /*var targetDistribution=this.makeSampleTargetLengthDistribution_();
       this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
           new Uint8Array([key]).buffer,
