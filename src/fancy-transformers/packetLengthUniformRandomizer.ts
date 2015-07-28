@@ -49,7 +49,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     if(minimum>=37) {
       this.targetMinimum_=minimum;
     } else {
-      throw new Error('Target packet length is too small %1 / %2', minimum, 37);
+      throw new Error('Target packet length is too small');
     }
   }
 
@@ -57,7 +57,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     if(maximum<=1440) {
       this.targetMaximum_=maximum;
     } else {
-      throw new Error('Target packet length is too large %1 / %2', maximum, 1440);
+      throw new Error('Target packet length is too large');
     }
   }
 
