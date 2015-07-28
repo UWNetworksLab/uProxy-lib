@@ -397,7 +397,8 @@ module.exports = (grunt) ->
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
+            'uproxy-obfuscators',
+            'freedom-port-control'
           ]
           localDestPath: 'samples/adventure-chromeapp/'
       libsForAdventureFirefoxApp:
@@ -405,7 +406,8 @@ module.exports = (grunt) ->
           npmLibNames: ['freedom-for-firefox']
           pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
+            'uproxy-obfuscators',
+            'freedom-port-control'
           ]
           localDestPath: 'samples/adventure-firefoxapp/data/'
 
