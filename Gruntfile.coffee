@@ -137,6 +137,7 @@ taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
+  'browserify:fancyTransformersSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
@@ -173,6 +174,7 @@ taskManager.add 'unit_test', [
   'jasmine:bridge'
   'jasmine:handler'
   'jasmine:buildTools'
+  'jasmine:fancyTransformers'
   'jasmine:logging'
   'jasmine:loggingProvider'
   'jasmine:net'
@@ -467,6 +469,7 @@ module.exports = (grunt) ->
       buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
       churn: Rule.jasmineSpec 'churn'
       churnCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'churn')
+      fancyTransformers: Rule.jasmineSpec 'fancy-transformers'
       handler: Rule.jasmineSpec 'handler'
       handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
       logging: Rule.jasmineSpec 'logging'
@@ -540,6 +543,7 @@ module.exports = (grunt) ->
       rtcToNetCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'rtc-to-net/rtc-to-net')
       simpleTransformersCaesarSpec: Rule.browserifySpec 'simple-transformers/caesar'
       simpleTransformersCaesarCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'simple-transformers/caesar')
+      fancyTransformersSpec: Rule.browserifySpec 'fancy-transformers/arithmetic'
       socksCommonHeadersSpec: Rule.browserifySpec 'socks-common/socks-headers'
       socksCommonHeadersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-common/socks-headers')
       socksToRtcSpec: Rule.browserifySpec 'socks-to-rtc/socks-to-rtc'
