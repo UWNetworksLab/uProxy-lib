@@ -12,6 +12,9 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 
 // TODO(bwiley): Convert /* */ to // as specified in the style guide
 
+export interface SerializedSequenceConfig {addSequences: SerializedSequenceModel[]; removeSequences: SerializedSequenceModel[]}
+export interface SerializedSequenceModel {index: number; offset: number; sequence: string; length: number}
+
 export interface SequenceConfig {addSequences: SequenceModel[]; removeSequences: SequenceModel[]}
 export interface SequenceModel {index: number; offset: number; sequence: ArrayBuffer; length: number}
 
@@ -23,7 +26,7 @@ export class ByteSequenceShaper implements Transformer {
   private removeSequences_ : SequenceModel[];
   private firstIndex_ : number;
   private lastIndex_ : number;
-  private indices_ : number[]
+  private indices_ : number[]=[];
   private outputIndex_ : number=0;
 
   public constructor() {
@@ -40,14 +43,12 @@ export class ByteSequenceShaper implements Transformer {
 
   /** Get the target length. */
   public superConfigure = (json:string) : void => {
-    log.error('JSON config file');
-    log.error(json);
     var config=JSON.parse(json);
 
     // Required parameter
     if('sequences' in config) {
       log.debug('typcasting');
-      var sequenceConfig=<SequenceConfig>config.sequences;
+      var sequenceConfig=this.deserializeConfig_(<SerializedSequenceConfig>config.sequences);
       log.debug('typecasted');
       this.addSequences_=sequenceConfig.addSequences;
       this.removeSequences_=sequenceConfig.removeSequences;
@@ -67,7 +68,11 @@ export class ByteSequenceShaper implements Transformer {
   public configure = (json:string) : void => {
     log.debug("Configuring byte sequence shaper");
 
-    this.superConfigure(json);
+    try {
+      this.superConfigure(json);
+    } catch(err) {
+      log.error("Config crashed");
+    }
 
     log.debug("Configured byte sequence shaper");
   }
@@ -95,6 +100,8 @@ export class ByteSequenceShaper implements Transformer {
         this.outputIndex_=this.outputIndex_+1;
         nextPacket=this.findNextPacket_(this.outputIndex_);
       }
+
+      return results;
     } else {
       this.outputIndex_=this.outputIndex_+1;
       return [buffer];
@@ -112,6 +119,28 @@ export class ByteSequenceShaper implements Transformer {
 
   // No-op (we have no state or any resources to dispose).
   public dispose = () : void => {}
+
+  private deserializeConfig_ = (config:SerializedSequenceConfig) : SequenceConfig => {
+    var adds : SequenceModel[]=[];
+    var rems : SequenceModel[]=[];
+
+    for(var i=0; i<config.addSequences.length; i++) {
+      adds.push(this.deserializeModel_(config.addSequences[i]));
+    }
+
+    for(var i=0; i<config.removeSequences.length; i++) {
+      rems.push(this.deserializeModel_(config.removeSequences[i]));
+    }
+
+    return {addSequences: adds, removeSequences: rems};
+  }
+
+  private deserializeModel_ = (model:SerializedSequenceModel) : SequenceModel => {
+    return {index: model.index, offset: model.offset,
+      sequence: arraybuffers.hexStringToArrayBuffer(model.sequence),
+      length: model.length
+    }
+  }
 
   private findNextPacket_ = (index:number) => {
     for(var i=0; i<this.addSequences_.length; i++) {
