@@ -30,6 +30,7 @@ import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
 import random = require('../crypto/random');
 import signals = require('../webrtc/signals');
+import bytes = require('../fancy-transformers/byteSequenceShaper');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
@@ -291,9 +292,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       /*this.pipe_.setTransformer('packetLengthNormalizer',
           new Uint8Array([key]).buffer,
           '{"targetLength": 1440, "fragmentation": true}');*/
-      this.pipe_.setTransformer('packetLengthUniformRandomizer',
+      /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
           new Uint8Array([key]).buffer,
-          '{"targetMinimum": 37, "targetMaximum": 1440, "fragmentation": true}');
+          '{"targetMinimum": 37, "targetMaximum": 1440, "fragmentation": true}');*/
       /*this.pipe_.setTransformer('packetLengthPassthrough',
           new Uint8Array([key]).buffer,
           '{"fragmentation": true}');*/
@@ -301,6 +302,9 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
           new Uint8Array([key]).buffer,
           JSON.stringify({"targetDistribution": targetDistribution}));*/
+      this.pipe_.setTransformer('byteSequenceShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'sequences': this.makeSampleSequences_()}));
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
@@ -324,6 +328,14 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
 
       return result;
+    }
+
+    private makeSampleSequences_ = () : bytes.SequenceConfig => {
+      var sequence={index: 0, offset: 0,
+        sequence: arraybuffers.stringToArrayBuffer("OH HELLO"),
+        length: 256};
+
+      return {addSequences: [sequence], removeSequences: [sequence]};
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {

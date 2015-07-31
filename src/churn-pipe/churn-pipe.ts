@@ -23,6 +23,8 @@ import PacketLengthShortener = require('../fancy-transformers/packetLengthShorte
 import PacketLengthNormalizer = require('../fancy-transformers/packetLengthNormalizer');
 import PacketLengthUniformRandomizer = require('../fancy-transformers/packetLengthUniformRandomizer');
 import PacketLengthMultinomialRandomizer = require('../fancy-transformers/packetLengthMultinomialRandomizer');
+import bytes = require('../fancy-transformers/byteSequenceShaper');
+
 
 import logging = require('../logging/logging');
 
@@ -81,6 +83,8 @@ var makeTransformer_ = (
        transformer = new PacketLengthUniformRandomizer();
      } else if (name == 'packetLengthMultinomialRandomizer') {
        transformer = new PacketLengthMultinomialRandomizer();
+     } else if (name == 'byteSequenceShaper') {
+       transformer = new bytes.ByteSequenceShaper();
      } else if (name == 'none') {
        transformer = new PassThrough();
      } else {
