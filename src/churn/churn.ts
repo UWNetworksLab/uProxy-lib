@@ -330,9 +330,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       return result;
     }
 
-    private makeSampleSequences_ = () : bytes.SequenceConfig => {
+    private makeSampleSequences_ = () : bytes.SerializedSequenceConfig => {
+      var buffer=arraybuffers.stringToArrayBuffer("OH HELLO");
+      var hex=arraybuffers.arrayBufferToHexString(buffer);
       var sequence={index: 0, offset: 0,
-        sequence: arraybuffers.stringToArrayBuffer("OH HELLO"),
+        sequence: hex,
         length: 256};
 
       return {addSequences: [sequence], removeSequences: [sequence]};
