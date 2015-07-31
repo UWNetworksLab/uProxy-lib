@@ -23,7 +23,7 @@ export class ByteSequenceShaper implements Transformer {
   private removeSequences_ : SequenceModel[];
   private firstIndex_ : number;
   private lastIndex_ : number;
-  private indices_ : number[]
+  private indices_ : number[]=[];
   private outputIndex_ : number=0;
 
   public constructor() {
@@ -40,8 +40,6 @@ export class ByteSequenceShaper implements Transformer {
 
   /** Get the target length. */
   public superConfigure = (json:string) : void => {
-    log.error('JSON config file');
-    log.error(json);
     var config=JSON.parse(json);
 
     // Required parameter
@@ -73,12 +71,13 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-    log.info('Transforming byte sequence');
     if((this.outputIndex_ <= this.lastIndex_) && (this.outputIndex_ >= this.firstIndex_)) {
+      log.info('In range %1 <= %2 <= %3', this.firstIndex_, this.outputIndex_, this.lastIndex_);
       var results : ArrayBuffer[]=[];
 
       // Inject fake packets before the real packet
       var nextPacket=this.findNextPacket_(this.outputIndex_);
+      log.debug("nextPacket %1", nextPacket);
       while(nextPacket!=null) {
         results.push(this.makePacket_(nextPacket));
         this.outputIndex_=this.outputIndex_+1;
@@ -95,6 +94,10 @@ export class ByteSequenceShaper implements Transformer {
         this.outputIndex_=this.outputIndex_+1;
         nextPacket=this.findNextPacket_(this.outputIndex_);
       }
+
+      log.debug("Returning injected packets %1 %2", results[0].byteLength, results[1].byteLength);
+
+      return results;
     } else {
       this.outputIndex_=this.outputIndex_+1;
       return [buffer];
@@ -136,16 +139,22 @@ export class ByteSequenceShaper implements Transformer {
   private makePacket_ = (model:SequenceModel) : ArrayBuffer => {
     var parts : ArrayBuffer[]=[];
     if(model.offset>0) {
+      log.debug('case 1');
       var length=model.offset;
       parts.push(arraybuffers.randomBytes(length));
     }
 
     parts.push(model.sequence);
+    log.debug('pushed model %1 %2', model.sequence, parts[0]);
+    log.debug('pushed model types %1 %2', typeof(model.sequence), typeof(parts[0]));
 
     if(model.offset<1440) {
+      log.debug('case 2');
       length=1440-model.offset;
       parts.push(arraybuffers.randomBytes(length));
     }
+
+    log.debug("parts %1 %2 %3 %4", model, model.sequence, parts[0].byteLength, parts[1].byteLength);
 
     return arraybuffers.assemble(parts);
   }
