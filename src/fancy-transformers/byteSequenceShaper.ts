@@ -177,9 +177,9 @@ export class ByteSequenceShaper implements Transformer {
     log.debug('pushed model %1 %2', model.sequence, parts[0]);
     log.debug('pushed model types %1 %2', typeof(model.sequence), typeof(parts[0]));
 
-    if(model.offset<1440) {
+    if(model.offset<model.length) {
       log.debug('case 2');
-      length=1440-model.offset;
+      length=model.length-(model.offset+model.sequence.byteLength);
       parts.push(arraybuffers.randomBytes(length));
     }
 
