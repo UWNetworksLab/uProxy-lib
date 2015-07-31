@@ -7,12 +7,6 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv();
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import arithmetic = require('./arithmetic');
 
-/*describe('Sanity check', function() {
-  it('true==true', function() {
-    expect(true).toBe(true);
-  });
-});*/
-
 var makeUniformProbabilities = () : number[] => {
   var probs : number[] = [];
   for(var index=0; index<256; index++) {
@@ -23,9 +17,9 @@ var makeUniformProbabilities = () : number[] => {
 }
 
 describe('Arithmetic coding and decoding', function() {
-  it('encode("abc")=="\x00\x61"', function() {
+  it('encode("\x00\x01\x02\x04\x05\x06")=="\x00\x61"', function() {
     var encoder=new arithmetic.Encoder(makeUniformProbabilities());
-    var result=encoder.encode(arraybuffers.stringToArrayBuffer("abc"));
+    var result=encoder.encode(arraybuffers.stringToArrayBuffer("\x00\x01\x02\x03\x04\x05\x06"));
     console.log('result: '+arraybuffers.arrayBufferToHexString(result));
     expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\x00\x61"))).toBe(true);
   });
