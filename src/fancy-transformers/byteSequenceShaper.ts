@@ -40,25 +40,36 @@ export class ByteSequenceShaper implements Transformer {
 
   /** Get the target length. */
   public superConfigure = (json:string) : void => {
+    log.error('JSON config file');
+    log.error(json);
     var config=JSON.parse(json);
 
     // Required parameter
     if('sequences' in config) {
-      var sequenceConfig=<SequenceConfig>config;
-      this.addSequences_=config.addSequences;
-      this.removeSequences_=config.removeSequences;
+      log.debug('typcasting');
+      var sequenceConfig=<SequenceConfig>config.sequences;
+      log.debug('typecasted');
+      this.addSequences_=sequenceConfig.addSequences;
+      this.removeSequences_=sequenceConfig.removeSequences;
       this.firstIndex_=this.addSequences_[0].index;
       this.lastIndex_=this.addSequences_[this.addSequences_.length-1].index;
       for (var i = 0; i < this.addSequences_.length; i++) {
         this.indices_.push(this.addSequences_[i].index);
       }
+      log.debug('done');
     } else {
+      log.error('Bad JSON config file');
+      log.error(json);
       throw new Error("Byte sequence shaper requires sequences parameter");
     }
   }
 
   public configure = (json:string) : void => {
+    log.debug("Configuring byte sequence shaper");
+
     this.superConfigure(json);
+
+    log.debug("Configured byte sequence shaper");
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
