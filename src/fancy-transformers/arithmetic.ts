@@ -109,7 +109,7 @@ export class Encoder extends Coder {
   private init_ = () : void => {
     this.low_ = 0;
     this.range_ = this.top_value_;
-    this.working_ = 0;
+    this.working_ = 0xCA;
     this.underflow_ = 0;
   }
 
@@ -201,14 +201,14 @@ export class Decoder extends Coder {
     this.range_ = 1 << this.extra_bits_;
   }
 
-  private decodeSymbol_ = (symbol:number) : number => {
+  private decodeSymbol_ = (symbol:number) : void => {
     this.renormalize_();
     this.underflow_=this.range_/this.total_;
     var temp=this.low_/this.underflow_;
     if(temp > this.total_) {
-      return this.total_;
+      this.output_.push(this.total_);
     } else {
-      return temp;
+      this.output_.push(temp);
     }
   }
 
