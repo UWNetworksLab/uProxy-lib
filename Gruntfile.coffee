@@ -137,6 +137,8 @@ taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
+  'browserify:candidateSpec'
+  'browserify:churnSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
@@ -171,6 +173,7 @@ taskManager.add 'unit_test', [
   'browserifySpecs',
   'jasmine:arraybuffers'
   'jasmine:bridge'
+  'jasmine:churn'
   'jasmine:handler'
   'jasmine:buildTools'
   'jasmine:logging'
@@ -526,6 +529,8 @@ module.exports = (grunt) ->
       bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
+      candidateSpec: Rule.browserifySpec 'churn/candidate'
+      candidateCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/candidate')
       churnSpec: Rule.browserifySpec 'churn/churn'
       churnCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/churn')
       handlerSpec: Rule.browserifySpec 'handler/queue'
