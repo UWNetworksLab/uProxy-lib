@@ -86,6 +86,14 @@ to set Chrome's proxy settings and then just browse stuff.
 
 To see debugging output, open the background page.
 
+### Adventure
+
+Distributed SOCKS proxy with a telnet-based signalling channel.
+
+Intended for use with [our Docker-based integration testing](https://github.com/uProxy/uproxy-docker).
+
+If you're curious, try `telnet localhost 9000` or running `bin/connect-pair.py`.
+
 ### copypaste SOCKS
 
 Distributed SOCKS proxy demo. This is essentially uProxy without any

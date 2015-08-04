@@ -1,21 +1,38 @@
 #!/usr/bin/python
 
-# Connects two copy-paste samples running on localhost.
+# Connects two SOCKS adventure instances running on localhost.
 # TODO: add host/port args.
 
+import select
 import socket
-import time
 
-first = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-first.connect(("localhost", 9000))
+getter = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+getter.connect_ex(('localhost', 9000))
+getter.setblocking(False)
 
-second = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-second.connect(("localhost", 9010))
+giver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+giver.connect(('localhost', 9010))
+giver.setblocking(False)
 
-first.send("GET\n")
-time.sleep(0.5)
-first_sdp = first.recv(4096)
-second.send("GIVE " + first_sdp + "\n")
-time.sleep(0.5)
-second_sdp = second.recv(4096)
-first.send(second_sdp)
+getter.sendall('get\n')
+giver.sendall('give\n')
+
+getterOpen = True
+giverOpen = True
+while getterOpen and giverOpen:
+  inready, outready, exceptready = select.select([getter, giver], [], [])
+  for s in inready:
+    raw = s.recv(16384)
+    if len(raw) < 1:
+      if s == getter:
+        getterOpen = False
+      else:
+        giverOpen = False
+    else:
+      for signal in raw.splitlines():
+        if s == getter:
+          giver.sendall(signal + '\n')
+        else:
+          getter.sendall(signal + '\n')
+
+print 'all done!'
