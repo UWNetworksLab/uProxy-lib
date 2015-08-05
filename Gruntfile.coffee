@@ -30,6 +30,7 @@ taskManager.add 'samples', [
   'simpleChurnChatChromeApp'
   'copypasteChurnChatChromeApp'
   'adventure'
+  'uprobe'
 ]
 
 # Makes the distribution build.
@@ -130,6 +131,26 @@ taskManager.add 'adventureFirefoxApp', [
 taskManager.add 'adventure', [
   'adventureChromeApp'
   'adventureFirefoxApp'
+]
+
+taskManager.add 'uprobeBase', [
+  'base'
+  'browserify:uprobeFreedomModule'
+]
+
+taskManager.add 'uprobeChromeApp', [
+  'uprobeBase'
+  'copy:libsForUprobeChromeApp'
+]
+
+taskManager.add 'uprobeFirefoxApp', [
+  'uprobeBase'
+  'copy:libsForUprobeFirefoxApp'
+]
+
+taskManager.add 'uprobe', [
+  'uprobeChromeApp'
+  'uprobeFirefoxApp'
 ]
 
 # Create unit test code
@@ -414,6 +435,17 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/adventure-firefoxapp/data/'
 
+      libsForUprobeChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['uprobe', 'loggingprovider']
+          localDestPath: 'samples/uprobe-chromeapp/'
+      libsForUprobeFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['uprobe', 'loggingprovider']
+          localDestPath: 'samples/uprobe-firefoxapp/data/'
+
       # Integration Tests.
       libsForIntegrationTcp:
         Rule.copyLibs
@@ -522,6 +554,7 @@ module.exports = (grunt) ->
       simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
       copypasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
+      uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
