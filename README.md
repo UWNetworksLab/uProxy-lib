@@ -94,6 +94,10 @@ Intended for use with [our Docker-based integration testing](https://github.com/
 
 If you're curious, try `telnet localhost 9000` or running `bin/connect-pair.py`.
 
+### uProbe
+
+Guess-timates your NAT type.
+
 ### copypaste SOCKS
 
 Distributed SOCKS proxy demo. This is essentially uProxy without any
