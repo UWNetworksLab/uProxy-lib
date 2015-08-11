@@ -137,7 +137,8 @@ taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
-  'browserify:fancyTransformersSpec'
+  'browserify:arithmeticSpec'
+  'browserify:aesSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
@@ -543,7 +544,8 @@ module.exports = (grunt) ->
       rtcToNetCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'rtc-to-net/rtc-to-net')
       simpleTransformersCaesarSpec: Rule.browserifySpec 'simple-transformers/caesar'
       simpleTransformersCaesarCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'simple-transformers/caesar')
-      fancyTransformersSpec: Rule.browserifySpec 'fancy-transformers/arithmetic'
+      arithmeticSpec: Rule.browserifySpec 'fancy-transformers/arithmetic'
+      aesSpec: Rule.browserifySpec 'fancy-transformers/aes'
       socksCommonHeadersSpec: Rule.browserifySpec 'socks-common/socks-headers'
       socksCommonHeadersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-common/socks-headers')
       socksToRtcSpec: Rule.browserifySpec 'socks-to-rtc/socks-to-rtc'
