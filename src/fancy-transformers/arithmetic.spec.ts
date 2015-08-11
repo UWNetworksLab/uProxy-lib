@@ -17,19 +17,25 @@ var makeUniformProbabilities = () : number[] => {
 }
 
 describe('Arithmetic coding and decoding', function() {
-  it('encode("\x00\x01\x02\x04\x05\x06")=="\x00\x61"', function() {
+  it('encode("\x00\x01\x02\x03")=="\xCA\x00\x01\x02\x03\x00\x00"', function() {
     var encoder=new arithmetic.Encoder(makeUniformProbabilities());
-    var result=encoder.encode(arraybuffers.stringToArrayBuffer("\x00\x01\x02\x03\x04\x05\x06"));
-    console.log('result: '+arraybuffers.arrayBufferToHexString(result));
-    expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\x00\x61"))).toBe(true);
+    var result=encoder.encode(arraybuffers.stringToArrayBuffer("\x00\x01\x02\x03"));
+//    console.log('encoded result: '+arraybuffers.arrayBufferToHexString(result));
+    expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\xCA\x00\x01\x02\x03\x00\x00"))).toBe(true);
   });
-  it('encode("0123456789abcdefghijklmnopqrstuvxyz")=="\x00\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x78"', function() {
+  it('decode("\xCA\x00\x01\x02\x03\x00\x00")=="\x00\x01\x02\x03"', function() {
+    var decoder=new arithmetic.Decoder(makeUniformProbabilities());
+    var result=decoder.decode(arraybuffers.stringToArrayBuffer("\xCA\x00\x01\x02\x03\x00\x00"));
+//    console.log('decoded result: '+arraybuffers.arrayBufferToHexString(result));
+    expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\x00\x01\x02\x03"))).toBe(true);
+  });
+  /*it('encode("0123456789abcdefghijklmnopqrstuvxyz")=="\x00\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x78"', function() {
     var encoder=new arithmetic.Encoder(makeUniformProbabilities());
     var result=encoder.encode(arraybuffers.stringToArrayBuffer("0123456789abcdefghijklmnopqrstuvxyz"));
     console.log('result: '+arraybuffers.arrayBufferToHexString(result));
     expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\x00\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70\x71\x72\x73\x74\x75\x76\x78"))).toBe(true);
-  });
-  it('decode(encode("abc"))=="abc"', function() {
+  });*/
+  /*it('decode(encode("abc"))=="abc"', function() {
     var probs=makeUniformProbabilities();
     var encoder=new arithmetic.Encoder(probs);
     var decoder=new arithmetic.Decoder(probs);
@@ -40,5 +46,5 @@ describe('Arithmetic coding and decoding', function() {
     console.log('decoded: '+decoded.byteLength.toString());
     console.log('decoded: '+arraybuffers.arrayBufferToHexString(decoded));
     expect(arraybuffers.byteEquality(original, decoded)).toBe(true);
-  });
+  });*/
 });
