@@ -98,11 +98,13 @@ export class Encoder extends Coder {
       this.encodeSymbol_(bytes[index]);
     }
 
+    this.flush_();
+
     var output=new Uint8Array(this.output_.length);
     for(index=0; index<this.output_.length; index++) {
       output[index]=this.output_[index];
     }
-    console.log('encoded '+input.byteLength.toString()+' '+output.byteLength.toString());
+//    console.log('encoded '+input.byteLength.toString()+' '+output.byteLength.toString());
     return output.buffer;
   }
 
@@ -111,10 +113,15 @@ export class Encoder extends Coder {
     this.range_ = this.top_value_;
     this.working_ = 0xCA;
     this.underflow_ = 0;
+    this.input_=[];
+    this.output_=[];
+//    log.debug('old state %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
   }
 
   private encodeSymbol_ = (symbol:number) => {
     var interval = this.intervals_[symbol];
+
+//    log.debug('encoding %1 %2 %3 %4', symbol, interval.length, interval.low, this.total_);
 
     this.renormalize_();
     var newRange = this.range_ / this.total_;
@@ -126,6 +133,8 @@ export class Encoder extends Coder {
     }
 
     this.low_ = this.low_ + temp;
+
+//    log.debug('new state %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
   }
 
   private renormalize_ = () : void => {
@@ -155,15 +164,17 @@ export class Encoder extends Coder {
   }
 
 
-  private flush = () : void => {
+  private flush_ = () : void => {
     this.renormalize_();
-    var temp = this.low_ >>> 23;
+    var temp = this.low_ >>> this.shift_bits_;
     if(temp > 0xFF) {
+//      log.debug('#2');
       this.output_.push(this.working_+1);
       for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
         this.output_.push(0x00);
       }
     } else {
+//      log.debug('#3');
       this.output_.push(this.working_);
       for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
         this.output_.push(0xFF);
@@ -181,48 +192,97 @@ export class Decoder extends Coder {
   }
 
   public decode = (input:ArrayBuffer) : ArrayBuffer => {
-    this.init_();
+    this.input_=[];
 
     var bytes=new Uint8Array(input);
     for(var index=0; index<bytes.length; index++) {
-      this.decodeSymbol_(bytes[index]);
+      this.input_.push(bytes[index]);
     }
+
+    this.init_();
+    this.decodeSymbols_();
+    this.flush_();
 
     var output=new Uint8Array(this.output_.length);
     for(index=0; index<this.output_.length; index++) {
       output[index]=this.output_[index];
     }
+
     return output.buffer;
   }
 
   private init_ = () : void => {
+    var discard=this.input_.shift(); // discard first byte because the encoder is weird
+    log.debug('discarding %1', discard);
     this.working_ = this.input_.shift();
+    log.debug('read %1', this.working_);
     this.low_ = this.working_ >>> (8 - this.extra_bits_);
     this.range_ = 1 << this.extra_bits_;
+    this.underflow_ = 0;
+    this.output_=[];
+    log.debug('old state %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
   }
 
-  private decodeSymbol_ = (symbol:number) : void => {
-    this.renormalize_();
-    this.underflow_=this.range_/this.total_;
-    var temp=this.low_/this.underflow_;
-    if(temp > this.total_) {
-      this.output_.push(this.total_);
-    } else {
-      this.output_.push(temp);
+  private decodeSymbols_ = () : void => {
+    while(this.input_.length > 0) {
+      this.decodeSymbol_();
     }
+  }
+
+  /*private decodeSymbol_ = () : void => {
+    this.renormalize_();
+    this.underflow_=(this.range_/this.total_) >>> 0;
+    var temp=(this.low_/this.underflow_) >>> 0;
+    var result : number = null;
+    if(temp > this.total_) {
+      result=this.total_;
+    } else {
+      result=temp;
+    }
+
+    this.output_.push(result);
+    this.update_(result);
+
+    log.debug('new state %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
+  }*/
+
+  private decodeSymbol_ = () : void => {
+    log.debug('<r %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
+    this.renormalize_();
+    log.debug('>r %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
+    this.underflow_=this.range_ >>> 8;
+    var temp=(this.low_/this.underflow_) >>> 0;
+    var result : number = null;
+    if(temp>>>8==0) {
+      result=temp;
+    } else {
+      result=(1<<8)-1;
+    }
+
+    this.output_.push(result);
+    this.update_(result);
+
+    log.debug('new state %1 %2 %3 %4', this.low_, this.range_, this.working_, this.underflow_);
   }
 
   private renormalize_ = () : void => {
     while(this.range_ <= this.bottom_value_) {
       this.low_=(this.low_ << 8) | ((this.working_ << this.extra_bits_) & 0xFF);
-      this.working_ = this.input_.shift();
-      this.low_ = this.low_ | (this.working_ >>> (8-this.extra_bits_));
+      if(this.input_.length>0) {
+        this.working_ = this.input_.shift();
+      } else {
+        this.working_=0;
+      }
+      log.debug('read byte %1', this.working_);
+      this.low_ = (this.low_ | (this.working_ >>> (8-this.extra_bits_)));
+      this.low_ = this.low_ >>> 0;
       this.range_ = (this.range_ << 8) >>> 0;
     }
   }
 
   private update_ = (symbol:number) : void => {
     var interval = this.intervals_[symbol];
+    log.debug('decoding %1 %2 %3 %4', symbol, interval.length, interval.low, this.total_);
     var temp = this.underflow_ * interval.low;
     this.low_ = this.low_ - temp;
     if(interval.high < this.total_) {
@@ -233,6 +293,7 @@ export class Decoder extends Coder {
   }
 
   private flush_ = () : void => {
+    this.decodeSymbol_();
     this.renormalize_();
   }
 }
