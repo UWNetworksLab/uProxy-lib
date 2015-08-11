@@ -31,6 +31,7 @@ import peerconnection = require('../webrtc/peerconnection');
 import random = require('../crypto/random');
 import signals = require('../webrtc/signals');
 import bytes = require('../fancy-transformers/byteSequenceShaper');
+import encryption = require('../fancy-transformers/encryptionShaper');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
@@ -302,9 +303,23 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
           new Uint8Array([key]).buffer,
           JSON.stringify({"targetDistribution": targetDistribution}));*/
-      this.pipe_.setTransformer('byteSequenceShaper',
+      /*this.pipe_.setTransformer('byteSequenceShaper',
           new Uint8Array([key]).buffer,
-          JSON.stringify({'sequences': this.makeSampleSequences_()}));
+          JSON.stringify({'sequences': this.makeSampleSequences_()}));*/
+      /*log.debug('make sample pipe');
+      this.makeSampleEncryption_(function(config:encryption.SerializedEncryptionConfig) {
+        log.debug('making sample encryption');
+        this.pipe_.setTransformer('encryptionShaper',
+            new Uint8Array([key]).buffer,
+            JSON.stringify(config));
+        this.havePipe_();
+      });*/
+      this.pipe_.setTransformer('encryptionShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'key': this.makeSampleEncryptionKey_()}));
+      /*this.pipe_.setTransformer('compressionShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));*/
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
@@ -338,6 +353,20 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         length: 256};
 
       return {addSequences: [sequence], removeSequences: [sequence]};
+    }
+
+    private makeSampleEncryptionKey_ = () : string => {
+      var key = new ArrayBuffer(16);
+      return arraybuffers.arrayBufferToHexString(key);
+    }
+
+    private makeSampleFrequencies_ = () : number[] => {
+      var result : number[] = [];
+      for (var i = 0; i < 256; i++) {
+          result[i]=1;
+      }
+
+      return result;
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
