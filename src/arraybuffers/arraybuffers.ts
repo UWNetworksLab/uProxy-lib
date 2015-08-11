@@ -172,3 +172,22 @@ export function randomBytes(len:number) : ArrayBuffer {
   }
   return bytes.buffer;
 }
+
+/* Takes a number and returns a two byte (network byte order) representation
+ * of this number.
+ */
+export function encodeShort(len:number) : ArrayBuffer {
+  var bytes = new Uint8Array(2);
+  bytes[0] = Math.floor(len >> 8);
+  bytes[1] = Math.floor((len << 8) >> 8);
+  return bytes.buffer;
+}
+
+/* Takes a two byte (network byte order) representation of a number and returns
+ * the number.
+ */
+ export function decodeShort(buffer:ArrayBuffer) : number {
+  var bytes = new Uint8Array(buffer);
+  var result = (bytes[0] << 8) | bytes[1];
+  return result;
+}
