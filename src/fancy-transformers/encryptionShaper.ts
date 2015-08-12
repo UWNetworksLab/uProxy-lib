@@ -118,7 +118,7 @@ export class EncryptionShaper implements Transformer {
 
     var cbc : aes.ModeOfOperationCBC = new aes.ModeOfOperationCBC(this.key_, iv);
     var ciphertext=cbc.encrypt(plaintext);
-    log.debug('-> %1', arraybuffers.arrayBufferToHexString(plaintext));
+
     return ciphertext;
   }
 
@@ -132,10 +132,8 @@ export class EncryptionShaper implements Transformer {
     var rest = parts[1];
     if(rest.byteLength > length) {
       parts=arraybuffers.split(rest, length);
-      log.debug('<- %1', arraybuffers.arrayBufferToHexString(plaintext);
       return parts[0];
     } else {
-      log.debug('<- %1', arraybuffers.arrayBufferToHexString(plaintext));
       return rest;
     }
   }
