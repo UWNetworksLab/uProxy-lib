@@ -304,7 +304,7 @@ export class ModeOfOperationCBC {
         plaintext[i] ^= this._lastCipherblock[i];
     }
 
-    this.copy_(this._lastCipherblock, ciphertext);
+    this.copy_(ciphertext, this._lastCipherblock);
 
     return plaintext;
   }
