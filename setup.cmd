@@ -5,7 +5,7 @@
 :: directory of the project (which is where this script is located).
 for %%F in (%0) do set ROOT_DIR=%%~dpF
 set NPM_BIN_DIR=%ROOT_DIR%node_modules\.bin\
-cd %ROOT_DIR%
+cd "%ROOT_DIR%"
 
 if "%1" == "install" (
 	call :installDevDependencies
@@ -52,22 +52,33 @@ goto:eof
 	call %~1 || exit /b
 goto:eof
 
+:: Same as runAndAssertCmd, but takes in an arbitrary number of
+:: arguments, and calls them without stripping the double quotes
+:: This is used for commands where the path may have spaces
+:runAndAssertCmdArgs
+	echo Running: %*
+	call %* || exit /b
+goto:eof
+
 :: Note: tsc doesn't seem to support wildcard files (e.g. "tsc *.ts" in setup.sh)
 :: So we use a for loop to achieve the same effect
 :buildTools
 	call :runCmd "mkdir build\dev\uproxy-lib\build-tools"
 	call :runCmd "copy src\build-tools\*.ts build\dev\uproxy-lib\build-tools\"
 	for /f "tokens=*" %%G in ('dir /b build\dev\uproxy-lib\build-tools\*.ts') do (
-		call :runAndAssertCmd "%NPM_BIN_DIR%tsc --module commonjs --noImplicitAny build\dev\uproxy-lib\build-tools\%%G"
+		call :runAndAssertCmdArgs "%NPM_BIN_DIR%tsc" --module commonjs --noImplicitAny build\dev\uproxy-lib\build-tools\%%G
 	)
 	call :runCmd "mkdir build\tools"
 	call :runCmd "copy build\dev\uproxy-lib\build-tools\*.js build\tools\"
 goto:eof
 
+:: Note: The "tsd reinstall" command seems to create a third_party/third_party folder 
+:: on Windows, so we manually delete this after
 :thirdParty
-	call :runAndAssertCmd "%NPM_BIN_DIR%bower install --allow-root"
+	call :runAndAssertCmdArgs "%NPM_BIN_DIR%bower" install --allow-root
 	call :runCmd "mkdir build\third_party"
-	call :runAndAssertCmd "%NPM_BIN_DIR%tsd reinstall --config .\third_party\tsd.json"
+	call :runAndAssertCmdArgs "%NPM_BIN_DIR%tsd" reinstall --config .\third_party\tsd.json
+	call :runCmd "rmdir third_party\third_party /s /q"
 	call :runCmd "robocopy third_party\ build\third_party\ /s /e > nul 2>&1"
 	call :runCmd "mkdir build\third_party\freedom-pgp-e2e"
 	call :runCmd "copy node_modules\freedom-pgp-e2e\dist build\third_party\freedom-pgp-e2e\"
