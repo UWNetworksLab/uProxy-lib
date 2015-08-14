@@ -6,6 +6,7 @@
 /// <reference path='../../../third_party/ipaddrjs/ipaddrjs.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import dispatch = require('../dispatch/dispatch');
 import freedom_types = require('freedom.types');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
@@ -135,7 +136,7 @@ import ProxyConfig = require('./proxyconfig');
 
     // The connection to the peer that is acting as a proxy client. Once
     // assigned, is never un-assigned. Use in this class to tell if started.
-    private peerConnection_ :peerconnection.PeerConnection<Object>;
+    public peerConnection_ :peerconnection.PeerConnection<Object>;
 
     // This pool manages the data channels for the PeerConnection.
     private pool_ :Pool;
@@ -150,8 +151,11 @@ import ProxyConfig = require('./proxyconfig');
     // removed.
     private sessions_ :{ [channelLabel:string] : Session } = {};
 
+    public dispatch_ :dispatch.Dispatch;
+
     // |userId_| is used to enforce user-wide resource limits.
-    public constructor(private userId_?:string) {}
+    public constructor(private userId_?:string) {
+    }
 
     // Starts with the supplied peerconnection.
     // Returns this.onceReady.
@@ -162,8 +166,10 @@ import ProxyConfig = require('./proxyconfig');
       if (this.peerConnection_) {
         throw new Error('already configured');
       }
+      this.dispatch_ = new dispatch.Dispatch("rtc-to-net:Dispatch",
+                                             peerconnection);
       this.peerConnection_ = peerconnection;
-      this.pool_ = new Pool(peerconnection, 'RtcToNet');
+      this.pool_ = new Pool(peerconnection, this.dispatch_, 'RtcToNet');
       this.proxyConfig = proxyConfig;
 
       this.signalsForPeer = this.peerConnection_.signalForPeerQueue;

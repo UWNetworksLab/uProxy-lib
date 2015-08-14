@@ -1,0 +1,19 @@
+<link rel="import" href='../../../../third_party/bower/polymer/polymer.html'>
+<link rel="import" href='connection-state.html'>
+
+<polymer-element name='copypaste-chat'>
+  <template>
+    <style></style>
+    <div id='topPanel'>
+      <div id='chatHistory'>
+        <textarea id='allChatHistory' value='{{ model.allChatText }}' readonly></textarea>
+        <br />
+        <input is="core-input" id='inputChat' value='{{ model.inboundChatText }}'
+               on-commit='{{ sendChatMessage }}'></input>
+        <button id='send' on-click='{{ sendChatMessage }}'>SEND</button>
+      </div>
+    </div>
+  </template>
+  <script src='chat.js'>
+  </script>
+</polymer-element>

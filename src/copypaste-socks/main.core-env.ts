@@ -17,6 +17,7 @@ module copypaste_module {
 
   export var onceReady :Promise<freedom_types.OnAndEmit<any,any>> =
       loadModule().then((copypaste:freedom_types.OnAndEmit<any,any>) => {
+        console.log("onceReady active.");
     copypaste.on('signalForPeer', (message:signals.Message) => {
       model.readyForStep2 = true;
 
@@ -40,6 +41,10 @@ module copypaste_module {
 
     copypaste.on('ciphertext', (ciphertext:string) => {
       model.outboundMessageValue = ciphertext;
+    });
+
+    copypaste.on('chatIncoming', (msg:string) => {
+       model.allChatText += 'them: ' + msg + '\n';
     });
 
     copypaste.on('verifyDecryptResult', (result:VerifyDecryptResult) => {
@@ -76,6 +81,8 @@ module copypaste_module {
 
   // TODO: use actual interaction to define user-ids.
   export var model :copypaste_api.Model = {
+    allChatText : '',
+    inboundChatText : '',
     givingOrGetting : <string>null,
     usingCrypto : false,
     inputDecrypted : false,
@@ -113,6 +120,7 @@ module copypaste_module {
   // signalling messages. Enables/disables the corresponding form button, as
   // appropriate. Returns null if the field contents are malformed.
   export function parseInboundMessages(inboundMessageFieldValue:string) : void {
+    console.log("parseInboundMessages("+inboundMessageFieldValue+"):starting");
     // Base64-decode the pasted text.
     var signalsString :string = null;
     try {
@@ -145,8 +153,10 @@ module copypaste_module {
     // Enable/disable, as appropriate, the button for consuming the messages.
     if (null !== parsedSignals && parsedSignals.length > 0) {
       model.inputIsWellFormed = true;
+      console.log("Parsed " + parsedSignals.length + " signals");
     } else {
       // TODO: Notify the user that the pasted text is malformed.
+      console.log("Found no parsed signals in ", signalsString);
     }
 
     parsedInboundMessages = parsedSignals;
@@ -158,7 +168,9 @@ module copypaste_module {
   // or rtc-to-net module. Disables the form field.
   export function consumeInboundMessage() : void {
     // Forward the signalling messages to the Freedom app.
+    console.log("consumeInboundMessage: " + model.inboundText);
     onceReady.then(function(copypaste) {
+      console.log("consumeInboundMessage: onceReady!");
       for (var i = 0; i < parsedInboundMessages.length; i++) {
         copypaste.emit('handleSignalMessage', parsedInboundMessages[i]);
       }
@@ -173,6 +185,14 @@ module copypaste_module {
       copypaste.emit('verifyDecrypt', ciphertext);
     });
   };
+
+  export function sendChatMessage(message:string) :void {
+    console.log("sendChatmessage: " + message);
+    onceReady.then(function(copypaste) {
+      model.allChatText += "me: " + message + "\n";
+      copypaste.emit('sendMessage', message);
+    });
+  }
 
 }  // module copypaste_api
 

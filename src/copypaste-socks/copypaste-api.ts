@@ -6,6 +6,8 @@ import freedom_types = require('freedom.types');
 // Polymer elements will bind to model so that the elements' style and
 // contents are up to date.
 export interface Model {
+  allChatText : string;
+  inboundChatText : string;
   givingOrGetting : string;
   usingCrypto : boolean;
   inputDecrypted : boolean;
@@ -29,5 +31,6 @@ export interface CopypasteApi {
   model :Model;
   parseInboundMessages :(inboundMessageFieldValue:string) => void;
   consumeInboundMessage :() => void;
+  sendChatMessage :(message:string) => void;
   verifyDecryptInboundMessage :(ciphertext:string) => void;
 }

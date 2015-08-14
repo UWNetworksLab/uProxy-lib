@@ -17,6 +17,7 @@
 
 import peerconnection = require('../webrtc/peerconnection');
 import datachannel = require('../webrtc/datachannel');
+import dispatch = require('../dispatch/dispatch');
 import handler = require('../handler/queue');
 import queue = require('../queue/queue');
 
@@ -39,9 +40,10 @@ class Pool {
 
   constructor(
       pc:peerconnection.PeerConnection<Object>,
+      dispatch:dispatch.Dispatch,
       name_:string) {
     this.localPool_ = new LocalPool(pc, name_);
-    var remotePool = new RemotePool(pc, name_);
+    var remotePool = new RemotePool(dispatch, name_);
     this.peerOpenedChannelQueue = remotePool.peerOpenedChannelQueue;
   }
 
@@ -115,9 +117,9 @@ class RemotePool {
   public peerOpenedChannelQueue = new handler.Queue<PoolChannel,void>();
 
   constructor(
-      private pc_:peerconnection.PeerConnection<Object>,
+      private dispatch:dispatch.Dispatch,
       private name_:string) {
-    this.pc_.peerOpenedChannelQueue.setSyncHandler(this.onNewChannel_);
+    dispatch.register('p[0-9]+', this.onNewChannel_);
   }
 
   private onNewChannel_ = (dc:datachannel.DataChannel) => {

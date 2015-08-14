@@ -2,6 +2,7 @@
 
 import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
 freedom = freedomMocker.makeMockFreedomInModuleEnv();
+import dispatch = require('../dispatch/dispatch');
 
 import peerconnection = require('../webrtc/peerconnection');
 import handler = require('../handler/queue');
@@ -35,8 +36,8 @@ describe('pool', function() {
       }),
       peerOpenedChannelQueue: new handler.Queue<peerconnection.DataChannel, void>()
     };
-      
-    pool = new Pool(mockPeerConnection, 'test');
+    var dsp = new dispatch.Dispatch('td', mockPeerConnection);
+    pool = new Pool(mockPeerConnection, dsp, 'test');
   });
 
   it('check a single open and close sequence', (done) => {

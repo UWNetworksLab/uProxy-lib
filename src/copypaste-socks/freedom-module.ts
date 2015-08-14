@@ -5,9 +5,11 @@
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import bridge = require('../bridge/bridge');
+import datachannel = require('../webrtc/datachannel');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
+import peerconnection = require('../webrtc/peerconnection');
 import rtc_to_net = require('../rtc-to-net/rtc-to-net');
 import signals = require('../webrtc/signals');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
@@ -56,6 +58,8 @@ var pcConfig :freedom_RTCPeerConnection.RTCConfiguration = {
 var socksRtc:socks_to_rtc.SocksToRtc;
 var rtcNet:rtc_to_net.RtcToNet;
 
+var chat:peerconnection.DataChannel;
+
 var doStart = () => {
   var localhostEndpoint:net.Endpoint = { address: '0.0.0.0', port: 9999 };
 
@@ -87,12 +91,51 @@ var doStart = () => {
     log.info('SocksToRtc listening on %1', endpoint);
     log.info('curl -x socks5h://%1:%2 www.example.com',
         endpoint.address, endpoint.port);
+    socksRtc.dispatch_.register("chat",  (dc:peerconnection.DataChannel) => {
+      console.log("Got chat channel");
+      chat = dc;
+      chat.dataFromPeerQueue.setHandler((data:datachannel.Data) => {
+        parentModule.emit('chatIncoming', data.str);
+        console.log(data);
+        return Promise.resolve<void>()
+      })
+    });
   }, (e:Error) => {
     log.error('failed to start SocksToRtc: %1', e.message);
   });
 }
 
+function setupChat(dc:peerconnection.DataChannel) {
+  console.log("setupchat: (before creation) chat is currently " + chat);
+  chat = dc;
+  chat.dataFromPeerQueue.setHandler((d:datachannel.Data) => {
+    parentModule.emit('chatIncoming', d.str);
+    return Promise.resolve<void>();
+  });
+}
+
 parentModule.on('start', doStart);
+
+parentModule.on('sendMessage', (message:string) => {
+  if (chat !== undefined) {
+    chat.send({str:message});
+  }
+  else {
+    if (socksRtc !== undefined) {
+      socksRtc.peerConnection_.openDataChannel("chat").then(
+        (dc:peerconnection.DataChannel) => {
+          setupChat(dc);
+          chat.send({str:message});
+      });
+    } else {
+      rtcNet.peerConnection_.openDataChannel("chat").then(
+        (dc:peerconnection.DataChannel) => {
+          setupChat(dc);
+          chat.send({str:message});
+      });
+    }
+  }
+});
 
 // Receive signalling channel messages from the UI.
 // Messages are dispatched to either the socks-to-rtc or rtc-to-net
@@ -107,6 +150,17 @@ parentModule.on('handleSignalMessage', (message:signals.Message) => {
       rtcNet.start({
         allowNonUnicast: true
       }, bridge.best('rtctonet', pcConfig));
+
+      rtcNet.dispatch_.register("chat",  (dc:peerconnection.DataChannel) => {
+        console.log("rtcNet dispatcher got \"chat\"");
+        chat = dc;
+        chat.dataFromPeerQueue.setHandler((data:datachannel.Data) => {
+          console.log("[chat from peer] ", data);
+          parentModule.emit('chatIncoming', data.str);
+          return Promise.resolve<void>()
+        })
+      });
+
       log.info('created rtc-to-net');
 
       // Forward signalling channel messages to the UI.

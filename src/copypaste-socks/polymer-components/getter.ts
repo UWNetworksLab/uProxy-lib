@@ -16,6 +16,7 @@ Polymer({
     copypaste.onceReady.then((copypasteModule) => { copypasteModule.emit('start', {}); });
   },
   parseInboundText: function() {
+    console.log("(getter) parseInboundText: " + copypaste.model.inboundText);
     if (copypaste.model.usingCrypto && !copypaste.model.inputDecrypted) {
       copypaste.verifyDecryptInboundMessage(copypaste.model.inboundText);
     } else {
@@ -23,6 +24,8 @@ Polymer({
     }
   },
   consumeInboundText: function() {
+    this.parseInboundText();
+    console.log("(getter) consumeInboundText: " + copypaste.model.inboundText);
     copypaste.consumeInboundMessage();
     // Disable the form field, since it no longer makes sense to accept further
     // input in it.
@@ -31,6 +34,7 @@ Polymer({
     this.$.consumeMessageButton.disabled = true;
   },
   ready: function() {
+    console.log("(getter) ready()");
     i18nUtil.translateStrings(this);
   }
 });

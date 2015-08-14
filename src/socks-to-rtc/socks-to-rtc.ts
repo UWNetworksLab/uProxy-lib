@@ -3,6 +3,7 @@
 /// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
+import dispatch = require('../dispatch/dispatch');
 import handler = require('../handler/queue');
 import net = require('../net/net.types');
 import logging = require('../logging/logging');
@@ -59,7 +60,8 @@ module SocksToRtc {
 
     // The connection to the peer that is acting as the endpoint for the proxy
     // connection.
-    private peerConnection_ :peerconnection.PeerConnection<Object>;
+    public peerConnection_ :peerconnection.PeerConnection<Object>;
+    public dispatch_ :dispatch.Dispatch;
 
     // This pool manages the PeerConnection's datachannels.
     private pool_ : Pool;
@@ -101,7 +103,9 @@ module SocksToRtc {
       this.tcpServer_.connectionsQueue
           .setSyncHandler(this.makeTcpToRtcSession_);
       this.peerConnection_ = peerconnection;
-      this.pool_ = new Pool(this.peerConnection_, 'SocksToRtc');
+      this.dispatch_ = new dispatch.Dispatch("socks-to-rtc:Dispatch",
+                                             peerconnection);
+      this.pool_ = new Pool(this.peerConnection_, this.dispatch_, 'SocksToRtc');
 
       this.peerConnection_.signalForPeerQueue.setSyncHandler(
           this.dispatchEvent_.bind(this, 'signalForPeer'));
