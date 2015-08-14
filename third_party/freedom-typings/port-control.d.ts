@@ -11,6 +11,7 @@ declare module freedom_PortControl {
         protocol :string;
         timeoutId ?:number;
         nonce ?:number[];
+        errInfo ?:string;
     }
     // A collection of Mappings
     interface ActiveMappings {
