@@ -7,8 +7,8 @@ freedom = freedomMocker.makeMockFreedomInModuleEnv();
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import arithmetic = require('./arithmetic');
 
-var makeUniformProbabilities = () : number[] => {
-  var probs : number[] = [];
+var makeUniformProbabilities = () :number[] => {
+  var probs :number[] = [];
   for(var index=0; index<256; index++) {
     probs[index]=1;
   }

@@ -11,35 +11,35 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 var log :logging.Log = new logging.Log('fancy-transformers');
 
 export interface SerializedSequenceConfig {
-  addSequences: SerializedSequenceModel[];
-  removeSequences: SerializedSequenceModel[]
+  addSequences:SerializedSequenceModel[];
+  removeSequences:SerializedSequenceModel[]
 }
 export interface SerializedSequenceModel {
-  index: number;
-  offset: number;
-  sequence: string;
-  length: number
+  index:number;
+  offset:number;
+  sequence:string;
+  length:number
 }
 
 export interface SequenceConfig {
-  addSequences: SequenceModel[];
-  removeSequences: SequenceModel[]
+  addSequences:SequenceModel[];
+  removeSequences:SequenceModel[]
 }
 export interface SequenceModel {
-  index: number;
-  offset: number;
-  sequence: ArrayBuffer;
-  length: number
+  index:number;
+  offset:number;
+  sequence:ArrayBuffer;
+  length:number
 }
 
 // An obfuscator that injects byte sequences.
 export class ByteSequenceShaper implements Transformer {
-  private addSequences_ : SequenceModel[];
-  private removeSequences_ : SequenceModel[];
-  private firstIndex_ : number;
-  private lastIndex_ : number;
-  private indices_ : number[]=[];
-  private outputIndex_ : number=0;
+  private addSequences_ :SequenceModel[];
+  private removeSequences_ :SequenceModel[];
+  private firstIndex_ :number;
+  private lastIndex_ :number;
+  private indices_ :number[]=[];
+  private outputIndex_ :number=0;
 
   public constructor() {
     log.info('Constructed byte sequence shaper');
@@ -47,12 +47,12 @@ export class ByteSequenceShaper implements Transformer {
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) : void => {
+  public setKey = (key:ArrayBuffer) :void => {
     // Do nothing.
   }
 
   // Get the target length.
-  public superConfigure = (json:string) : void => {
+  public superConfigure = (json:string) :void => {
     var config=JSON.parse(json);
 
     // Required parameter
@@ -75,7 +75,7 @@ export class ByteSequenceShaper implements Transformer {
     }
   }
 
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     log.debug("Configuring byte sequence shaper");
 
     try {
@@ -87,11 +87,11 @@ export class ByteSequenceShaper implements Transformer {
     log.debug("Configured byte sequence shaper");
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     if((this.outputIndex_ <= this.lastIndex_) &&
        (this.outputIndex_ >= this.firstIndex_)) {
       log.info('In range %1 <= %2 <= %3', this.firstIndex_, this.outputIndex_, this.lastIndex_);
-      var results : ArrayBuffer[]=[];
+      var results :ArrayBuffer[]=[];
 
       // Inject fake packets before the real packet
       var nextPacket=this.findNextPacket_(this.outputIndex_);
@@ -122,7 +122,7 @@ export class ByteSequenceShaper implements Transformer {
     }
   }
 
-  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     var match=this.findMatchingPacket_(buffer);
     if(match!=null) {
       return [];
@@ -132,11 +132,11 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   // No-op (we have no state or any resources to dispose).
-  public dispose = () : void => {}
+  public dispose = () :void => {}
 
-  private deserializeConfig_ = (config:SerializedSequenceConfig) : SequenceConfig => {
-    var adds : SequenceModel[]=[];
-    var rems : SequenceModel[]=[];
+  private deserializeConfig_ = (config:SerializedSequenceConfig) :SequenceConfig => {
+    var adds :SequenceModel[]=[];
+    var rems :SequenceModel[]=[];
 
     for(var i=0; i<config.addSequences.length; i++) {
       adds.push(this.deserializeModel_(config.addSequences[i]));
@@ -146,13 +146,13 @@ export class ByteSequenceShaper implements Transformer {
       rems.push(this.deserializeModel_(config.removeSequences[i]));
     }
 
-    return {addSequences: adds, removeSequences: rems};
+    return {addSequences:adds, removeSequences:rems};
   }
 
-  private deserializeModel_ = (model:SerializedSequenceModel) : SequenceModel => {
-    return {index: model.index, offset: model.offset,
-      sequence: arraybuffers.hexStringToArrayBuffer(model.sequence),
-      length: model.length
+  private deserializeModel_ = (model:SerializedSequenceModel) :SequenceModel => {
+    return {index:model.index, offset:model.offset,
+      sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
+      length:model.length
     }
   }
 
@@ -176,8 +176,8 @@ export class ByteSequenceShaper implements Transformer {
     return null;
   }
 
-  private makePacket_ = (model:SequenceModel) : ArrayBuffer => {
-    var parts : ArrayBuffer[]=[];
+  private makePacket_ = (model:SequenceModel) :ArrayBuffer => {
+    var parts :ArrayBuffer[]=[];
     if(model.offset>0) {
       log.debug('case 1');
       var length=model.offset;

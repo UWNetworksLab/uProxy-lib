@@ -22,7 +22,7 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
   }
 
   // Get the target distribution.
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     this.superConfigure(json);
 
     var data=JSON.parse(json);
@@ -30,13 +30,13 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
     this.targetDistribution_=data['distribution'];
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }
 
   // Generates a random number from 1-1440 inclusive
-  private nextTargetLength = () : number => {
+  private nextTargetLength = () :number => {
     var random=Math.random();
     var index=0;
     while(index<this.targetDistribution_.length-1) {

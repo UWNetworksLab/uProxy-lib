@@ -19,11 +19,11 @@ class PacketLengthPassthrough extends PacketLengthShaper implements Transformer 
   }
 
   // Get the target minimum and maximum lengths.
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     this.superConfigure(json);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     log.info('Transforming');
     return this.shapePacketLength(buffer, buffer.byteLength+36);
   }

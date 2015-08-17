@@ -11,13 +11,13 @@ import arithmetic = require('./arithmetic');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-export interface CompressionConfig {frequencies: number[]}
+export interface CompressionConfig {frequencies:number[]}
 
 // An obfuscator that uses an arithmetic coder to change the entropy.
 export class CompressionShaper implements Transformer {
-  private frequencies_ : number[];
-  private encoder_ : arithmetic.Encoder;
-  private decoder_ : arithmetic.Decoder;
+  private frequencies_ :number[];
+  private encoder_ :arithmetic.Encoder;
+  private decoder_ :arithmetic.Decoder;
 
   public constructor() {
     log.info('Constructed compression shaper');
@@ -25,13 +25,13 @@ export class CompressionShaper implements Transformer {
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) : void => {
+  public setKey = (key:ArrayBuffer) :void => {
     // Do nothing.
   }
 
 
   // Get the target length.
-  public superConfigure = (json:string) : void => {
+  public superConfigure = (json:string) :void => {
     var config=JSON.parse(json);
 
     // Required parameter
@@ -49,7 +49,7 @@ export class CompressionShaper implements Transformer {
     }
   }
 
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     log.debug("Configuring configuration shaper");
 
     try {
@@ -61,7 +61,7 @@ export class CompressionShaper implements Transformer {
     log.debug("Configured configuration shaper");
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
 //    buffer=arraybuffers.stringToArrayBuffer('\x00\x01\x02\x03');
     log.debug('encoding %1', arraybuffers.arrayBufferToHexString(buffer));
     var encoded=this.encoder_.encode(buffer);
@@ -69,7 +69,7 @@ export class CompressionShaper implements Transformer {
     return [encoded];
   }
 
-  public restore = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     var decoded=this.decoder_.decode(buffer);
     log.debug('final decoded %1', arraybuffers.arrayBufferToHexString(decoded));
     log.debug('--------------------------------------------------------------');
@@ -77,5 +77,5 @@ export class CompressionShaper implements Transformer {
   }
 
   // No-op (we have no state or any resources to dispose).
-  public dispose = () : void => {}
+  public dispose = () :void => {}
 }

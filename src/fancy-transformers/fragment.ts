@@ -4,16 +4,16 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 
-var takeByte_ = (buffer:ArrayBuffer) : number => {
+var takeByte_ = (buffer:ArrayBuffer) :number => {
   var bytes=new Uint8Array(buffer);
   return bytes[0];
 }
 
-var dropByte_ = (buffer:ArrayBuffer) : ArrayBuffer => {
+var dropByte_ = (buffer:ArrayBuffer) :ArrayBuffer => {
   var bytes=new Uint8Array(buffer)
   var result = new Uint8Array(buffer.byteLength-1);
-  var fromIndex : number = 1;
-  var toIndex : number = 0;
+  var fromIndex :number = 1;
+  var toIndex :number = 0;
   while(toIndex < result.length) {
     result[toIndex] = bytes[fromIndex];
     toIndex=toIndex+1;
@@ -23,19 +23,19 @@ var dropByte_ = (buffer:ArrayBuffer) : ArrayBuffer => {
   return result.buffer;
 }
 
-var encodeByte_ = (num:number) : ArrayBuffer => {
+var encodeByte_ = (num:number) :ArrayBuffer => {
   var bytes = new Uint8Array(1);
   bytes[0]=num;
   return bytes.buffer;
 }
 
 class Fragment {
-  public length : number;
-  public id : ArrayBuffer;
-  public index : number;
-  public count : number;
-  public payload : ArrayBuffer;
-  public padding : ArrayBuffer;
+  public length :number;
+  public id :ArrayBuffer;
+  public index :number;
+  public count :number;
+  public payload :ArrayBuffer;
+  public padding :ArrayBuffer;
 
   public constructor(
     length:number,
@@ -52,7 +52,7 @@ class Fragment {
       this.padding=padding;
   }
 
-  static randomId = () : ArrayBuffer => {
+  static randomId = () :ArrayBuffer => {
     var bytes = new Uint8Array(32);
     for (var i = 0; i < bytes.byteLength; i++) {
       bytes[i] = Math.floor(Math.random()*255);
@@ -60,7 +60,7 @@ class Fragment {
     return bytes.buffer;
   }
 
-  static decodeFragment = (buffer:ArrayBuffer) : Fragment => {
+  static decodeFragment = (buffer:ArrayBuffer) :Fragment => {
 //    log.debug('Decode fragment %1 %2', buffer.byteLength, length);
     var parts = arraybuffers.split(buffer, 2);
     var lengthBytes = parts[0];
@@ -79,8 +79,8 @@ class Fragment {
 
 //    log.debug('Decoded fragment %1 %2 %3', fragmentId, fragmentNumber, totalNumber);
 
-    var payload : ArrayBuffer=null;
-    var padding : ArrayBuffer=null;
+    var payload :ArrayBuffer=null;
+    var padding :ArrayBuffer=null;
 
     if(buffer.byteLength > length) {
       parts=arraybuffers.split(buffer, length);
@@ -107,7 +107,7 @@ class Fragment {
     return fragment;
   }
 
-  public encodeFragment = () : ArrayBuffer => {
+  public encodeFragment = () :ArrayBuffer => {
 //    log.info("Encoding %1 %2 %3", this.id, this.index, this.count);
     return arraybuffers.assemble([
       arraybuffers.encodeShort(this.length),

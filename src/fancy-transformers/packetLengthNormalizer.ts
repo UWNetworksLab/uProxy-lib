@@ -22,7 +22,7 @@ class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
   }
 
   // Get the target length.
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     this.superConfigure(json);
 
     var dict = JSON.parse(json);
@@ -30,7 +30,7 @@ class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
     log.info('Configured packet length normalizer %1', this.targetLength_);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, this.targetLength_);
   }
@@ -38,7 +38,7 @@ class PacketLengthNormalizer extends PacketLengthShaper implements Transformer {
    // Packet length normalizer requires just one parameter: the target length to
    // which packets should be normalized. target should be a number in the range
    // 1-1500 inclusive. All packets will be normalized to this length.
-  private setTargetLength_ = (target:number) : void => {
+  private setTargetLength_ = (target:number) :void => {
     if (target < 1 || target > 1500) {
       throw new Error('target packet length must be in the range 1-1500');
     }

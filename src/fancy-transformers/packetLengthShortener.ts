@@ -19,11 +19,11 @@ class PacketLengthShortener extends PacketLengthShaper implements Transformer {
   }
 
   // Get the target minimum and maximum lengths.
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     this.superConfigure(json);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
 //    log.info('Transforming');
     var results=this.shapePacketLength(buffer, buffer.byteLength+35);
 //    log.info('Sending %1 packets', results.length);

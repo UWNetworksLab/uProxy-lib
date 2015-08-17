@@ -23,7 +23,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
   }
 
   // Get the target minimum and maximum lengths.
-  public configure = (json:string) : void => {
+  public configure = (json:string) :void => {
     this.superConfigure(json);
 
     var dict = JSON.parse(json);
@@ -32,12 +32,12 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     log.info('Configured packet length normalizer %1 %2', this.targetMinimum_, this.targetMaximum_);
   }
 
-  public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
+  public transform = (buffer:ArrayBuffer) :ArrayBuffer[] => {
 //    log.info('Transforming');
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }
 
-  private setTargetMinimum_ = (minimum:number) : void => {
+  private setTargetMinimum_ = (minimum:number) :void => {
     if(minimum>=37) {
       this.targetMinimum_=minimum;
     } else {
@@ -45,7 +45,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     }
   }
 
-  private setTargetMaximum_ = (maximum:number) : void => {
+  private setTargetMaximum_ = (maximum:number) :void => {
     if(maximum<=1440) {
       this.targetMaximum_=maximum;
     } else {
@@ -54,7 +54,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
   }
 
   // Generates a random number from 1-1440 inclusive
-  private nextTargetLength = () : number => {
+  private nextTargetLength = () :number => {
     return Math.floor(
       Math.random()*(this.targetMaximum_-this.targetMinimum_)+this.targetMinimum_
     );
