@@ -25,11 +25,12 @@ taskManager.add 'samples', [
   'echoServerFirefoxApp'
   'simpleSocksChromeApp'
   'simpleSocksFirefoxApp'
-  'copyPasteSocks'
+  'copypasteSocks'
   'simpleTurn'
   'simpleChurnChatChromeApp'
-  'copyPasteChurnChatChromeApp'
+  'copypasteChurnChatChromeApp'
   'adventure'
+  'uprobe'
 ]
 
 # Makes the distribution build.
@@ -79,11 +80,11 @@ taskManager.add 'simpleSocksFirefoxApp', [
   'copy:libsForSimpleSocksFirefoxApp'
 ]
 
-taskManager.add 'copyPasteSocks', [
+taskManager.add 'copypasteSocks', [
   'base'
-  'browserify:copyPasteSocksFreedomModule'
-  'browserify:copyPasteSocksMain'
-  'vulcanize:copyPasteSocks'
+  'browserify:copypasteSocksFreedomModule'
+  'browserify:copypasteSocksMain'
+  'vulcanize:copypasteSocks'
   'copy:libsForCopyPasteSocksChromeApp'
   'copy:libsForCopyPasteSocksFirefoxApp'
 ]
@@ -105,10 +106,10 @@ taskManager.add 'simpleChurnChatChromeApp', [
   'copy:libsForSimpleChurnChatChromeApp'
 ]
 
-taskManager.add 'copyPasteChurnChatChromeApp', [
+taskManager.add 'copypasteChurnChatChromeApp', [
   'base'
-  'browserify:copyPasteChurnChatFreedomModule'
-  'browserify:copyPasteChurnChatChromeApp'
+  'browserify:copypasteChurnChatFreedomModule'
+  'browserify:copypasteChurnChatChromeApp'
   'copy:libsForCopyPasteChurnChatChromeApp'
 ]
 
@@ -132,11 +133,33 @@ taskManager.add 'adventure', [
   'adventureFirefoxApp'
 ]
 
+taskManager.add 'uprobeBase', [
+  'base'
+  'browserify:uprobeFreedomModule'
+]
+
+taskManager.add 'uprobeChromeApp', [
+  'uprobeBase'
+  'copy:libsForUprobeChromeApp'
+]
+
+taskManager.add 'uprobeFirefoxApp', [
+  'uprobeBase'
+  'copy:libsForUprobeFirefoxApp'
+]
+
+taskManager.add 'uprobe', [
+  'uprobeChromeApp'
+  'uprobeFirefoxApp'
+]
+
 # Create unit test code
 taskManager.add 'browserifySpecs', [
   'base'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
+  'browserify:candidateSpec'
+  'browserify:churnSpec'
   'browserify:handlerSpec'
   'browserify:buildToolsTaskmanagerSpec'
   'browserify:loggingSpec'
@@ -171,6 +194,7 @@ taskManager.add 'unit_test', [
   'browserifySpecs',
   'jasmine:arraybuffers'
   'jasmine:bridge'
+  'jasmine:churn'
   'jasmine:handler'
   'jasmine:buildTools'
   'jasmine:logging'
@@ -397,7 +421,8 @@ module.exports = (grunt) ->
           npmLibNames: ['freedom-for-chrome']
           pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
+            'uproxy-obfuscators',
+            'freedom-port-control'
           ]
           localDestPath: 'samples/adventure-chromeapp/'
       libsForAdventureFirefoxApp:
@@ -405,9 +430,21 @@ module.exports = (grunt) ->
           npmLibNames: ['freedom-for-firefox']
           pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
+            'uproxy-obfuscators',
+            'freedom-port-control'
           ]
           localDestPath: 'samples/adventure-firefoxapp/data/'
+
+      libsForUprobeChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['uprobe', 'loggingprovider']
+          localDestPath: 'samples/uprobe-chromeapp/'
+      libsForUprobeFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['uprobe', 'loggingprovider']
+          localDestPath: 'samples/uprobe-firefoxapp/data/'
 
       # Integration Tests.
       libsForIntegrationTcp:
@@ -510,13 +547,14 @@ module.exports = (grunt) ->
             browserifyOptions: { standalone: 'browserified_exports' }
           })
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
-      copyPasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
+      copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
       turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
       simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
-      copyPasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
+      copypasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
+      uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       # Browserify specs
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
@@ -524,6 +562,8 @@ module.exports = (grunt) ->
       bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
+      candidateSpec: Rule.browserifySpec 'churn/candidate'
+      candidateCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/candidate')
       churnSpec: Rule.browserifySpec 'churn/churn'
       churnCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/churn')
       handlerSpec: Rule.browserifySpec 'handler/queue'
@@ -561,10 +601,10 @@ module.exports = (grunt) ->
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
-      copyPasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
+      copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
       simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
       simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
-      copyPasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
+      copypasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
@@ -580,7 +620,7 @@ module.exports = (grunt) ->
         browserifyIntegrationTest 'integration-tests/socks-echo/slow.core-env'
 
     vulcanize:
-      copyPasteSocks:
+      copypasteSocks:
         options:
           inline: true
           csp: true

@@ -11,6 +11,7 @@ declare module freedom_PortControl {
         protocol :string;
         timeoutId ?:number;
         nonce ?:number[];
+        errInfo ?:string;
     }
     // A collection of Mappings
     interface ActiveMappings {
@@ -37,7 +38,8 @@ declare module freedom_PortControl {
         deleteMappingPcp(extPort:number) :Promise<boolean>;
 
         probeUpnpSupport() :Promise<boolean>;
-        addMappingUpnp(intPort:number, extPort:number, lifetime:number) :Promise<Mapping>;
+        addMappingUpnp(intPort:number, extPort:number, lifetime:number, 
+                       controlUrl?:string) :Promise<Mapping>;
         deleteMappingUpnp(extPort:number) :Promise<boolean>;
 
         getActiveMappings() :Promise<ActiveMappings>;
