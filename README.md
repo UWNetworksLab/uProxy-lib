@@ -50,7 +50,9 @@ To run Firefox add-ons:
 
 ### simple-freedom-chat
 
-Simplest possible, single-page, `src/peerconnection` demo.
+WebRTC-powered chat client, with both peers on the same page.
+
+This is the simplest possible demo and test of `src/peerconnection`.
 
 ### copypaste-freedom-chat
 
@@ -91,6 +93,10 @@ Distributed SOCKS proxy with a telnet-based signalling channel.
 Intended for use with [our Docker-based integration testing](https://github.com/uProxy/uproxy-docker).
 
 If you're curious, try `telnet localhost 9000` or running `bin/connect-pair.py`.
+
+### uProbe
+
+Guess-timates your NAT type.
 
 ### copypaste SOCKS
 

@@ -141,6 +141,11 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
    * Right now, CaesarCipher is used with a key which is randomly generated
    * each time a new connection is negotiated.
    */
+  // TODO: The increasing number of calls gated on the probe connection
+  //       strongly suggests that factoring out the NAT hole-punching code
+  //       as suggested here would greatly help readability and
+  //       maintainability:
+  //         https://github.com/uProxy/uproxy/issues/585
   export class Connection implements peerconnection.PeerConnection<ChurnSignallingMessage> {
 
     public peerOpenedChannelQueue :handler.QueueHandler<peerconnection.DataChannel, void>;
@@ -175,27 +180,27 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
 
     private pipe_ :ChurnPipe;
     private havePipe_ :() => void;
+    // |onceHavePipe_| resolves once the churn pipe has been created and the
+    // probe candidates have been added to the pipe.
     private onceHavePipe_ = new Promise((F,R) => {
       this.havePipe_ = F;
     });
-
-    private portControl_ :freedom_PortControl.PortControl;
 
     private static internalConnectionId_ = 0;
 
     constructor(probeRtcPc:freedom_RTCPeerConnection.RTCPeerConnection,
                 peerName?:string,
-                private skipPublicEndpoint_?:boolean) {
+                private skipPublicEndpoint_?:boolean,
+                private portControl_?:freedom_PortControl.PortControl) {
       this.peerName = peerName || 'churn-connection-' +
           (++Connection.internalConnectionId_);
 
       this.signalForPeerQueue = new handler.Queue<ChurnSignallingMessage,void>();
 
-      this.portControl_ = freedom['portControl']();
-
       this.configureObfuscatedConnection_();
+      // When the probe connection is complete, it will trigger the
+      // creation of the churn pipe.
       this.configureProbeConnection_(probeRtcPc);
-      this.onceHaveCaesarKey_.then(this.configurePipe_);
 
       // Forward onceXxx promises.
       this.onceConnected = this.obfuscatedConnection_.onceConnected;
@@ -224,14 +229,19 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
             // Try to make port mappings for all srflx candidates
             var MAP_LIFETIME = 24 * 60 * 60;  // 24 hours in seconds
             if (c.type === 'srflx') {
-              this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
+              if (this.portControl_ === undefined) {
+                log.debug('Port control not available in churn');
+              } else {
+                this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed.");
+                      log.debug("addMapping() failed. Mapping object: ", 
+                                mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
                     }
-                  });
+                });
+              }
             }
 
             // It's immediately safe to send each candidate to the remote peer,
@@ -249,7 +259,10 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
           }
         } else if (message.type === signals.Type.NO_MORE_CANDIDATES) {
           this.probeConnection_.close().then(() => {
+            return this.onceHaveCaesarKey_;
+          }).then(this.configurePipe_).then(() => {
             this.processProbeCandidates_(candidates);
+            this.havePipe_();
           });
         }
       });
@@ -257,19 +270,17 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
     }
 
     private processProbeCandidates_ = (candidates:Candidate[]) => {
-      this.onceHavePipe_.then(() => {
-        candidates.forEach((c) => {
-          this.pipe_.bindLocal(c.getLocalEndpoint());
-        });
-
-        // For backwards compatibility.
-        if (!this.skipPublicEndpoint_) {
-          var bestEndpointPair = selectBestPublicAddress(candidates);
-          this.signalForPeerQueue.handle({
-            publicEndpoint: bestEndpointPair.external
-          });
-        }
+      candidates.forEach((c) => {
+        this.pipe_.bindLocal(c.getLocalEndpoint());
       });
+
+      // For backwards compatibility.
+      if (!this.skipPublicEndpoint_) {
+        var bestEndpointPair = selectBestPublicAddress(candidates);
+        this.signalForPeerQueue.handle({
+          publicEndpoint: bestEndpointPair.external
+        });
+      }
     }
 
     private configurePipe_ = (key:number) :void => {
@@ -330,8 +341,6 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
       //       'ciphertext_dfa': regex2dfa('^.*$'),
       //       'ciphertext_max_len': 1450
       //     }
-
-      this.havePipe_();
     }
 
     private makeSampleTargetLengthDistribution_ = () :Array<number> => {
@@ -505,12 +514,19 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
         var message = churnMessage.webrtcMessage;
         if (message.type == signals.Type.OFFER ||
             message.type == signals.Type.ANSWER) {
-          // Remove candidates from the SDP.  This is redundant, but ensures
-          // that a bug in the remote client won't cause us to send
-          // unobfuscated traffic.
-          message.description.sdp = filterCandidatesFromSdp(
+          // Do not forward the signalling message until the probe connection
+          // has been torn down. This is important because Firefox will give
+          // up if no candidates are received within five seconds of having
+          // received the offer and this can easily happen if candidate
+          // gathering is slow due to slow STUN servers.
+          this.onceHavePipe_.then(() => {
+            // Remove candidates from the SDP.  This is redundant, but ensures
+            // that a bug in the remote client won't cause us to send
+            // unobfuscated traffic.
+            message.description.sdp = filterCandidatesFromSdp(
               message.description.sdp);
-          this.obfuscatedConnection_.handleSignalMessage(message);
+            this.obfuscatedConnection_.handleSignalMessage(message);
+          });
         } else if (message.type === signals.Type.CANDIDATE) {
           this.addRemoteCandidate_(message.candidate);
         }
