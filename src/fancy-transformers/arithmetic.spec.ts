@@ -17,13 +17,13 @@ var makeUniformProbabilities = () :number[] => {
 }
 
 describe('Arithmetic coding and decoding - short inputs', function() {
-  it('encode("\x00\x01\x02\x03")=="\xCA\x00\x01\x02\x03\x00\x00"', function() {
+  it('Encode("\x00\x01\x02\x03")=="\xCA\x00\x01\x02\x03\x00\x00"', function() {
     var encoder=new arithmetic.Encoder(makeUniformProbabilities());
     var result=encoder.encode(arraybuffers.stringToArrayBuffer("\x00\x01\x02\x03"));
 //    console.log('encoded result: '+arraybuffers.arrayBufferToHexString(result));
     expect(arraybuffers.byteEquality(result, arraybuffers.stringToArrayBuffer("\xCA\x00\x01\x02\x03\x00\x00"))).toBe(true);
   });
-  it('decode("\xCA\x00\x01\x02\x03\x00\x00")=="\x00\x01\x02\x03"', function() {
+  it('Decode("\xCA\x00\x01\x02\x03\x00\x00")=="\x00\x01\x02\x03"', function() {
     var decoder=new arithmetic.Decoder(makeUniformProbabilities());
     var result=decoder.decode(arraybuffers.stringToArrayBuffer("\xCA\x00\x01\x02\x03\x00\x00"));
 //    console.log('decoded result: '+arraybuffers.arrayBufferToHexString(result));
