@@ -29,6 +29,7 @@ var encodeByte_ = (num:number) :ArrayBuffer => {
   return bytes.buffer;
 }
 
+// A Fragment represents a piece of a packet when fragmentation has occurred.
 class Fragment {
   public length :number;
   public id :ArrayBuffer;

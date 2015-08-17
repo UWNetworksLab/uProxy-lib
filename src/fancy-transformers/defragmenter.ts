@@ -4,6 +4,10 @@ import Fragment = require('./fragment');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
+// The Defragmenter collects fragmented packets in a buffer and defragments them.
+// Currently no cache expiration has been implemented, so fragments are stored
+// forever, leaking memory.
+// TODO(bwiley): Add cache expiration
 class Defragmenter {
   private tracker_ :{[index:string]:ArrayBuffer[]}={};
   private counter_ :{[index:string]:number}={};
