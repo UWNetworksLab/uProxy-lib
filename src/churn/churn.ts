@@ -292,7 +292,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           '{"targetLength": 1440}');*/
       /*this.pipe_.setTransformer('packetLengthNormalizer',
           new Uint8Array([key]).buffer,
-          '{"targetLength": 1440, "fragmentation": true}');*/
+          '{"targetLength": 300, "fragmentation": true}');*/
       /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
           new Uint8Array([key]).buffer,
           '{"targetMinimum": 37, "targetMaximum": 1440, "fragmentation": true}');*/
@@ -314,12 +314,12 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
             JSON.stringify(config));
         this.havePipe_();
       });*/
-      this.pipe_.setTransformer('encryptionShaper',
+      /*this.pipe_.setTransformer('encryptionShaper',
           new Uint8Array([key]).buffer,
-          JSON.stringify({'key': this.makeSampleEncryptionKey_()}));
-      /*this.pipe_.setTransformer('compressionShaper',
+          JSON.stringify({'key': this.makeSampleEncryptionKey_()}));*/
+      this.pipe_.setTransformer('compressionShaper',
           new Uint8Array([key]).buffer,
-          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));*/
+          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
