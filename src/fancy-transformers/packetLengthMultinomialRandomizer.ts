@@ -40,7 +40,8 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
     var random=Math.random();
     var index=0;
     while(index<this.targetDistribution_.length-1) {
-      if(random>=this.targetDistribution_[index] && random<this.targetDistribution_[index+1]) {
+      if(random>=this.targetDistribution_[index] &&
+         random<this.targetDistribution_[index+1]) {
         break;
       } else {
         index=index+1;

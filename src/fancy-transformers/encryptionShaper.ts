@@ -13,23 +13,6 @@ var log :logging.Log = new logging.Log('fancy-transformers');
 
 export interface EncryptionConfig {key: ArrayBuffer}
 export interface SerializedEncryptionConfig {key: string}
-export interface CryptoWindow {
-  crypto: {
-    getRandomValues(buffer:Uint8Array):Uint8Array;
-    subtle: {
-      generateKey(config:GenerateKeyConfig, extractable:boolean, modes:string[]):GenerateKeyPromise;
-      exportKey(format:string, key:CryptoKey):ExportKeyPromise;
-    }
-  }
-}
-export interface GenerateKeyConfig {name:string; length:number}
-export interface GenerateKeyPromise {
-  then(callback:(key:CryptoKey)=>void):void
-}
-export interface ExportKeyPromise {
-  then(callback:(key:ArrayBuffer)=>void):void
-}
-export interface CryptoKey {}
 
 // An obfuscator that encrypts the packets with AES CBC.
 export class EncryptionShaper implements Transformer {

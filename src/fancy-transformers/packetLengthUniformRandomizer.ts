@@ -55,7 +55,9 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
 
   // Generates a random number from 1-1440 inclusive
   private nextTargetLength = () : number => {
-    return Math.floor(Math.random()*(this.targetMaximum_-this.targetMinimum_)+this.targetMinimum_);
+    return Math.floor(
+      Math.random()*(this.targetMaximum_-this.targetMinimum_)+this.targetMinimum_
+    );
   }
 }
 

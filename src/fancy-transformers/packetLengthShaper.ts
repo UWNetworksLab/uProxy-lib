@@ -59,11 +59,21 @@ class PacketLengthShaper {
       return results;
     } else {
       if (buffer.byteLength + 2 == target) {
-        return [arraybuffers.append(arraybuffers.encodeShort(buffer.byteLength), buffer)];
+        return [
+          arraybuffers.append(arraybuffers.encodeShort(buffer.byteLength),
+          buffer)
+        ];
       } else if (buffer.byteLength + 2 > target) {
-        return [arraybuffers.append(arraybuffers.encodeShort(0), this.randomBytes_(target))];
+        return [
+          arraybuffers.append(arraybuffers.encodeShort(0),
+          this.randomBytes_(target))
+        ];
       } else { // buffer.byteLength + 2 < target
-        var result=arraybuffers.append(arraybuffers.encodeShort(buffer.byteLength), arraybuffers.append(buffer, this.randomBytes_(target-buffer.byteLength-2)))
+        var result=arraybuffers.assemble([
+          arraybuffers.encodeShort(buffer.byteLength),
+          buffer,
+          this.randomBytes_(target-buffer.byteLength-2)
+        ]);
         return [result];
       }
     }
@@ -77,7 +87,14 @@ class PacketLengthShaper {
       var id=Fragment.randomId();
       var index=0;
       var count=1;
-      var fragment=new Fragment(buffer.byteLength, id, index, count, buffer, new ArrayBuffer(0));
+      var fragment=new Fragment(
+        buffer.byteLength,
+        id,
+        index,
+        count,
+        buffer,
+        new ArrayBuffer(0)
+      );
       return [fragment];
     } else if (buffer.byteLength + headerLength > target) {
       var firstLength=target-headerLength;
@@ -97,7 +114,14 @@ class PacketLengthShaper {
       var index=0;
       var count=1;
       var padding=this.randomBytes_(target-(buffer.byteLength+headerLength))
-      var fragment=new Fragment(buffer.byteLength, id, index, count, buffer, padding);
+      var fragment=new Fragment(
+        buffer.byteLength,
+        id,
+        index,
+        count,
+        buffer,
+        padding
+      );
       return [fragment];
     }
   }

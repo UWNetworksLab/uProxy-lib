@@ -37,13 +37,19 @@ class Fragment {
   public payload : ArrayBuffer;
   public padding : ArrayBuffer;
 
-  public constructor(length:number, id:ArrayBuffer, index:number, count:number, payload:ArrayBuffer, padding:ArrayBuffer) {
-    this.length=length;
-    this.id=id;
-    this.index=index;
-    this.count=count;
-    this.payload=payload;
-    this.padding=padding;
+  public constructor(
+    length:number,
+    id:ArrayBuffer,
+    index:number,
+    count:number,
+    payload:ArrayBuffer,
+    padding:ArrayBuffer) {
+      this.length=length;
+      this.id=id;
+      this.index=index;
+      this.count=count;
+      this.payload=payload;
+      this.padding=padding;
   }
 
   static randomId = () : ArrayBuffer => {
@@ -89,14 +95,27 @@ class Fragment {
       throw new Error("Short buffer");
     }
 
-    var fragment=new Fragment(length, fragmentId, fragmentNumber, totalNumber, payload, padding);
+    var fragment=new Fragment(
+      length,
+      fragmentId,
+      fragmentNumber,
+      totalNumber,
+      payload,
+      padding
+    );
 //    log.info("Decoding %1 %2 %3", fragment.id, fragment.index, fragment.count);
     return fragment;
   }
 
   public encodeFragment = () : ArrayBuffer => {
 //    log.info("Encoding %1 %2 %3", this.id, this.index, this.count);
-    return arraybuffers.assemble([arraybuffers.encodeShort(this.length), this.id, encodeByte_(this.index), encodeByte_(this.count), this.payload, this.padding]);
+    return arraybuffers.assemble([
+      arraybuffers.encodeShort(this.length),
+      this.id, encodeByte_(this.index),
+      encodeByte_(this.count),
+      this.payload,
+      this.padding
+    ]);
   }
 }
 

@@ -10,11 +10,27 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-export interface SerializedSequenceConfig {addSequences: SerializedSequenceModel[]; removeSequences: SerializedSequenceModel[]}
-export interface SerializedSequenceModel {index: number; offset: number; sequence: string; length: number}
+export interface SerializedSequenceConfig {
+  addSequences: SerializedSequenceModel[];
+  removeSequences: SerializedSequenceModel[]
+}
+export interface SerializedSequenceModel {
+  index: number;
+  offset: number;
+  sequence: string;
+  length: number
+}
 
-export interface SequenceConfig {addSequences: SequenceModel[]; removeSequences: SequenceModel[]}
-export interface SequenceModel {index: number; offset: number; sequence: ArrayBuffer; length: number}
+export interface SequenceConfig {
+  addSequences: SequenceModel[];
+  removeSequences: SequenceModel[]
+}
+export interface SequenceModel {
+  index: number;
+  offset: number;
+  sequence: ArrayBuffer;
+  length: number
+}
 
 // An obfuscator that injects byte sequences.
 export class ByteSequenceShaper implements Transformer {
@@ -72,7 +88,8 @@ export class ByteSequenceShaper implements Transformer {
   }
 
   public transform = (buffer:ArrayBuffer) : ArrayBuffer[] => {
-    if((this.outputIndex_ <= this.lastIndex_) && (this.outputIndex_ >= this.firstIndex_)) {
+    if((this.outputIndex_ <= this.lastIndex_) &&
+       (this.outputIndex_ >= this.firstIndex_)) {
       log.info('In range %1 <= %2 <= %3', this.firstIndex_, this.outputIndex_, this.lastIndex_);
       var results : ArrayBuffer[]=[];
 
