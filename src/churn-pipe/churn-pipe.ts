@@ -53,6 +53,20 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
   });
 }
 
+var transformers :{[index :string] :new (...args: any[]) => Transformer} = {
+  'caesar': CaesarCipher,
+  'packetLengthPassthrough': PacketLengthPassthrough,
+  'packetLengthExtender': PacketLengthExtender,
+  'packetLengthShortener': PacketLengthShortener,
+  'packetLengthNormalizer': PacketLengthNormalizer,
+  'packetLengthUniformRandomizer': PacketLengthUniformRandomizer,
+  'packetLengthMultinomialRandomizer': PacketLengthMultinomialRandomizer,
+  'byteSequenceShaper': bytes.ByteSequenceShaper,
+  'encryptionShaper': encryption.EncryptionShaper,
+  'compressionShaper': compression.CompressionShaper,
+  'none': PassThrough
+};
+
 var makeTransformer_ = (
     // Name of transformer to use, e.g. 'rabbit' or 'none'.
     name :string,
@@ -64,37 +78,13 @@ var makeTransformer_ = (
   var transformer :Transformer;
   log.info('Instantiating transformer %1', name)
 
-  // TODO(ldixon): re-enable rabbit and FTE once we can figure out why they
-  // don't load in freedom.
-  /* if (name == 'rabbit') {
-     transformer = Rabbit.Transformer();
-     } else if (name == 'fte') {
-     transformer = Fte.Transformer();
-     } else */ if (name == 'caesar') {
-       transformer = new CaesarCipher();
-     } else if (name == 'packetLengthPassthrough') {
-       transformer = new PacketLengthPassthrough();
-     } else if (name == 'packetLengthExtender') {
-       transformer = new PacketLengthExtender();
-     } else if (name == 'packetLengthShortener') {
-       transformer = new PacketLengthShortener();
-     } else if (name == 'packetLengthNormalizer') {
-       transformer = new PacketLengthNormalizer();
-     } else if (name == 'packetLengthUniformRandomizer') {
-       transformer = new PacketLengthUniformRandomizer();
-     } else if (name == 'packetLengthMultinomialRandomizer') {
-       transformer = new PacketLengthMultinomialRandomizer();
-     } else if (name == 'byteSequenceShaper') {
-       transformer = new bytes.ByteSequenceShaper();
-     } else if (name == 'encryptionShaper') {
-       transformer = new encryption.EncryptionShaper();
-     } else if (name == 'compressionShaper') {
-       transformer = new compression.CompressionShaper();
-     } else if (name == 'none') {
-       transformer = new PassThrough();
-     } else {
-       throw new Error('unknown transformer: ' + name);
-     }
+   if(name in transformers) {
+     var transformerClass=transformers[name];
+     transformer=new transformerClass();
+   } else {
+     throw new Error('unknown transformer: ' + name);
+   }
+
   if (key) {
     transformer.setKey(key);
   }
