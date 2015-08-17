@@ -11,8 +11,6 @@ import aes = require('./aes');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
 export interface EncryptionConfig {key: ArrayBuffer}
 export interface SerializedEncryptionConfig {key: string}
 export interface CryptoWindow {
@@ -33,9 +31,7 @@ export interface ExportKeyPromise {
 }
 export interface CryptoKey {}
 
-/**
- * An obfuscator that injects byte sequences.
- */
+// An obfuscator that encrypts the packets with AES CBC.
 export class EncryptionShaper implements Transformer {
   private key_ : ArrayBuffer;
 
@@ -43,15 +39,13 @@ export class EncryptionShaper implements Transformer {
     log.info('Constructed encryption shaper');
   }
 
-  /**
-   * This method is required to implement the Transformer API.
-   * @param {ArrayBuffer} key Key to set, not used by this class.
-   */
+  // This method is required to implement the Transformer API.
+  // @param {ArrayBuffer} key Key to set, not used by this class.
   public setKey = (key:ArrayBuffer) : void => {
-    /* Do nothing. */
+    // Do nothing.
   }
 
-  /** Get the target length. */
+  // Get the target length.
   public superConfigure = (json:string) : void => {
     var config=JSON.parse(json);
 

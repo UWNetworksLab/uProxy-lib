@@ -10,18 +10,10 @@ import PacketLengthShaper = require('./packetLengthShaper');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
-/**
- * An obfuscator that only modifies packet length.
- * To start out, this is a very simple (and bad) packet length obfuscator.
- * It follows this logic:
- * Case 1 - buffer length + 2 == target: return length(buffer) + buffer
- * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
- * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
- */
+// An obfuscator that only modifies packet length.
+// The packet length is randomized according to a multinomial distribution.
 class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Transformer {
-  /** Length to which packets should be normalized. */
+  // Length to which packets should be normalized.
   private targetDistribution_ :Array<number>;
 
   public constructor() {
@@ -29,7 +21,7 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
     log.info('Constructed packet length normalizer');
   }
 
-  /** Get the target distribution. */
+  // Get the target distribution.
   public configure = (json:string) : void => {
     this.superConfigure(json);
 
@@ -43,10 +35,7 @@ class PacketLengthMultinomialRandomizer extends PacketLengthShaper implements Tr
     return this.shapePacketLength(buffer, this.nextTargetLength());
   }
 
-  /**
-   * Generates a random number from 1-1440 inclusive
-   * @type {[type]}
-   */
+  // Generates a random number from 1-1440 inclusive
   private nextTargetLength = () : number => {
     var random=Math.random();
     var index=0;

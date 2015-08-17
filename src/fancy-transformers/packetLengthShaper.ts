@@ -12,16 +12,8 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
-/**
- * An obfuscator that only modifies packet length.
- * To start out, this is a very simple (and bad) packet length obfuscator.
- * It follows this logic:
- * Case 1 - buffer length + 2 == target: return length(buffer) + buffer
- * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
- * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
- */
+// An obfuscator that only modifies packet length.
+// This is an abstract class. The specific behavior is defined by subclasses.
 class PacketLengthShaper {
   private fragmentation_ : boolean = false;
   private fragmentBuffer_ : Defragmenter = null;
@@ -30,15 +22,13 @@ class PacketLengthShaper {
     log.info('Constructed packet length shaper');
   }
 
-  /**
-   * This method is required to implement the Transformer API.
-   * @param {ArrayBuffer} key Key to set, not used by this class.
-   */
+  // This method is required to implement the Transformer API.
+  // @param {ArrayBuffer} key Key to set, not used by this class.
   public setKey = (key:ArrayBuffer) : void => {
-    /* Do nothing. */
+    // Do nothing.
   }
 
-  /** Get the target length. */
+  // Get the target length.
   public superConfigure = (json:string) : void => {
     var config=JSON.parse(json);
     // Optional parameter

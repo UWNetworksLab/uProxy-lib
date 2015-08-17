@@ -10,18 +10,10 @@ import PacketLengthShaper = require('./packetLengthShaper');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
-/**
- * An obfuscator that only modifies packet length.
- * To start out, this is a very simple (and bad) packet length obfuscator.
- * It follows this logic:
- * Case 1 - buffer length + 2 == target: return length(buffer) + buffer
- * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
- * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
- */
+// An obfuscator that only modifies packet length.
+// The packet length is randomized according to a uniform distribution.
 class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transformer {
-  /** Length to which packets should be normalized. */
+  // Length to which packets should be normalized
   private targetMinimum_ :number;
   private targetMaximum_ :number;
 
@@ -30,7 +22,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     log.info('Constructed packet length uniform randomizer');
   }
 
-  /** Get the target minimum and maximum lengths. */
+  // Get the target minimum and maximum lengths.
   public configure = (json:string) : void => {
     this.superConfigure(json);
 
@@ -61,10 +53,7 @@ class PacketLengthUniformRandomizer extends PacketLengthShaper implements Transf
     }
   }
 
-  /**
-   * Generates a random number from 1-1440 inclusive
-   * @type {[type]}
-   */
+  // Generates a random number from 1-1440 inclusive
   private nextTargetLength = () : number => {
     return Math.floor(Math.random()*(this.targetMaximum_-this.targetMinimum_)+this.targetMinimum_);
   }

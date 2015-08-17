@@ -231,9 +231,8 @@ export class AES {
   }
 }
 
-/**
- *  Mode Of Operation - Cipher Block Chaining (CBC)
- */
+
+// Mode Of Operation - Cipher Block Chaining (CBC)
 export class ModeOfOperationCBC {
   private _lastCipherblock : Uint8Array;
   private _aes : AES;

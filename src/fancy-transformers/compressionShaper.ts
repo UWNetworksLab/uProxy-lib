@@ -11,13 +11,9 @@ import arithmetic = require('./arithmetic');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
 export interface CompressionConfig {frequencies: number[]}
 
-/**
- * An obfuscator that injects byte sequences.
- */
+// An obfuscator that uses an arithmetic coder to change the entropy.
 export class CompressionShaper implements Transformer {
   private frequencies_ : number[];
   private encoder_ : arithmetic.Encoder;
@@ -27,15 +23,14 @@ export class CompressionShaper implements Transformer {
     log.info('Constructed compression shaper');
   }
 
-  /**
-   * This method is required to implement the Transformer API.
-   * @param {ArrayBuffer} key Key to set, not used by this class.
-   */
+  // This method is required to implement the Transformer API.
+  // @param {ArrayBuffer} key Key to set, not used by this class.
   public setKey = (key:ArrayBuffer) : void => {
-    /* Do nothing. */
+    // Do nothing.
   }
 
-  /** Get the target length. */
+
+  // Get the target length.
   public superConfigure = (json:string) : void => {
     var config=JSON.parse(json);
 

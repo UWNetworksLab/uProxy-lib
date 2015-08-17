@@ -10,17 +10,13 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
 export interface SerializedSequenceConfig {addSequences: SerializedSequenceModel[]; removeSequences: SerializedSequenceModel[]}
 export interface SerializedSequenceModel {index: number; offset: number; sequence: string; length: number}
 
 export interface SequenceConfig {addSequences: SequenceModel[]; removeSequences: SequenceModel[]}
 export interface SequenceModel {index: number; offset: number; sequence: ArrayBuffer; length: number}
 
-/**
- * An obfuscator that injects byte sequences.
- */
+// An obfuscator that injects byte sequences.
 export class ByteSequenceShaper implements Transformer {
   private addSequences_ : SequenceModel[];
   private removeSequences_ : SequenceModel[];
@@ -33,15 +29,13 @@ export class ByteSequenceShaper implements Transformer {
     log.info('Constructed byte sequence shaper');
   }
 
-  /**
-   * This method is required to implement the Transformer API.
-   * @param {ArrayBuffer} key Key to set, not used by this class.
-   */
+  // This method is required to implement the Transformer API.
+  // @param {ArrayBuffer} key Key to set, not used by this class.
   public setKey = (key:ArrayBuffer) : void => {
-    /* Do nothing. */
+    // Do nothing.
   }
 
-  /** Get the target length. */
+  // Get the target length.
   public superConfigure = (json:string) : void => {
     var config=JSON.parse(json);
 

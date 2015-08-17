@@ -10,23 +10,15 @@ import PacketLengthShaper = require('./packetLengthShaper');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// TODO(bwiley): Convert /* */ to // as specified in the style guide
-
-/**
- * An obfuscator that only modifies packet length.
- * To start out, this is a very simple (and bad) packet length obfuscator.
- * It follows this logic:
- * Case 1 - buffer length + 2 == target: return length(buffer) + buffer
- * Case 2 - buffer length + 2 > target:  return length(target) + randomBytes(target)
- * Case 3 - buffer length + 2 < target:  return length(target) + buffer + randomBytes(target)
- */
+// An obfuscator that only modifies packet length.
+// The packet length is extended by 1 byte.
 class PacketLengthExtender extends PacketLengthShaper implements Transformer {
   public constructor() {
     super();
     log.info('Constructed packet length extender');
   }
 
-  /** Get the target minimum and maximum lengths. */
+  // Get the target minimum and maximum lengths.
   public configure = (json:string) : void => {
     this.superConfigure(json);
   }
