@@ -64,7 +64,7 @@ class Fragment {
 //    log.debug('Decode fragment %1 %2', buffer.byteLength, length);
     var parts = arraybuffers.split(buffer, 2);
     var lengthBytes = parts[0];
-    var length = arraybuffers.decodeShort_(lengthBytes);
+    var length = arraybuffers.decodeShort(lengthBytes);
     buffer = parts[1];
 
     parts=arraybuffers.split(buffer, 32);
