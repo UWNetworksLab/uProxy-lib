@@ -96,7 +96,7 @@ export class ByteSequenceShaper implements Transformer {
       // Inject fake packets before the real packet
       var nextPacket=this.findNextPacket_(this.outputIndex_);
       log.debug("nextPacket %1", nextPacket);
-      while(nextPacket!=null) {
+      while(nextPacket!==null) {
         results.push(this.makePacket_(nextPacket));
         this.outputIndex_=this.outputIndex_+1;
         nextPacket=this.findNextPacket_(this.outputIndex_);
@@ -107,7 +107,7 @@ export class ByteSequenceShaper implements Transformer {
 
       //Inject fake packets after the real packet
       nextPacket=this.findNextPacket_(this.outputIndex_);
-      while(nextPacket!=null) {
+      while(nextPacket!==null) {
         results.push(this.makePacket_(nextPacket));
         this.outputIndex_=this.outputIndex_+1;
         nextPacket=this.findNextPacket_(this.outputIndex_);
@@ -124,7 +124,7 @@ export class ByteSequenceShaper implements Transformer {
 
   public restore = (buffer:ArrayBuffer) :ArrayBuffer[] => {
     var match=this.findMatchingPacket_(buffer);
-    if(match!=null) {
+    if(match!==null) {
       return [];
     } else {
       return [buffer];
@@ -158,7 +158,7 @@ export class ByteSequenceShaper implements Transformer {
 
   private findNextPacket_ = (index:number) => {
     for(var i=0; i<this.addSequences_.length; i++) {
-      if(index==this.addSequences_[i].index) {
+      if(index===this.addSequences_[i].index) {
         return this.addSequences_[i];
       }
     }
@@ -168,7 +168,7 @@ export class ByteSequenceShaper implements Transformer {
 
   private findMatchingPacket_ = (sequence:ArrayBuffer) => {
     for(var i=0; i<this.removeSequences_.length; i++) {
-      if(sequence==this.removeSequences_[i].sequence) {
+      if(sequence===this.removeSequences_[i].sequence) {
         return this.removeSequences_.splice(i, 1);
       }
     }

@@ -30,7 +30,7 @@ var sum = (items:number[]) :number => {
 var scale = (items:number[], divisor:number) :number[] => {
   for(var i=0; i<items.length; i++) {
     items[i]=Math.floor(items[i]/divisor);
-    if(items[i]==0) {
+    if(items[i]===0) {
       items[i]=1;
     }
   }
@@ -190,14 +190,14 @@ export class Encoder extends Coder {
       if(this.low_ < (0xFF << this.shift_bits_)) {
 //        console.log('1');
         this.write_(this.working_);
-        for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
+        for(; this.underflow_!==0; this.underflow_=this.underflow_-1) {
           this.write_(0xFF);
         }
         this.working_=(this.low_ >>> this.shift_bits_) & 0xFF;
-      } else if((this.low_ & this.top_value_) != 0) {
+      } else if((this.low_ & this.top_value_) !== 0) {
 //          console.log('2');
           this.write_(this.working_+1);
-          for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
+          for(; this.underflow_!==0; this.underflow_=this.underflow_-1) {
             this.write_(0x00);
           }
 
@@ -220,13 +220,13 @@ export class Encoder extends Coder {
     if(temp > 0xFF) {
 //      log.debug('#2');
       this.write_(this.working_+1);
-      for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
+      for(; this.underflow_!==0; this.underflow_=this.underflow_-1) {
         this.write_(0x00);
       }
     } else {
 //      log.debug('#3');
       this.write_(this.working_);
-      for(; this.underflow_!=0; this.underflow_=this.underflow_-1) {
+      for(; this.underflow_!==0; this.underflow_=this.underflow_-1) {
         this.write_(0xFF);
       }
     }
@@ -237,7 +237,7 @@ export class Encoder extends Coder {
 
   private write_ = (byte:number) :void => {
     this.output_.push(byte);
-    if(this.target_[this.output_.length-1]!=byte) {
+    if(this.target_[this.output_.length-1]!==byte) {
       console.log('SYNC ERROR ', this.output_.length-1, this.target_[this.output_.length-1], byte);
     }
   }
@@ -310,7 +310,7 @@ export class Decoder extends Coder {
     this.underflow_=this.range_ >>> 8;
     var temp=(this.low_/this.underflow_) >>> 0;
     var result :number = null;
-    if(temp>>>8==0) {
+    if(temp>>>8===0) {
       result=temp;
     } else {
       result=(1<<8)-1;

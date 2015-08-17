@@ -103,7 +103,7 @@ export class AES {
         rconpointer += 1;
 
         // key expansion (for non-256 bit)
-        if (KC != 8) {
+        if (KC !== 8) {
             for (var i = 1; i < KC; i++) {
                 tk[i] ^= tk[i - 1];
             }
@@ -151,7 +151,7 @@ export class AES {
   }
 
   public encrypt = (plaintext:Uint8Array) :Uint8Array => {
-    if (plaintext.length != 16) {
+    if (plaintext.length !== 16) {
         throw new Error('plaintext must be a block of size 16');
     }
 
@@ -191,7 +191,7 @@ export class AES {
   }
 
   public decrypt = (ciphertext:Uint8Array) :Uint8Array => {
-    if (ciphertext.byteLength != 16) {
+    if (ciphertext.byteLength !== 16) {
         throw new Error('ciphertext must be a block of size 16');
     }
 
@@ -238,7 +238,7 @@ export class ModeOfOperationCBC {
   private _aes :AES;
 
   constructor(key:ArrayBuffer, iv:ArrayBuffer) {
-    if (iv.byteLength != 16) {
+    if (iv.byteLength !== 16) {
         throw new Error('initialization vector iv must be of length 16');
     }
 
@@ -257,7 +257,7 @@ export class ModeOfOperationCBC {
   }
 
   private encryptChunk_ = (plaintext:ArrayBuffer) :ArrayBuffer => {
-    if (plaintext.byteLength != 16) {
+    if (plaintext.byteLength !== 16) {
       throw new Error('plaintext must be a block of size 16');
     }
 
@@ -285,7 +285,7 @@ export class ModeOfOperationCBC {
   }
 
   private decryptChunk_ = (ciphertext:ArrayBuffer) :ArrayBuffer => {
-    if (ciphertext.byteLength != 16) {
+    if (ciphertext.byteLength !== 16) {
         throw new Error('plaintext must be a block of size 16');
     }
 
@@ -294,7 +294,7 @@ export class ModeOfOperationCBC {
   }
 
   public decryptArray_ = (ciphertext:Uint8Array) :Uint8Array => {
-    if (ciphertext.byteLength != 16) {
+    if (ciphertext.byteLength !== 16) {
         throw new Error('ciphertext must be a block of size 16');
     }
 

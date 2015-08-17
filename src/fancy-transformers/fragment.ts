@@ -87,7 +87,7 @@ class Fragment {
       payload=parts[0];
       padding=parts[1];
 //      log.debug('shortened payoad %1 %2 %3', buffer.byteLength, length, payload.byteLength);
-    } else if (buffer.byteLength == length) {
+    } else if (buffer.byteLength === length) {
       payload=buffer;
       padding=new ArrayBuffer(0);
 //      log.debug('perect payoad %1 %2 %3', buffer.byteLength, length, payload.byteLength);

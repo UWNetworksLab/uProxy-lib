@@ -86,7 +86,7 @@ export class EncryptionShaper implements Transformer {
     var len :ArrayBuffer = arraybuffers.encodeShort(buffer.byteLength);
     var remainder = (len.byteLength + buffer.byteLength) % 16;
     var plaintext:ArrayBuffer;
-    if (remainder == 0) {
+    if (remainder === 0) {
       plaintext=arraybuffers.assemble([len, buffer]);
     } else {
       var padding :ArrayBuffer = arraybuffers.randomBytes(16-remainder);
