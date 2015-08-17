@@ -51,36 +51,13 @@ class Defragmenter {
       var hexid=this.complete_.pop();
       var fragments=this.tracker_[hexid];
       if(fragments != null && fragments.length > 0) {
-        var packet = this.assemble_(fragments);
+        var packet = arraybuffers.assemble(fragments);
 //        log.debug('pushing packet %1', packet.byteLength);
         packets.push(packet);
       }
     }
 
     return packets;
-  }
-
-  private assemble_ = (buffers:ArrayBuffer[]) : ArrayBuffer => {
-//    log.debug('Assembling %1 fragments %2 %3', buffers.length, buffers[0].byteLength, buffers[1].byteLength);
-//    log.debug("First packet %1", arraybuffers.arrayBufferToHexString(buffers[0]));
-    var total=0;
-    for(var i=0; i<buffers.length; i++) {
-      total=total+buffers[i].byteLength;
-    }
-
-    var result = new Uint8Array(total);
-    var toIndex=0;
-    for(var i=0; i<buffers.length; i++) {
-      var bytes=new Uint8Array(buffers[i]);
-      for(var fromIndex=0; fromIndex<bytes.length; fromIndex++) {
-        result[toIndex]=bytes[fromIndex];
-        toIndex=toIndex+1;
-      }
-    }
-
-//    log.debug("assembled %1", arraybuffers.arrayBufferToHexString(result.buffer));
-
-    return result.buffer;
   }
 }
 

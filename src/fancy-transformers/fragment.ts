@@ -2,6 +2,8 @@ import logging = require('../logging/logging');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
+import arraybuffers = require('../arraybuffers/arraybuffers');
+
 var takeByte_ = (buffer:ArrayBuffer) : number => {
   var bytes=new Uint8Array(buffer);
   return bytes[0];
@@ -26,41 +28,6 @@ var encodeByte_ = (num:number) : ArrayBuffer => {
   bytes[0]=num;
   return bytes.buffer;
 }
-
-var split_ = (buffer:ArrayBuffer, firstLen:number) : Array<ArrayBuffer> => {
-  var bytes=new Uint8Array(buffer)
-  var lastLen : number = buffer.byteLength-firstLen;
-  var first = new Uint8Array(firstLen);
-  var last = new Uint8Array(lastLen);
-  var fromIndex : number = 0;
-  var toIndex : number = 0;
-  while(toIndex < first.length) {
-    first[toIndex] = bytes[fromIndex];
-    toIndex=toIndex+1;
-    fromIndex=fromIndex+1;
-  }
-
-  toIndex=0;
-  while(toIndex < last.length) {
-    last[toIndex] = bytes[fromIndex];
-    toIndex=toIndex+1;
-    fromIndex=fromIndex+1;
-  }
-
-  return [first.buffer, last.buffer];
-}
-
-/* Takes a two byte (network byte order) representation of a number and returns
- * the number.
- */
- // TODO(bwiley): Byte order may be backward
- // TODO(bwiley): Fix type error
-var decodeLength_ = (buffer:ArrayBuffer) : number => {
-  var bytes = new Uint8Array(buffer);
-  var result = (bytes[0] << 8) | bytes[1];
-  return result;
-}
-
 
 class Fragment {
   public length : number;
@@ -89,12 +56,12 @@ class Fragment {
 
   static decodeFragment = (buffer:ArrayBuffer) : Fragment => {
 //    log.debug('Decode fragment %1 %2', buffer.byteLength, length);
-    var parts = split_(buffer, 2);
+    var parts = arraybuffers.split(buffer, 2);
     var lengthBytes = parts[0];
-    var length = decodeLength_(lengthBytes);
+    var length = arraybuffers.decodeShort_(lengthBytes);
     buffer = parts[1];
 
-    parts=split_(buffer, 32);
+    parts=arraybuffers.split(buffer, 32);
     var fragmentId=parts[0];
     buffer=parts[1];
 
@@ -110,7 +77,7 @@ class Fragment {
     var padding : ArrayBuffer=null;
 
     if(buffer.byteLength > length) {
-      parts=split_(buffer, length);
+      parts=arraybuffers.split(buffer, length);
       payload=parts[0];
       padding=parts[1];
 //      log.debug('shortened payoad %1 %2 %3', buffer.byteLength, length, payload.byteLength);
@@ -129,48 +96,7 @@ class Fragment {
 
   public encodeFragment = () : ArrayBuffer => {
 //    log.info("Encoding %1 %2 %3", this.id, this.index, this.count);
-    return this.assemble_([this.encodeLength_(this.length), this.id, encodeByte_(this.index), encodeByte_(this.count), this.payload, this.padding]);
-  }
-
-  /* Takes a number and returns a two byte (network byte order) representation
-   * of this number.
-   */
-   // TODO(bwiley): Byte order may be backward
-  private encodeLength_ = (len:number) : ArrayBuffer => {
-    var bytes = new Uint8Array(2);
-    bytes[0] = Math.floor(len >> 8);
-    bytes[1] = Math.floor((len << 8) >> 8);
-    return bytes.buffer;
-  }
-
-  private assemble_ = (buffers:ArrayBuffer[]) : ArrayBuffer => {
-    var total=0;
-    for(var i=0; i<buffers.length; i++) {
-      total=total+buffers[i].byteLength;
-    }
-
-    var result = new Uint8Array(total);
-    var toIndex=0;
-    for(var i=0; i<buffers.length; i++) {
-      var bytes=new Uint8Array(buffers[i]);
-      for(var fromIndex=0; fromIndex<buffers[i].byteLength; fromIndex++) {
-        result[toIndex]=bytes[fromIndex];
-        toIndex=toIndex+1;
-      }
-    }
-
-    return result.buffer;
-  }
-
-  /* Takes a two byte (network byte order) representation of a number and returns
-   * the number.
-   */
-   // TODO(bwiley): Byte order may be backward
-   // TODO(bwiley): Fix type error
-  private decodeLength_ = (buffer:ArrayBuffer) : number => {
-    var bytes = new Uint8Array(buffer);
-    var result = (bytes[0] << 8) | bytes[1];
-    return result;
+    return arraybuffers.assemble([arraybuffers.encodeShort(this.length), this.id, encodeByte_(this.index), encodeByte_(this.count), this.payload, this.padding]);
   }
 }
 
