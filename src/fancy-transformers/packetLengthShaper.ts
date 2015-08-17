@@ -68,7 +68,8 @@ class PacketLengthShaper {
           arraybuffers.append(arraybuffers.encodeShort(0),
           this.randomBytes_(target))
         ];
-      } else { // buffer.byteLength + 2 < target
+      } else {
+        // buffer.byteLength + 2 < target
         var result=arraybuffers.assemble([
           arraybuffers.encodeShort(buffer.byteLength),
           buffer,
@@ -82,7 +83,8 @@ class PacketLengthShaper {
   // TODO(bwiley): Support target lengths below the header length
   private makeFragments_ = (buffer:ArrayBuffer, target:number) :Fragment[] => {
     var headerLength=36;
-    if (buffer.byteLength + headerLength === target) { // One fragment with no padding
+    if (buffer.byteLength + headerLength === target) {
+      // One fragment with no padding
 //      log.debug("One fragment no padding");
       var id=Fragment.randomId();
       var index=0;
@@ -108,7 +110,8 @@ class PacketLengthShaper {
       var fragments=first.concat(rest);
       this.fixFragments_(fragments);
       return fragments;
-    } else { // buffer.bytelength + headerLength < target, One fragment with padding
+    } else {
+      // buffer.bytelength + headerLength < target, One fragment with padding
 //      log.debug("One fragment with padding");
       var id=Fragment.randomId();
       var index=0;

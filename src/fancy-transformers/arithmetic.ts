@@ -83,7 +83,9 @@ export class Coder {
       var divisor=maxProb/256;
       probs=scale(probs, divisor);
     }
-    while(sum(probs)>=16384) {// 2^14
+
+    // If the sum of probabilities is >= 2^14, rescale
+    while(sum(probs)>=16384) {
       probs=scale(probs, 2);
     }
 
@@ -269,7 +271,8 @@ export class Decoder extends Coder {
   }
 
   private init_ = () :void => {
-    var discard=this.input_.shift(); // discard first byte because the encoder is weird
+    // Discard first byte because the encoder is weird.
+    var discard=this.input_.shift();
     log.debug('discarding %1', discard);
     this.working_ = this.input_.shift();
     log.debug('read %1', this.working_);

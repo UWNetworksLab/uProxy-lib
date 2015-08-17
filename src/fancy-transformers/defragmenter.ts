@@ -17,11 +17,14 @@ class Defragmenter {
 
   public addFragment(fragment:Fragment) {
     var hexid=arraybuffers.arrayBufferToHexString(fragment.id);
-    if(hexid in this.tracker_) { // A fragment for an existing packet
+     // A fragment for an existing packet
+    if(hexid in this.tracker_) {
       var fragments :ArrayBuffer[]=this.tracker_[hexid];
-      if(fragments[fragment.index]!==null) { // Duplicate fragment
+      // Duplicate fragment
+      if(fragments[fragment.index]!==null) {
         log.info('Duplicate fragment %1: %2 / %3', hexid, fragment.index, fragment.count);
-      } else { // New fragment
+      } else {
+        // New fragment
         fragments[fragment.index]=fragment.payload;
         this.tracker_[hexid]=fragments;
         this.counter_[hexid]=this.counter_[hexid]-1;
@@ -29,7 +32,8 @@ class Defragmenter {
           this.complete_.push(hexid);
         }
       }
-    } else { // A fragment for a new packet
+    } else {
+      // A fragment for a new packet
       var fragments :ArrayBuffer[]=[];
       for(var i=0; i<fragment.count; i++) {
         fragments.push(null);
