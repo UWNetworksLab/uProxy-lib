@@ -20,18 +20,18 @@ interface Transformer {
   /**
    * Transforms a piece of data to obfuscated form.
    *
-   * @param {ArrayBuffer} plaintext data need to be obfuscated.
-   * @return {?ArrayBuffer} obfuscated data, or null if failed.
+   * @param {ArrayBuffer} plaintext data that needs to be obfuscated.
+   * @return {ArrayBuffer[]} array of obfuscated data, empty if failed.
    */
-  transform(buffer:ArrayBuffer) : ArrayBuffer;
+  transform(buffer:ArrayBuffer) : ArrayBuffer[];
 
   /**
    * Restores data from obfuscated form to original form.
    *
    * @param {ArrayBuffer} ciphertext obfuscated data.
-   * @return {?ArrayBuffer} original data, or null if failed.
+   * @return {ArrayBuffer} array of original data, empty if failed.
    */
-  restore(buffer:ArrayBuffer) : ArrayBuffer;
+  restore(buffer:ArrayBuffer) : ArrayBuffer[];
 
   /**
    * Dispose the transformer.

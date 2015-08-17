@@ -17,6 +17,8 @@
 //
 // import regex2dfa = require('regex2dfa');
 
+// TODO(bwiley): Remove hardcoded caesar parameter flow
+
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
@@ -28,6 +30,8 @@ import net = require('../net/net.types');
 import peerconnection = require('../webrtc/peerconnection');
 import random = require('../crypto/random');
 import signals = require('../webrtc/signals');
+import bytes = require('../fancy-transformers/byteSequenceShaper');
+import encryption = require('../fancy-transformers/encryptionShaper');
 
 import ChurnSignallingMessage = churn_types.ChurnSignallingMessage;
 import ChurnPipe = churn_pipe_types.freedom_ChurnPipe;
@@ -38,7 +42,7 @@ import RTCIceCandidate = freedom_RTCPeerConnection.RTCIceCandidate;
 
 var log :logging.Log = new logging.Log('churn');
 
-export var filterCandidatesFromSdp = (sdp:string) : string => {
+export var filterCandidatesFromSdp = (sdp:string) :string => {
   return sdp.split('\n').filter((s) => {
     return s.indexOf('a=candidate') !== 0;
   }).join('\n');
@@ -46,8 +50,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
 
   export interface NatPair {
-    internal: net.Endpoint;
-    external: net.Endpoint;
+    internal:net.Endpoint;
+    external:net.Endpoint;
   }
 
   // This function implements a heuristic to select the single candidate
@@ -65,8 +69,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   // CHURN endpoints.
   // TODO: remove this function once those CHURN endpoints are deprecated.
   export var selectBestPublicAddress = (candidates:Candidate[])
-      : NatPair => {
-    var score = (c:Candidate) : boolean[] => {
+      :NatPair => {
+    var score = (c:Candidate) :boolean[] => {
       var addr = ipaddr.process(c.ip);
       // List of selection criteria, from most important to least.
       return [
@@ -76,7 +80,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
         c.type === 'srflx'
       ];
     };
-    candidates.sort((a, b) : number => {
+    candidates.sort((a, b) :number => {
       var scoreA = score(a), scoreB = score(b);
       for (var i = 0; i < scoreA.length; ++i) {
         if (scoreA[i] && !scoreB[i]) {
@@ -114,7 +118,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
   };
 
   // Generates a key suitable for use with CaesarCipher, viz. 1-255.
-  var generateCaesarKey_ = (): number => {
+  var generateCaesarKey_ = ():number => {
     try {
       return (random.randomUint32() % 255) + 1;
     } catch (e) {
@@ -163,8 +167,8 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     // All candidates received from the remote peer, organized by their
     // connection address.
     private remoteCandidates_ :{
-      [address:string]: {
-        [port:number]: Candidate
+      [address:string]:{
+        [port:number]:Candidate
       }
     } = {};
 
@@ -203,7 +207,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.onceClosed = this.obfuscatedConnection_.onceClosed;
 
       // Debugging.
-      this.onceHaveCaesarKey_.then((key: number) => {
+      this.onceHaveCaesarKey_.then((key:number) => {
         log.info('%1: caesar key is %2', this.peerName, key);
       });
     }
@@ -231,7 +235,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ", 
+                      log.debug("addMapping() failed. Mapping object: ",
                                 mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
@@ -279,12 +283,54 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       }
     }
 
-    private configurePipe_ = (key:number) : void => {
+    private configurePipe_ = (key:number) :void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      this.pipe_.setTransformer('caesar',
+      this.pipe_.setTransformer('none',
           new Uint8Array([key]).buffer,
           '{}');
+      /*this.pipe_.setTransformer('caesar',
+          new Uint8Array([key]).buffer,
+          '{}');*/
+      /*this.pipe_.setTransformer('packetLengthExtender',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
+      /*this.pipe_.setTransformer('packetLengthShortener',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
+      /*this.pipe_.setTransformer('packetLengthNormalizer',
+          new Uint8Array([key]).buffer,
+          '{"targetLength": 1440}');*/
+      /*this.pipe_.setTransformer('packetLengthNormalizer',
+          new Uint8Array([key]).buffer,
+          '{"targetLength": 300, "fragmentation": true}');*/
+      /*this.pipe_.setTransformer('packetLengthUniformRandomizer',
+          new Uint8Array([key]).buffer,
+          '{"targetMinimum": 37, "targetMaximum": 1440, "fragmentation": true}');*/
+      /*this.pipe_.setTransformer('packetLengthPassthrough',
+          new Uint8Array([key]).buffer,
+          '{"fragmentation": true}');*/
+      /*var targetDistribution=this.makeSampleTargetLengthDistribution_();
+      this.pipe_.setTransformer('packetLengthMultinomialRandomizer',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({"targetDistribution": targetDistribution}));*/
+      /*this.pipe_.setTransformer('byteSequenceShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'sequences': this.makeSampleSequences_()}));*/
+      /*log.debug('make sample pipe');
+      this.makeSampleEncryption_(function(config:encryption.SerializedEncryptionConfig) {
+        log.debug('making sample encryption');
+        this.pipe_.setTransformer('encryptionShaper',
+            new Uint8Array([key]).buffer,
+            JSON.stringify(config));
+        this.havePipe_();
+      });*/
+      /*this.pipe_.setTransformer('encryptionShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'key': this.makeSampleEncryptionKey_()}));*/
+      /*this.pipe_.setTransformer('compressionShaper',
+          new Uint8Array([key]).buffer,
+          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));*/
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
@@ -295,6 +341,41 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       //       'ciphertext_dfa': regex2dfa('^.*$'),
       //       'ciphertext_max_len': 1450
       //     }
+    }
+
+    private makeSampleTargetLengthDistribution_ = () :Array<number> => {
+      var result :Array<number> =[];
+      var prob = 1 / 1440;
+      var index=0;
+      while(index<1440) {
+        result.push(prob);
+      }
+
+      return result;
+    }
+
+    private makeSampleSequences_ = () :bytes.SerializedSequenceConfig => {
+      var buffer=arraybuffers.stringToArrayBuffer("OH HELLO");
+      var hex=arraybuffers.arrayBufferToHexString(buffer);
+      var sequence={index: 0, offset: 0,
+        sequence: hex,
+        length: 256};
+
+      return {addSequences: [sequence], removeSequences: [sequence]};
+    }
+
+    private makeSampleEncryptionKey_ = () :string => {
+      var key = new ArrayBuffer(16);
+      return arraybuffers.arrayBufferToHexString(key);
+    }
+
+    private makeSampleFrequencies_ = () :number[] => {
+      var result :number[] = [];
+      for (var i = 0; i < 256; i++) {
+          result[i]=1;
+      }
+
+      return result;
     }
 
     private addRemoteCandidate_ = (iceCandidate:RTCIceCandidate) => {
@@ -316,7 +397,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     // This is used to recover the entire candidate when a new mapping is
     // added, in order to convey the right candidate metadata (priority,
     // generation, etc.) to the obfuscated connection.
-    private getRemoteCandidate_ = (endpoint:net.Endpoint) : Candidate => {
+    private getRemoteCandidate_ = (endpoint:net.Endpoint) :Candidate => {
       return this.remoteCandidates_[endpoint.address] &&
           this.remoteCandidates_[endpoint.address][endpoint.port];
     }
@@ -392,7 +473,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
           this.obfuscatedConnection_.peerOpenedChannelQueue;
     }
 
-    public negotiateConnection = () : Promise<void> => {
+    public negotiateConnection = () :Promise<void> => {
       // Generate a key and send it to the remote party.
       // Once they've received it, they'll be able to establish
       // a matching pipe.
@@ -405,7 +486,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     }
 
     private static rtcIceCandidateFromPublicEndpoint_ =
-        (endpoint:net.Endpoint) : RTCIceCandidate => {
+        (endpoint:net.Endpoint) :RTCIceCandidate => {
       var c = Candidate.fromRTCIceCandidate({
         candidate: 'candidate:0 1 UDP 2130379007 0.0.0.0 0 typ host',
         sdpMid: '',
@@ -420,7 +501,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
     // In the case of obfuscated signalling channel messages, we inject our
     // local forwarding socket's endpoint.
     public handleSignalMessage = (
-        churnMessage:ChurnSignallingMessage) : void => {
+        churnMessage:ChurnSignallingMessage) :void => {
       if (churnMessage.publicEndpoint !== undefined) {
         var fakeRTCIceCandidate = Connection.rtcIceCandidateFromPublicEndpoint_(
             churnMessage.publicEndpoint);
@@ -454,15 +535,15 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
 
     public openDataChannel = (channelLabel:string,
         options?:freedom_RTCPeerConnection.RTCDataChannelInit)
-        : Promise<peerconnection.DataChannel> => {
+        :Promise<peerconnection.DataChannel> => {
       return this.obfuscatedConnection_.openDataChannel(channelLabel);
     }
 
-    public close = () : Promise<void> => {
+    public close = () :Promise<void> => {
       return this.obfuscatedConnection_.close();
     }
 
-    public toString = () : string => {
+    public toString = () :string => {
       return this.obfuscatedConnection_.toString();
     };
   }

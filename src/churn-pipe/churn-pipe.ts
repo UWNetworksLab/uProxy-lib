@@ -16,6 +16,16 @@
 
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
+import PacketLengthShaper = require('../fancy-transformers/packetLengthShaper');
+import PacketLengthPassthrough = require('../fancy-transformers/packetLengthPassthrough');
+import PacketLengthExtender = require('../fancy-transformers/packetLengthExtender');
+import PacketLengthShortener = require('../fancy-transformers/packetLengthShortener');
+import PacketLengthNormalizer = require('../fancy-transformers/packetLengthNormalizer');
+import PacketLengthUniformRandomizer = require('../fancy-transformers/packetLengthUniformRandomizer');
+import PacketLengthMultinomialRandomizer = require('../fancy-transformers/packetLengthMultinomialRandomizer');
+import bytes = require('../fancy-transformers/byteSequenceShaper');
+import encryption = require('../fancy-transformers/encryptionShaper');
+import compression = require('../fancy-transformers/compressionShaper');
 
 import logging = require('../logging/logging');
 
@@ -43,6 +53,20 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
   });
 }
 
+var transformers :{[index :string] :new (...args: any[]) => Transformer} = {
+  'caesar': CaesarCipher,
+  'packetLengthPassthrough': PacketLengthPassthrough,
+  'packetLengthExtender': PacketLengthExtender,
+  'packetLengthShortener': PacketLengthShortener,
+  'packetLengthNormalizer': PacketLengthNormalizer,
+  'packetLengthUniformRandomizer': PacketLengthUniformRandomizer,
+  'packetLengthMultinomialRandomizer': PacketLengthMultinomialRandomizer,
+  'byteSequenceShaper': bytes.ByteSequenceShaper,
+  'encryptionShaper': encryption.EncryptionShaper,
+  'compressionShaper': compression.CompressionShaper,
+  'none': PassThrough
+};
+
 var makeTransformer_ = (
     // Name of transformer to use, e.g. 'rabbit' or 'none'.
     name :string,
@@ -52,19 +76,15 @@ var makeTransformer_ = (
     config ?:string)
   : Transformer => {
   var transformer :Transformer;
-  // TODO(ldixon): re-enable rabbit and FTE once we can figure out why they
-  // don't load in freedom.
-  /* if (name == 'rabbit') {
-     transformer = Rabbit.Transformer();
-     } else if (name == 'fte') {
-     transformer = Fte.Transformer();
-     } else */ if (name == 'caesar') {
-       transformer = new CaesarCipher();
-     } else if (name == 'none') {
-       transformer = new PassThrough();
-     } else {
-       throw new Error('unknown transformer: ' + name);
-     }
+  log.info('Instantiating transformer %1', name)
+
+   if(name in transformers) {
+     var transformerClass=transformers[name];
+     transformer=new transformerClass();
+   } else {
+     throw new Error('unknown transformer: ' + name);
+   }
+
   if (key) {
     transformer.setKey(key);
   }
@@ -77,12 +97,12 @@ var makeTransformer_ = (
 interface MirrorSet {
   // If true, these mirrors represent a remote endpoint that has been
   // explicitly signaled to us.
-  signaled: boolean;
+  signaled:boolean;
 
   // This array may be transiently sparse for signaled mirrors, and
   // persistently sparse for non-signaled mirrors (i.e. peer-reflexive).
   // Taking its length is therefore likely to be unhelpful.
-  sockets: Promise<Socket>[];
+  sockets:Promise<Socket>[];
 }
 
 /**
@@ -98,17 +118,19 @@ class Pipe {
   // Number of instances created, for logging purposes.
   private static id_ = 0;
 
+  private packetCount_ = 0;
+
   // For each physical network interface, this provides a list of the open
   // public sockets on that interface.  Each socket corresponds to a port that
   // is intended to be publicly routable (possibly thanks to NAT), and is
   // used only for sending and receiving obfuscated traffic with the remote
   // endpoints.
-  private publicSockets_ :{ [address:string]: Socket[] } = {};
+  private publicSockets_ :{ [address:string]:Socket[] } = {};
 
   // Promises to track the progress of binding any public port.  This is used
   // to return the appropriate Promise when there is a redundant call to
   // |bindLocal|.
-  private publicPorts_ : { [address:string]: { [port:number]: Promise<void> } } =
+  private publicPorts_ :{ [address:string]:{ [port:number]:Promise<void> } } =
       {};
 
   // The maximum number of bound remote ports on any single interface.  This is
@@ -123,7 +145,7 @@ class Pipe {
   // when a mirror socket receives a (unobfuscated) message from the browser
   // endpoint, the public socket sends the corresponding obfuscated packet to
   // that mirror socket's remote endpoint.
-  private mirrorSockets_ : { [address:string]: { [port:number]: MirrorSet } } =
+  private mirrorSockets_ :{ [address:string]:{ [port:number]:MirrorSet } } =
       {};
 
   // Obfuscates and deobfuscates messages.
@@ -133,7 +155,7 @@ class Pipe {
   // interface.  The key is the interface, and the value is the port.
   // This requires the simplifying assumption that the browser allocates at
   // most one port on each interface.
-  private browserEndpoints_ : { [address:string]: number } = {};
+  private browserEndpoints_ :{ [address:string]:number } = {};
 
   // The most recently set public interface for IPv6 and IPv4.  Used to
   // report mirror endpoints.
@@ -150,7 +172,7 @@ class Pipe {
   public setTransformer = (
       transformerName :string,
       key ?:ArrayBuffer,
-      config ?:string) : Promise<void> => {
+      config ?:string) :Promise<void> => {
     try {
       this.transformer_ = makeTransformer_(transformerName, key, config);
       return Promise.resolve<void>();
@@ -211,7 +233,7 @@ class Pipe {
         this.onIncomingData_(recvFromInfo, publicEndpoint.address, index);
       });
     });
-    
+
     this.publicPorts_[publicEndpoint.address][publicEndpoint.port] = portPromise;
     return portPromise;
   }
@@ -221,7 +243,7 @@ class Pipe {
   // updates necessary to make the new socket functional, and returns an index
   // that identifies the socket within its interface.
   private addPublicSocket_ = (socket:Socket, endpoint:net.Endpoint)
-      : number => {
+      :number => {
     if (!(endpoint.address in this.publicSockets_)) {
       this.publicSockets_[endpoint.address] = [];
     }
@@ -281,7 +303,7 @@ class Pipe {
   // endpoint, if necessary.  If |signaled| is true, the structure will be
   // marked as signaled, whether or not it already existed.
   private ensureRemoteEndpoint_ = (endpoint:net.Endpoint, signaled:boolean)
-      : MirrorSet => {
+      :MirrorSet => {
     if (!(endpoint.address in this.mirrorSockets_)) {
       this.mirrorSockets_[endpoint.address] = {};
     }
@@ -301,7 +323,7 @@ class Pipe {
    * Given an endpoint from which obfuscated datagrams may arrive, this method
    * constructs a corresponding mirror socket, and returns its endpoint.
    */
-  public bindRemote = (remoteEndpoint:net.Endpoint) : Promise<void> => {
+  public bindRemote = (remoteEndpoint:net.Endpoint) :Promise<void> => {
     try {
       var dummyAddress = this.getLocalInterface_(remoteEndpoint.address);
     } catch (e) {
@@ -314,7 +336,7 @@ class Pipe {
     for (var i = 0; i < this.maxSocketsPerInterface_; ++i) {
       promises.push(this.getMirrorSocketAndEmit_(remoteEndpoint, i));
     }
-    return Promise.all(promises).then((fulfills:void[]) : void => {});
+    return Promise.all(promises).then((fulfills:void[]) :void => {});
   }
 
   // Returns the "any" interface with the same address family (IPv4 or IPv6) as
@@ -324,7 +346,7 @@ class Pipe {
   }
 
   private getMirrorSocket_ = (remoteEndpoint:net.Endpoint, index:number)
-      : Promise<Socket> => {
+      :Promise<Socket> => {
     var mirrorSet = this.ensureRemoteEndpoint_(remoteEndpoint, false);
     var socketPromise :Promise<Socket> = mirrorSet.sockets[index];
     if (socketPromise) {
@@ -338,7 +360,7 @@ class Pipe {
     //   https://github.com/uProxy/uproxy/issues/1597
     // TODO: bind to an actual, non-localhost address (see the issue)
     var anyInterface = Pipe.anyInterface_(remoteEndpoint.address);
-    socketPromise = mirrorSocket.bind(anyInterface, 0).then(() : Socket => {
+    socketPromise = mirrorSocket.bind(anyInterface, 0).then(() :Socket => {
       mirrorSocket.on('onData', (recvFromInfo:freedom_UdpSocket.RecvFromInfo) => {
         // Ignore packets that do not originate from the browser, for a
         // theoretical security benefit.
@@ -359,6 +381,8 @@ class Pipe {
           // Drop the packet in that case.
           if (publicSocket) {
             this.sendTo_(publicSocket, recvFromInfo.data, remoteEndpoint);
+          } else {
+            log.warn('Dropping packet due to null public socket');
           }
         }
       });
@@ -369,7 +393,7 @@ class Pipe {
   }
 
   private getMirrorSocketAndEmit_ = (remoteEndpoint:net.Endpoint, index:number)
-      : Promise<void> => {
+      :Promise<void> => {
     return this.getMirrorSocket_(remoteEndpoint, index).then((socket) => {
       this.emitMirror_(remoteEndpoint, socket)
     }, (e) => {
@@ -411,12 +435,14 @@ class Pipe {
    * The message is obfuscated before it hits the wire.
    */
   private sendTo_ = (publicSocket:Socket, buffer:ArrayBuffer, to:net.Endpoint)
-      : void => {
-    var transformedBuffer = this.transformer_.transform(buffer);
-    publicSocket.sendTo.reckless(
-      transformedBuffer,
-      to.address,
-      to.port);
+      :void => {
+    var transformedBuffers = this.transformer_.transform(buffer);
+    for(var i=0; i<transformedBuffers.length; i++) {
+      publicSocket.sendTo.reckless(
+        transformedBuffers[i],
+        to.address,
+        to.port);
+    }
   }
 
   /**
@@ -432,16 +458,18 @@ class Pipe {
       return;
     }
     var transformedBuffer = recvFromInfo.data;
-    var buffer = this.transformer_.restore(transformedBuffer);
+    var buffers = this.transformer_.restore(transformedBuffer);
     this.getMirrorSocket_(recvFromInfo, index).then((mirrorSocket:Socket) => {
-      mirrorSocket.sendTo.reckless(
-          buffer,
-          iface,
-          browserPort);
+      for(var i=0; i<buffers.length; i++) {
+        mirrorSocket.sendTo.reckless(
+            buffers[i],
+            iface,
+            browserPort);
+      }
     });
   }
 
-  public on = (name:string, listener:(event:any) => void) : void => {
+  public on = (name:string, listener:(event:any) => void) :void => {
     throw new Error('Placeholder function to keep Typescript happy');
   }
 }
