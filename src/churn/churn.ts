@@ -235,7 +235,7 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom_PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ", 
+                      log.debug("addMapping() failed. Mapping object: ",
                                 mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
@@ -286,9 +286,9 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
     private configurePipe_ = (key:number) :void => {
       this.pipe_ = freedom['churnPipe'](this.peerName);
       this.pipe_.on('mappingAdded', this.onMappingAdded_);
-      /*this.pipe_.setTransformer('none',
+      this.pipe_.setTransformer('none',
           new Uint8Array([key]).buffer,
-          '{}');*/
+          '{}');
       /*this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');*/
@@ -328,9 +328,9 @@ export var filterCandidatesFromSdp = (sdp:string) :string => {
       /*this.pipe_.setTransformer('encryptionShaper',
           new Uint8Array([key]).buffer,
           JSON.stringify({'key': this.makeSampleEncryptionKey_()}));*/
-      this.pipe_.setTransformer('compressionShaper',
+      /*this.pipe_.setTransformer('compressionShaper',
           new Uint8Array([key]).buffer,
-          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));
+          JSON.stringify({'frequencies': this.makeSampleFrequencies_()}));*/
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
