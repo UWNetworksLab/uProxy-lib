@@ -8,14 +8,14 @@ interface Transformer {
    * @param {ArrayBuffer} key session key.
    * @return {boolean} true if successful.
    */
-  setKey(key:ArrayBuffer) : void;
+  setKey(key:ArrayBuffer) :void;
 
   /**
    * Configures this transformer.
    *
    * @param {String} serialized Json string.
    */
-  configure(json:string) : void;
+  configure(json:string) :void;
 
   /**
    * Transforms a piece of data to obfuscated form.
@@ -27,7 +27,7 @@ interface Transformer {
    *   When fragmention occurs, the list will have more than one item.
    *   When there is no fragmentation, the list will have one item.
    */
-  transform(buffer:ArrayBuffer) : ArrayBuffer[];
+  transform(buffer:ArrayBuffer) :ArrayBuffer[];
 
   /**
    * Restores data from obfuscated form to original form.
@@ -39,20 +39,20 @@ interface Transformer {
    *   When receiving a fragment, the list will have zero items,
    *   unless it was the last fragment, then the list will have one item.
    */
-  restore(buffer:ArrayBuffer) : ArrayBuffer[];
+  restore(buffer:ArrayBuffer) :ArrayBuffer[];
 
   /**
    * Dispose the transformer.
    *
    * This should be the last method called on a transformer instance.
    */
-  dispose() : void;
+  dispose() :void;
 }
 
 declare module "utransformers/src/transformers/uTransformers.fte" {
-  export function Transformer() : Transformer;
+  export function Transformer() :Transformer;
 }
 
 declare module "utransformers/src/transformers/uTransformers.rabbit" {
-  export function Transformer() : Transformer;
+  export function Transformer() :Transformer;
 }
