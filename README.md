@@ -46,7 +46,7 @@ To run Chrome apps:
 
 To run Firefox add-ons:
 
-- download the [Add-on SDK](https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation), `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute `cfx run`.
+- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
 
 ### simple-freedom-chat
 
