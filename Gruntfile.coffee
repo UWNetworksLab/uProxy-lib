@@ -92,8 +92,6 @@ taskManager.add 'copypasteSocks', [
 taskManager.add 'simpleTurn', [
   'base'
   'browserify:simpleTurnFreedomModule'
-  'browserify:turnBackendFreedomModule'
-  'browserify:turnFrontendFreedomModule'
   'browserify:simpleTurnChromeApp'
   'copy:libsForSimpleTurnChromeApp'
   'copy:libsForSimpleTurnFirefoxApp'
@@ -390,12 +388,12 @@ module.exports = (grunt) ->
       libsForSimpleTurnChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['simple-turn', 'turn-frontend', 'turn-backend', 'loggingprovider']
+          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
           localDestPath: 'samples/simple-turn-chromeapp/'
       libsForSimpleTurnFirefoxApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['simple-turn', 'turn-frontend', 'turn-backend', 'loggingprovider']
+          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
           localDestPath: 'samples/simple-turn-firefoxapp/data'
 
       libsForSimpleChurnChatChromeApp:
@@ -549,8 +547,6 @@ module.exports = (grunt) ->
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
-      turnBackendFreedomModule: Rule.browserify 'turn-backend/freedom-module'
-      turnFrontendFreedomModule: Rule.browserify 'turn-frontend/freedom-module'
       simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
       copypasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
