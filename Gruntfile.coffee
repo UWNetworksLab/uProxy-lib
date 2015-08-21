@@ -71,7 +71,6 @@ taskManager.add 'echoServerFirefoxApp', [
 taskManager.add 'simpleSocksChromeApp', [
   'base'
   'copy:libsForSimpleSocksChromeApp'
-  'browserify:simpleSocksChromeApp'
 ]
 
 taskManager.add 'simpleSocksFirefoxApp', [
@@ -598,7 +597,6 @@ module.exports = (grunt) ->
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
-      simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
       simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
       simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
