@@ -92,7 +92,6 @@ taskManager.add 'simpleTurn', [
   'browserify:simpleTurnFreedomModule'
   'browserify:turnBackendFreedomModule'
   'browserify:turnFrontendFreedomModule'
-  'browserify:simpleTurnChromeApp'
   'copy:libsForSimpleTurnChromeApp'
   'copy:libsForSimpleTurnFirefoxApp'
 ]
@@ -598,7 +597,6 @@ module.exports = (grunt) ->
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
-      simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
       simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
       copypasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
       # Integration tests.
