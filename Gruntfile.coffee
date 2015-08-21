@@ -61,7 +61,6 @@ taskManager.add 'copypasteFreedomChat', [
 taskManager.add 'echoServerChromeApp', [
   'base'
   'copy:libsForEchoServerChromeApp'
-  'browserify:echoServerChromeApp'
 ]
 
 taskManager.add 'echoServerFirefoxApp', [
@@ -599,7 +598,6 @@ module.exports = (grunt) ->
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
       simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
-      echoServerChromeApp: Rule.browserify 'samples/echo-server-chromeapp/background.core-env'
       simpleSocksChromeApp: Rule.browserify 'samples/simple-socks-chromeapp/background.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
       simpleTurnChromeApp: Rule.browserify 'samples/simple-turn-chromeapp/background.core-env'
