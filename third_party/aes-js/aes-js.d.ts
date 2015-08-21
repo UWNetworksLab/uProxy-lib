@@ -1,3 +1,5 @@
+/// <reference path='../typings/node/node.d.ts' />
+
 // TypeScript definitions for aes-js:
 //   https://github.com/ricmoo/aes-js
 
@@ -7,11 +9,10 @@
 declare module 'aes-js' {
   module ModeOfOperation {
     class cbc {
+      // TODO: should key and iv be Buffer too?
       constructor(key:Uint8Array, iv:Uint8Array);
-      encrypt(bytes:Uint8Array) : Uint8Array;
-      // NOTE: the returned type is a Uint8Array-like object which lacks a buffer field
-      // TODO: type definition for the returned type (examine the browserified source)
-      decrypt(bytes:Uint8Array) : Uint8Array;
+      encrypt(bytes:Buffer) : Buffer;
+      decrypt(bytes:Buffer) : Buffer;
     }
   }
 
