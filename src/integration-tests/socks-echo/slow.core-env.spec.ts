@@ -14,9 +14,9 @@ import freedom_types = require('freedom.types');
 function slowTestDescription(useChurn:boolean) {
   var testerFactoryManager
         :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
-  var createTestModule = function(denyLocalhost?:boolean)
-      :ProxyIntegrationTester {
-    return testerFactoryManager(denyLocalhost, useChurn);
+  var testModule :ProxyIntegrationTester;
+  var createTestModule = function(denyLocalhost?:boolean) {
+    testModule = testerFactoryManager(denyLocalhost, useChurn);
   };
 
   beforeEach((done) => {
@@ -27,10 +27,14 @@ function slowTestDescription(useChurn:boolean) {
         });
   });
 
-  afterEach(() => {
-    expect(testerFactoryManager).not.toBeUndefined();
-    // Close all created interfaces to the freedom module.
-    testerFactoryManager.close();
+  afterEach((done) => {
+    expect(testModule).not.toBeUndefined();
+    testModule.shutdown().then(() => {
+      expect(testerFactoryManager).not.toBeUndefined();
+      // Close all created interfaces to the freedom module.
+      testerFactoryManager.close();
+      done();
+    });
   });
 
   // The default TCP SYN timeout is two minutes, so to be safe we
@@ -42,7 +46,7 @@ function slowTestDescription(useChurn:boolean) {
     var blockSize = 1024;
     var testBlock :ArrayBuffer = new ArrayBuffer(blockSize);
     var repeat :number = 250;
-    var testModule = createTestModule();
+    createTestModule();
     testModule.setRepeat(repeat);
     testModule.startEchoServer().then((port:number) => {
       var connectionPromises :Promise<string>[] = [];
@@ -78,7 +82,7 @@ function slowTestDescription(useChurn:boolean) {
   it('upload load test', (done) => {
     var size = 250 * 1024;
     var testBlock :ArrayBuffer = new ArrayBuffer(size);
-    var testModule = createTestModule();
+    createTestModule();
     testModule.setRepeat(0);  // Don't send a reply at all.
     testModule.startEchoServer().then((port:number) => {
       var connectionPromises :Promise<string>[] = [];
@@ -100,7 +104,7 @@ function slowTestDescription(useChurn:boolean) {
   it('100 MB echo load test', (done) => {
     var size = 100 * 1024 * 1024;  // Larger than the 16 MB internal buffer in Chrome.
     var input = new ArrayBuffer(size);
-    var testModule = createTestModule();
+    createTestModule();
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
@@ -114,7 +118,7 @@ function slowTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent IP address', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     // 192.0.2.0/24 is a reserved IP address range.
     testModule.connect(80, '192.0.2.111').then((connectionId:string) => {
       // This code should not run, because this is a reserved IP address.
