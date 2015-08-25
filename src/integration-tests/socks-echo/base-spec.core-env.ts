@@ -23,9 +23,11 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   var testerFactoryManager
         :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
+  var testModule :ProxyIntegrationTester;
   var createTestModule = function(denyLocalhost?:boolean,
-      sessionLimit?:number, ipv6Only?:boolean) : ProxyIntegrationTester {
-        return testerFactoryManager(denyLocalhost, useChurn, sessionLimit, ipv6Only);
+      sessionLimit?:number, ipv6Only?:boolean) {
+    testModule = testerFactoryManager(denyLocalhost, useChurn,
+        sessionLimit, ipv6Only);
   };
 
   beforeEach((done) => {
@@ -36,15 +38,19 @@ export function socksEchoTestDescription(useChurn:boolean) {
         });
   });
 
-  afterEach(() => {
-    expect(testerFactoryManager).not.toBeUndefined();
-    // Close all created interfaces to the freedom module.
-    testerFactoryManager.close();
+  afterEach((done) => {
+    expect(testModule).not.toBeUndefined();
+    testModule.shutdown().then(() => {
+      expect(testerFactoryManager).not.toBeUndefined();
+      // Close all created interfaces to the freedom module.
+      testerFactoryManager.close();
+      done();
+    });
   });
 
   it('run a simple echo test', (done) => {
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
-    var testModule = createTestModule();
+    createTestModule();
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
@@ -58,7 +64,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('detects a remote close', (done) => {
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
-    var testModule = createTestModule();
+    createTestModule();
     var connId : string;
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
@@ -77,7 +83,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('run multiple echo tests in a batch on one connection', (done) => {
     var testBuffers = testStrings.map(arraybuffers.stringToArrayBuffer);
-    var testModule = createTestModule();
+    createTestModule();
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
@@ -94,7 +100,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('run multiple echo tests in series on one connection', (done) => {
     var testBuffers = testStrings.map(arraybuffers.stringToArrayBuffer);
-    var testModule = createTestModule();
+    createTestModule();
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
@@ -119,7 +125,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('connect to the same server multiple times in parallel', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     testModule.startEchoServer().then((port:number) : Promise<any> => {
       var promises = testStrings.map((s:string) : Promise<void> => {
         var buffer = arraybuffers.stringToArrayBuffer(s);
@@ -136,7 +142,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('connect to many different servers in parallel', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     var promises = testStrings.map((s:string) : Promise<void> => {
       var buffer = arraybuffers.stringToArrayBuffer(s);
 
@@ -158,7 +164,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('run a localhost echo test while localhost is blocked.', (done) => {
     // Get a test module that doesn't allow localhost access.
-    var testModule = createTestModule(true);
+    createTestModule(true);
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
@@ -197,12 +203,12 @@ export function socksEchoTestDescription(useChurn:boolean) {
   };
 
   it('fetch from non-localhost address', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     runUproxyOrg404Test(testModule, done);
   });
 
   it('fetch from non-localhost address while localhost is blocked.', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     runUproxyOrg404Test(testModule, done);
   });
 
@@ -211,7 +217,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
     var input = arraybuffers.stringToArrayBuffer(
         'GET ' + nonExistentPath + ' HTTP/1.0\r\n\r\n');
     // Get a test module that doesn't allow localhost access.
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // Try to connect to localhost, and fail
     testModule.connect(1023).then((connectionId:string) => {
       // This code should not run, because testModule.connect() should
@@ -226,7 +232,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('run a localhost-resolving DNS name echo test while localhost is blocked.', (done) => {
     // Get a test module with one that doesn't allow localhost access.
-    var testModule = createTestModule(true);
+    createTestModule(true);
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port, 'www.127.0.0.1.xip.io');
     }).then((connectionId:string) => {
@@ -246,7 +252,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent echo daemon', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     // 1023 is a reserved port.
     testModule.connect(1023).then((connectionId:string) => {
       // This code should not run, because there is no server on this port.
@@ -257,7 +263,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent echo daemon while localhost is blocked', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // 1023 is a reserved port.
     testModule.connect(1023).then((connectionId:string) => {
       // This code should not run, because localhost is blocked.
@@ -268,7 +274,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent local echo daemon while localhost is blocked as 0.0.0.0', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // 1023 is a reserved port.
     testModule.connect(1023, '0.0.0.0').then((connectionId:string) => {
       // This code should not run because the destination is invalid.
@@ -281,7 +287,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent local echo daemon while localhost is blocked as IPv6', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // 1023 is a reserved port.
     testModule.connect(1023, '::1').then((connectionId:string) => {
       // This code should not run, because localhost is blocked.
@@ -292,7 +298,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a local network IP address while it is blocked', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // 1023 is a reserved port.
     testModule.connect(1023, '10.5.5.5').then((connectionId:string) => {
       // This code should not run, because local network access is blocked.
@@ -303,7 +309,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('connection refused from DNS name', (done) => {
-    var testModule = createTestModule();
+    createTestModule();
     // Many sites (such as uproxy.org) seem to simply ignore SYN packets on
     // unmonitored ports, but openbsd.org actually refuses the connection as
     // expected.
@@ -316,7 +322,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('connection refused from DNS name while localhost is blocked', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     // Many sites (such as uproxy.org) seem to simply ignore SYN packets on
     // unmonitored ports, but openbsd.org actually refuses the connection as
     // expected.
@@ -333,7 +339,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   });
 
   it('attempt to connect to a nonexistent DNS name', (done) => {
-    var testModule = createTestModule(true);
+    createTestModule(true);
     testModule.connect(80, 'www.nonexistentdomain.gov').then((connectionId:string) => {
       // This code should not run, because there is no such DNS name.
       expect(connectionId).toBeUndefined();
@@ -344,7 +350,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
 
   it('Hit the session limit', (done) => {
     var limit = 4;
-    var testModule = createTestModule(false, limit);
+    createTestModule(false, limit);
 
     var workingConnections : Promise<void>[] = [];
 
@@ -368,7 +374,7 @@ export function socksEchoTestDescription(useChurn:boolean) {
   // is fixed.
   xit('run a simple echo test but force IPv6 transport', (done) => {
     var input = arraybuffers.stringToArrayBuffer('arbitrary test string');
-    var testModule = createTestModule(undefined, undefined, true);
+    createTestModule(undefined, undefined, true);
     testModule.startEchoServer().then((port:number) => {
       return testModule.connect(port);
     }).then((connectionId:string) => {
