@@ -8,3 +8,4 @@ install:
  - ./setup.sh install
 test:
  - grunt test
+sudo: false
