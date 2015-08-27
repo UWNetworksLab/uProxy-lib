@@ -35,7 +35,8 @@
       url          ?:string;
       // Image URI (e.g. data:image/png;base64,adkwe329...)
       imageData    ?:string;
-      timestamp    ?:number;
+      lastUpdated  ?:number;
+      status       ?:number;
     }
 
     interface Users   { [userId:string]   : UserProfile; }
@@ -95,6 +96,14 @@
     login(loginRequest:freedom_Social.LoginRequest) : Promise<freedom_Social.ClientState>;
     getUsers() : Promise<freedom_Social.Users>;
     getClients() : Promise<freedom_Social.Clients>;
+
+    // Invite user returns false when invitation was not delivered, typically due
+    // to the destination user lacking some initial setup done by installing and
+    // connecting their account.
+    inviteUser(userId: string): Promise<boolean>;
+    acceptUserInvitation(userId: string): void;
+    blockUser(userId: string): void;
+    removeUser(userId: string): void;
 
     // Send a message to user on your network
     // If the message is sent to a userId, it is sent to all clients
