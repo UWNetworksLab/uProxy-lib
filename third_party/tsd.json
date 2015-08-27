@@ -11,9 +11,6 @@
     "jasmine/jasmine.d.ts": {
       "commit": "675a63e4036624d24b06f1b173a92cbe7bb72ab7"
     },
-    "webcrypto/WebCrypto.d.ts": {
-      "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
-    },
     "form-data/form-data.d.ts": {
       "commit": "338059f48e4e32ef11472bd5a54ad91fb67f8c36"
     },
