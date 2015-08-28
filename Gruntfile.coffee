@@ -153,6 +153,7 @@ taskManager.add 'uprobe', [
 # Create unit test code
 taskManager.add 'browserifySpecs', [
   'base'
+  'browserify:aesSpec'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
   'browserify:candidateSpec'
@@ -194,6 +195,7 @@ taskManager.add 'unit_test', [
   'jasmine:churn'
   'jasmine:handler'
   'jasmine:buildTools'
+  'jasmine:crypto'
   'jasmine:logging'
   'jasmine:loggingProvider'
   'jasmine:net'
@@ -501,6 +503,7 @@ module.exports = (grunt) ->
       buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
       churn: Rule.jasmineSpec 'churn'
       churnCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'churn')
+      crypto: Rule.jasmineSpec 'crypto'
       handler: Rule.jasmineSpec 'handler'
       handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
       logging: Rule.jasmineSpec 'logging'
@@ -553,6 +556,7 @@ module.exports = (grunt) ->
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       # Browserify specs
+      aesSpec: Rule.browserifySpec 'crypto/aes'
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       bridgeSpec: Rule.browserifySpec 'bridge/bridge'
