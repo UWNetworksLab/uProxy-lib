@@ -1,3 +1,3 @@
-/// <reference path="./freedom-common.d.ts" />
+/// <reference path="./freedom.d.ts" />
 
 declare var freedom :freedom.FreedomInModuleEnv;
