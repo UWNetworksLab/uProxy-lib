@@ -6,7 +6,7 @@
   "bundle": "third_party/typings/tsd.d.ts",
   "installed": {
     "es6-promise/es6-promise.d.ts": {
-      "commit": "e5de5c4daf8cdc33ed60704cd6e8021c99a89f92"
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
     },
     "jasmine/jasmine.d.ts": {
       "commit": "675a63e4036624d24b06f1b173a92cbe7bb72ab7"
@@ -22,6 +22,15 @@
     },
     "circular-json/circular-json.d.ts": {
       "commit": "cb08e83dd87ace1202d1032a8f275b3efacde5c3"
+    },
+    "freedom/freedom.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-core-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "freedom/freedom-module-env.d.ts": {
+      "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
     }
   }
 }
