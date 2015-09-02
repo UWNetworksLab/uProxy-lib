@@ -156,6 +156,7 @@ taskManager.add 'browserifySpecs', [
   'browserify:aesSpec'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
+  'browserify:onetimeSpec'
   'browserify:candidateSpec'
   'browserify:churnSpec'
   'browserify:handlerSpec'
@@ -561,6 +562,8 @@ module.exports = (grunt) ->
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       bridgeSpec: Rule.browserifySpec 'bridge/bridge'
       bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
+      onetimeSpec: Rule.browserifySpec 'bridge/onetime'
+      onetimeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/onetime')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
       candidateSpec: Rule.browserifySpec 'churn/candidate'

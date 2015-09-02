@@ -25,7 +25,7 @@ export interface CopypasteApi {
   // This is a promise for the freedom module stub.
   onceReady :Promise<freedom.OnAndEmit<any,any>>;
   model :Model;
-  parseInboundMessages :(inboundMessageFieldValue:string) => void;
+  parseInboundMessages :() => void;
   consumeInboundMessage :() => void;
   verifyDecryptInboundMessage :(ciphertext:string) => void;
 }
