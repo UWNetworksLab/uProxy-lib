@@ -19,6 +19,7 @@ import arraybuffers = require('../arraybuffers/arraybuffers');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
+import encryption = require('../fancy-transformers/encryptionShaper');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -240,7 +241,7 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
                 this.portControl_.addMapping(c.relatedPort, c.port, MAP_LIFETIME).
                   then((mapping:freedom.PortControl.Mapping) => {
                     if (mapping.externalPort === -1) {
-                      log.debug("addMapping() failed. Mapping object: ", 
+                      log.debug("addMapping() failed. Mapping object: ",
                                 mapping);
                     } else {
                       log.debug("addMapping() success: ", mapping);
@@ -305,6 +306,11 @@ export var filterCandidatesFromSdp = (sdp:string) : string => {
       this.pipe_.setTransformer('caesar',
           new Uint8Array([key]).buffer,
           '{}');
+          
+      /*this.pipe_.setTransformer('encryptionShaper',
+        new Uint8Array([key]).buffer,
+        JSON.stringify({'key': this.makeSampleEncryptionKey_()}));*/
+
       // TODO(ldixon): re-enable FTE support instead of caesar cipher.
       //     'fte',
       //     arraybuffers.stringToArrayBuffer('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'),
