@@ -13,14 +13,13 @@
 // import Rabbit = require('utransformers/src/transformers/uTransformers.fte');
 // import Fte = require('utransformers/src/transformers/uTransformers.rabbit');
 
-import PassThrough = require('../simple-transformers/passthrough');
+import aqm = require('../aqm/aqm');
 import CaesarCipher = require('../simple-transformers/caesar');
-
+import encryption = require('../fancy-transformers/encryptionShaper');
+import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
-import aqm = require('../aqm/aqm');
-
-import ipaddr = require('ipaddr.js');
+import PassThrough = require('../simple-transformers/passthrough');
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -43,6 +42,12 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
   });
 }
 
+var transformers :{[index :string] :new (...args: any[]) => Transformer} = {
+  'caesar': CaesarCipher,
+  'encryptionShaper': encryption.EncryptionShaper,
+  'none': PassThrough
+};
+
 var makeTransformer_ = (
     // Name of transformer to use, e.g. 'rabbit' or 'none'.
     name :string,
@@ -52,19 +57,15 @@ var makeTransformer_ = (
     config ?:string)
   : Transformer => {
   var transformer :Transformer;
-  // TODO(ldixon): re-enable rabbit and FTE once we can figure out why they
-  // don't load in freedom.
-  /* if (name == 'rabbit') {
-     transformer = Rabbit.Transformer();
-     } else if (name == 'fte') {
-     transformer = Fte.Transformer();
-     } else */ if (name == 'caesar') {
-       transformer = new CaesarCipher();
-     } else if (name == 'none') {
-       transformer = new PassThrough();
-     } else {
-       throw new Error('unknown transformer: ' + name);
-     }
+  log.info('Instantiating transformer %1', name)
+
+   if(name in transformers) {
+     var transformerClass=transformers[name];
+     transformer=new transformerClass();
+   } else {
+     throw new Error('unknown transformer: ' + name);
+   }
+
   if (key) {
     transformer.setKey(key);
   }
@@ -73,7 +74,6 @@ var makeTransformer_ = (
   }
   return transformer;
 }
-
 interface MirrorSet {
   // If true, these mirrors represent a remote endpoint that has been
   // explicitly signaled to us.
