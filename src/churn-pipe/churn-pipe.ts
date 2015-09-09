@@ -2,19 +2,9 @@
 /// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 
-// TODO(ldixon): reorganize the utransformers and rename uproxy-obfuscators.
-// Ideal:
-//  import Transformer = require('uproxy-obfuscators/transformer');
-//  import Rabbit = require('uproxy-obfuscators/rabbit.transformer');
-//  import Fte = require('uproxy-obfuscators/fte.transformer');
-// Current:
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
-// import Rabbit = require('utransformers/src/transformers/uTransformers.fte');
-// import Fte = require('utransformers/src/transformers/uTransformers.rabbit');
-
 import PassThrough = require('../simple-transformers/passthrough');
 import CaesarCipher = require('../simple-transformers/caesar');
+import shaper = require('../fancy-transformers/encryptionShaper');
 
 import logging = require('../logging/logging');
 import net = require('../net/net.types');
@@ -43,6 +33,13 @@ var retry_ = <T>(func:() => Promise<T>, delayMs?:number) : Promise<T> => {
   });
 }
 
+// Maps transformer names to class constructors.
+var transformers :{[name:string] : new() => Transformer} = {
+  'caesar': CaesarCipher,
+  'encryptionShaper': shaper.EncryptionShaper,
+  'none': PassThrough
+};
+
 var makeTransformer_ = (
     // Name of transformer to use, e.g. 'rabbit' or 'none'.
     name :string,
@@ -50,21 +47,12 @@ var makeTransformer_ = (
     key ?:ArrayBuffer,
     // JSON-encoded configuration, if any.
     config ?:string)
-  : Transformer => {
-  var transformer :Transformer;
-  // TODO(ldixon): re-enable rabbit and FTE once we can figure out why they
-  // don't load in freedom.
-  /* if (name == 'rabbit') {
-     transformer = Rabbit.Transformer();
-     } else if (name == 'fte') {
-     transformer = Fte.Transformer();
-     } else */ if (name == 'caesar') {
-       transformer = new CaesarCipher();
-     } else if (name == 'none') {
-       transformer = new PassThrough();
-     } else {
-       throw new Error('unknown transformer: ' + name);
-     }
+    : Transformer => {
+  if (!(name in transformers)) {
+    throw new Error('unknown transformer: ' + name);
+  }
+
+  var transformer: Transformer = new transformers[name]();
   if (key) {
     transformer.setKey(key);
   }
@@ -170,6 +158,7 @@ class Pipe {
       key ?:ArrayBuffer,
       config ?:string) : Promise<void> => {
     try {
+      log.info('%1: using %2 transformer', this.name_, transformerName);
       this.transformer_ = makeTransformer_(transformerName, key, config);
       return Promise.resolve<void>();
     } catch (e) {
