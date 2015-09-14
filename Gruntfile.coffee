@@ -683,6 +683,17 @@ module.exports = (grunt) ->
           outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp_slow/'
           keepRunner: true
 
+    jasmine_firefoxaddon:
+      tests: [
+        devBuildPath + '/integration-tests/tcp/tcp.core-env.spec.static.js'
+      ]
+      resources: [
+        devBuildPath + '/integration-tests/tcp/**/*.js*'
+      ]
+      helpers: [
+        'node_modules/freedom-for-firefox/freedom-for-firefox.jsm'
+      ]
+
     clean:
       build:
         [ 'build/dev', 'build/dist', '.tscache/']
@@ -698,6 +709,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
+  grunt.loadNpmTasks 'grunt-jasmine-firefoxaddon'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
 
