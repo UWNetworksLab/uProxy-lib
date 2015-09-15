@@ -234,6 +234,7 @@ taskManager.add 'socksEchoIntegrationTest', [
 taskManager.add 'integration_test', [
   'tcpIntegrationTest'
   'socksEchoIntegrationTest'
+  'jasmine_firefoxaddon'  # Currently only TCP test
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
