@@ -6,8 +6,7 @@ import random = require('../crypto/random');
 
 var log :logging.Log = new logging.Log('fancy-transformers');
 
-// Configuration where the sequences have been encoded as strings.
-// This is the interface that configure() expects as an argument.
+// Accepted in serialised form by configure().
 export interface SequenceConfig {
   // Sequences that should be added to the outgoing packet stream.
   addSequences:SerializedSequenceModel[];
@@ -48,6 +47,23 @@ export interface SequenceModel {
   length:number
 }
 
+// Creates a sample (non-random) config, suitable for testing.
+export var sampleConfig = () : SequenceConfig => {
+  var buffer = arraybuffers.stringToArrayBuffer("OH HELLO");
+  var hex = arraybuffers.arrayBufferToHexString(buffer);
+  var sequence = {
+    index: 0,
+    offset: 0,
+    sequence: hex,
+    length: 256
+  };
+
+  return {
+    addSequences: [sequence],
+    removeSequences: [sequence]
+  };
+}
+
 // An obfuscator that injects byte sequences.
 export class ByteSequenceShaper implements Transformer {
   // Sequences that should be added to the outgoing packet stream.
@@ -68,8 +84,9 @@ export class ByteSequenceShaper implements Transformer {
   // equal, a byte sequence packet is injected into the output.
   private outputIndex_ :number = 0;
 
-  // This constructor is necessary for typechecking in churn-pipe.
-  public constructor() {}
+  public constructor() {
+    this.configure(JSON.stringify(sampleConfig()));
+  }
 
   // This method is required to implement the Transformer API.
   // @param {ArrayBuffer} key Key to set, not used by this class.
