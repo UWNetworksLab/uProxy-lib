@@ -54,6 +54,11 @@ taskManager.add 'simpleChatChromeApp', [
   'copy:libsForSimpleChatChromeApp'
 ]
 
+taskManager.add 'simpleChatFirefoxApp', [
+  'simpleChatBase'
+  'copy:libsForSimpleChatFirefoxApp'
+]
+
 taskManager.add 'simpleChatWebApp', [
   'simpleChatBase'
   'copy:libsForSimpleChatWebApp'
@@ -61,6 +66,7 @@ taskManager.add 'simpleChatWebApp', [
 
 taskManager.add 'simpleChat', [
   'simpleChatChromeApp'
+  'simpleChatFirefoxApp'
   'simpleChatWebApp'
 ]
 
@@ -407,6 +413,14 @@ module.exports = (grunt) ->
             'freedom-port-control'
           ]
           localDestPath: 'samples/simple-chat-chromeapp/'
+      libsForSimpleChatFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['simple-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/simple-chat-firefoxapp/data'
       # Simple chat.
       # While neither churn-pipe nor freedom-port-control can be used in a
       # regular web page environment, they are included so that obfuscation
