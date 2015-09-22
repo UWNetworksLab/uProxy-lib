@@ -19,7 +19,6 @@ taskManager.add 'base', [
 # Makes all sample apps.
 taskManager.add 'samples', [
   'base'
-  'simpleFreedomChat'
   'copypasteFreedomChat'
   'echoServerChromeApp'
   'echoServerFirefoxApp'
@@ -114,6 +113,13 @@ taskManager.add 'simpleTurn', [
   'browserify:turnFrontendFreedomModule'
   'copy:libsForSimpleTurnChromeApp'
   'copy:libsForSimpleTurnFirefoxApp'
+]
+
+taskManager.add 'copypasteChurnChatChromeApp', [
+  'base'
+  'browserify:copypasteChurnChatFreedomModule'
+  'browserify:copypasteChurnChatChromeApp'
+  'copy:libsForCopyPasteChurnChatChromeApp'
 ]
 
 taskManager.add 'adventureBase', [
@@ -323,12 +329,6 @@ module.exports = (grunt) ->
 
       # Copy the freedom output file to sample apps
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
-      libsForSimpleFreedomChat:
-        Rule.copyLibs
-          npmLibNames: ['freedom']
-          pathsFromDevBuild: ['loggingprovider']
-          localDestPath: 'samples/simple-freedom-chat/'
-
       libsForCopypasteFreedomChat:
         Rule.copyLibs
           npmLibNames: ['freedom']
@@ -405,6 +405,7 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['simple-turn', 'turn-frontend', 'turn-backend', 'loggingprovider']
           localDestPath: 'samples/simple-turn-firefoxapp/data'
 
+      # Simple chat.
       libsForSimpleChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -421,7 +422,6 @@ module.exports = (grunt) ->
             'freedom-port-control'
           ]
           localDestPath: 'samples/simple-chat-firefoxapp/data'
-      # Simple chat.
       # While neither churn-pipe nor freedom-port-control can be used in a
       # regular web page environment, they are included so that obfuscation
       # may be easily enabled in the Chrome and Firefox samples.
