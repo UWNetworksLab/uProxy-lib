@@ -154,6 +154,7 @@ taskManager.add 'browserifySpecs', [
   'browserify:aesSpec'
   'browserify:arraybuffersSpec'
   'browserify:bridgeSpec'
+  'browserify:onetimeSpec'
   'browserify:candidateSpec'
   'browserify:churnSpec'
   'browserify:handlerSpec'
@@ -231,6 +232,7 @@ taskManager.add 'socksEchoIntegrationTest', [
 taskManager.add 'integration_test', [
   'tcpIntegrationTest'
   'socksEchoIntegrationTest'
+  'jasmine_firefoxaddon'  # Currently only TCP test
 ]
 
 # Run unit tests to produce coverage; these are separate from unit_tests because
@@ -557,6 +559,8 @@ module.exports = (grunt) ->
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
       bridgeSpec: Rule.browserifySpec 'bridge/bridge'
       bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
+      onetimeSpec: Rule.browserifySpec 'bridge/onetime'
+      onetimeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/onetime')
       buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
       buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
       candidateSpec: Rule.browserifySpec 'churn/candidate'
@@ -676,6 +680,17 @@ module.exports = (grunt) ->
           outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp_slow/'
           keepRunner: true
 
+    jasmine_firefoxaddon:
+      tests: [
+        devBuildPath + '/integration-tests/tcp/tcp.core-env.spec.static.js'
+      ]
+      resources: [
+        devBuildPath + '/integration-tests/tcp/**/*.js*'
+      ]
+      helpers: [
+        'node_modules/freedom-for-firefox/freedom-for-firefox.jsm'
+      ]
+
     clean:
       build:
         [ 'build/dev', 'build/dist', '.tscache/']
@@ -691,6 +706,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-symlink'
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
+  grunt.loadNpmTasks 'grunt-jasmine-firefoxaddon'
   grunt.loadNpmTasks 'grunt-ts'
   grunt.loadNpmTasks 'grunt-vulcanize'
 
