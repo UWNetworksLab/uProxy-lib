@@ -117,15 +117,10 @@ As copypaste-fredom-chat, except WebRTC traffic between the two peers is obfusca
 
 ### Simple TURN
 
-Simplest possible use of the TURN server (`turn-frontend` and `turn-backend`
-directories).
+Simplest possible demo of the TURN server.
 
-*Note: this currently does not work on Firefox, due to these issues:*
-
- * https://github.com/freedomjs/freedom-for-firefox/issues/67
- * https://github.com/freedomjs/freedom-for-firefox/issues/62
-
-`turn-frontend` is the module with which TURN clients directly interact:
+The TURN "frontend" interacts directly with TURN clients, the "backend" manages
+relay sockets:
 
 ```
                                                     +-------------+
@@ -137,10 +132,10 @@ TURN client +-----> | oo          | <-------------> |          ++ +------->
                     | oo          |      webrtc     |          ++ |
                     |             |                 |             |
                     +---+---------+                 |          ++ +------->
-                    turn-frontend                   |          ++ |
+                    TURN frontend                   |          ++ |
                                                     |             |
                                                     +---+---------+
-                                                    turn-backend
+                                                    TURN backend
 
                       oo                              ++
                       oo server socket                ++ relay socket
