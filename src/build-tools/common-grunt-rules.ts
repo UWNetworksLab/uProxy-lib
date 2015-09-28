@@ -3,6 +3,7 @@
 /// <reference path='../../../third_party/typings/node/node.d.ts' />
 
 import path = require('path');
+import fs = require('fs');
 
 export interface RuleConfig {
   // The path where code in this repository should be built in.
@@ -213,6 +214,92 @@ export class Rule {
     });
 
     return { files: allFilesForlibPaths.concat(copyInfo.files) };
+  }
+
+  /*
+   * Returns a list of tasks that should be run in order to build each spec.ts
+   * file under a given directory.
+   *
+   * rootDir is the directory under which the layout will match what this file
+   * expects for paths being passed in (i.e. under devBuildPath).
+   *
+   * getTests('src', gruntConfig);
+   *   This adds tests for all the directories under src/ and browserifies all
+   *   spec files within those directories.
+   * getTests('src', gruntConfig, 'generic_ui/scripts');
+   *   This adds tests for all the directories under src/generic_ui/scripts and
+   *   browserifies spec files within those directories.  All paths will be
+   *   relative to src/.
+   * getTests('src', gruntConfig, undefined, ['integration-tests']);
+   *   This adds tests for all the directories under src/ and browserifies all
+   *   spec files within those directories.  Any directories named
+   *   "integration-tests" will not be examined.
+   */
+  public getTests = (rootDir :string, gruntConfig :{[c :string] :{[t :string] :Object}},
+                     current?:string, ignore?:string[], coverage?:boolean) => {
+    if (typeof ignore === 'undefined') {
+      ignore = [];
+    }
+
+    if (typeof coverage === 'undefined') {
+      coverage = false;
+    }
+
+    if (typeof current === 'undefined') {
+      current = '';
+    }
+
+    var dir = path.join(rootDir, current);
+
+    var tasks :string[] = [];
+    var childTasks :string[] = [];
+
+    var files = fs.readdirSync(dir);
+    for (var f in files) {
+      var file = files[f];
+      if (ignore.indexOf(file) !== -1) {
+        continue;
+      }
+
+      var stats = fs.statSync(path.join(dir, file));
+      if (stats.isDirectory()) {
+        childTasks = childTasks.concat(
+            this.getTests(rootDir, gruntConfig, path.join(current, file), ignore, coverage));
+        continue;
+      }
+
+      var match = /(.+)\.spec\.ts/.exec(file);
+      if (!match) {
+        continue;
+      }
+
+      var loc = path.join(current, match[1]);
+      var browserifyName = loc + 'Spec';
+      var browserifyRule = this.browserifySpec(loc);
+
+      if (coverage) {
+        browserifyName += 'Cov';
+        browserifyRule = this.addCoverageToBrowserify(browserifyRule);
+      }
+
+      gruntConfig['browserify'][browserifyName] = browserifyRule;
+      tasks.push('browserify:' + browserifyName);
+    }
+
+    if (tasks.length) {
+      var testName = current;
+      var testRule = this.jasmineSpec(current);
+
+      if (coverage) {
+        testName += 'Cov';
+        testRule = this.addCoverageToSpec(testRule);
+      }
+
+      gruntConfig['jasmine'][testName] = testRule;
+      tasks.push('jasmine:' + testName);
+    }
+
+    return childTasks.concat(tasks);
   }
 
 }  // class Rule
