@@ -203,6 +203,12 @@ taskManager.add 'unit_test', [
   'jasmine:queue'
 ]
 
+taskManager.add 'custom-test', [
+  'base'
+  'browserify:arithmeticSpec'
+  'jasmine:fancyTransformers'
+]
+
 taskManager.add 'tcpIntegrationTestModule', [
   'base'
   'copy:libsForIntegrationTcp'
@@ -517,6 +523,7 @@ module.exports = (grunt) ->
       rtcToNet: Rule.jasmineSpec 'rtc-to-net'
       rtcToNetCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'rtc-to-net')
       simpleTransformers: Rule.jasmineSpec 'simple-transformers'
+      fancyTransformers: Rule.jasmineSpec 'fancy-transformers'
       simpleTransformersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'simple-transformers')
       turnFrontEndMessagesSpec: Rule.browserifySpec 'turn-frontend/messages'
       turnFrontEndSpec: Rule.browserifySpec 'turn-frontend/turn-frontend'
@@ -554,6 +561,7 @@ module.exports = (grunt) ->
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       # Browserify specs
+      arithmeticSpec: Rule.browserifySpec 'fancy-transformers/arithmetic'
       aesSpec: Rule.browserifySpec 'crypto/aes'
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
       arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')

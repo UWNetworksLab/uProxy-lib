@@ -1,6 +1,9 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
 /// <reference path='../../../third_party/typings/jasmine/jasmine.d.ts' />
 
+import freedomMocker = require('../freedom/mocks/mock-freedom-in-module-env');
+freedom = freedomMocker.makeMockFreedomInModuleEnv();
+
 import arithmetic = require('./arithmetic');
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import decompression = require('../fancy-transformers/decompressionShaper');
