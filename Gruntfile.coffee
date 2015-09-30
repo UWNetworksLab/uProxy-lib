@@ -19,7 +19,6 @@ taskManager.add 'base', [
 # Makes all sample apps.
 taskManager.add 'samples', [
   'base'
-  'simpleFreedomChat'
   'copypasteFreedomChat'
   'echoServerChromeApp'
   'echoServerFirefoxApp'
@@ -27,7 +26,7 @@ taskManager.add 'samples', [
   'simpleSocksFirefoxApp'
   'copypasteSocks'
   'simpleTurn'
-  'simpleChurnChatChromeApp'
+  'simpleChat'
   'copypasteChurnChatChromeApp'
   'adventure'
   'uprobe'
@@ -42,12 +41,32 @@ taskManager.add 'dist', [
   'copy:dist'
 ]
 
-# Build the simple freedom chat sample app.
-taskManager.add 'simpleFreedomChat', [
+# Simple chat app.
+taskManager.add 'simpleChatBase', [
   'base'
-  'copy:libsForSimpleFreedomChat'
-  'browserify:simpleFreedomChatMain'
-  'browserify:simpleFreedomChatFreedomModule'
+  'browserify:simpleChatFreedomModule'
+  'browserify:simpleChatMain'
+]
+
+taskManager.add 'simpleChatChromeApp', [
+  'simpleChatBase'
+  'copy:libsForSimpleChatChromeApp'
+]
+
+taskManager.add 'simpleChatFirefoxApp', [
+  'simpleChatBase'
+  'copy:libsForSimpleChatFirefoxApp'
+]
+
+taskManager.add 'simpleChatWebApp', [
+  'simpleChatBase'
+  'copy:libsForSimpleChatWebApp'
+]
+
+taskManager.add 'simpleChat', [
+  'simpleChatChromeApp'
+  'simpleChatFirefoxApp'
+  'simpleChatWebApp'
 ]
 
 # Build the copy/paste freedom chat sample app.
@@ -92,13 +111,6 @@ taskManager.add 'simpleTurn', [
   'browserify:simpleTurnFreedomModule'
   'copy:libsForSimpleTurnChromeApp'
   'copy:libsForSimpleTurnFirefoxApp'
-]
-
-taskManager.add 'simpleChurnChatChromeApp', [
-  'base'
-  'browserify:simpleChurnChatFreedomModule'
-  'browserify:simpleChurnChatChromeApp'
-  'copy:libsForSimpleChurnChatChromeApp'
 ]
 
 taskManager.add 'copypasteChurnChatChromeApp', [
@@ -315,12 +327,6 @@ module.exports = (grunt) ->
 
       # Copy the freedom output file to sample apps
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
-      libsForSimpleFreedomChat:
-        Rule.copyLibs
-          npmLibNames: ['freedom']
-          pathsFromDevBuild: ['loggingprovider']
-          localDestPath: 'samples/simple-freedom-chat/'
-
       libsForCopypasteFreedomChat:
         Rule.copyLibs
           npmLibNames: ['freedom']
@@ -397,14 +403,35 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['simple-turn', 'loggingprovider']
           localDestPath: 'samples/simple-turn-firefoxapp/data'
 
-      libsForSimpleChurnChatChromeApp:
+      # Simple chat.
+      libsForSimpleChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['simple-chat', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
             'freedom-port-control'
           ]
-          localDestPath: 'samples/simple-churn-chat-chromeapp/'
+          localDestPath: 'samples/simple-chat-chromeapp/'
+      libsForSimpleChatFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['simple-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/simple-chat-firefoxapp/data'
+      # While neither churn-pipe nor freedom-port-control can be used in a
+      # regular web page environment, they are included so that obfuscation
+      # may be easily enabled in the Chrome and Firefox samples.
+      libsForSimpleChatWebApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['simple-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/simple-chat-webapp/'
+
       libsForCopyPasteChurnChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -549,7 +576,7 @@ module.exports = (grunt) ->
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
-      simpleChurnChatFreedomModule: Rule.browserify 'samples/simple-churn-chat-chromeapp/freedom-module'
+      simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
       copypasteChurnChatFreedomModule: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/freedom-module'
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
@@ -598,10 +625,8 @@ module.exports = (grunt) ->
       # Browserify sample apps main freedom module and core environments
       copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
       copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
-      simpleFreedomChatFreedomModule: Rule.browserify 'samples/simple-freedom-chat/freedom-module'
-      simpleFreedomChatMain: Rule.browserify 'samples/simple-freedom-chat/main.core-env'
+      simpleChatMain: Rule.browserify 'simple-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
-      simpleChurnChatChromeApp: Rule.browserify 'samples/simple-churn-chat-chromeapp/main.core-env'
       copypasteChurnChatChromeApp: Rule.browserify 'samples/copypaste-churn-chat-chromeapp/main.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
