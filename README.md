@@ -33,8 +33,7 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 ## Demo apps
 
 After building, the apps can be found at `build/dev/uproxy-lib/samples/`. They
-are a mix of web apps and browser extensions (Chrome and Firefox, although
-[not every demo is currently packaged for Firefox](https://github.com/uProxy/uproxy/issues/419)).
+are a mix of web apps and browser extensions (Chrome and Firefox).
 
 To run web apps:
  * start a webserver, e.g. `python -m SimpleHTTPServer`
