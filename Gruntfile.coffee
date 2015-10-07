@@ -19,7 +19,6 @@ taskManager.add 'base', [
 # Makes all sample apps.
 taskManager.add 'samples', [
   'base'
-  'copypasteFreedomChat'
   'echoServerChromeApp'
   'echoServerFirefoxApp'
   'simpleSocksChromeApp'
@@ -81,16 +80,14 @@ taskManager.add 'copypasteChatChromeApp', [
   'copy:libsForCopypasteChatChromeApp'
 ]
 
-taskManager.add 'copypasteChat', [
-  'copypasteChatChromeApp'
+taskManager.add 'copypasteChatWebApp', [
+  'copypasteChatBase'
+  'copy:libsForCopypasteChatWebApp'
 ]
 
-# Build the copy/paste freedom chat sample app.
-taskManager.add 'copypasteFreedomChat', [
-  'base'
-  'copy:libsForCopypasteFreedomChat'
-  'browserify:copypasteFreedomChatMain'
-  'browserify:copypasteFreedomChatFreedomModule'
+taskManager.add 'copypasteChat', [
+  'copypasteChatChromeApp'
+  'copypasteChatWebApp'
 ]
 
 taskManager.add 'echoServerChromeApp', [
@@ -336,12 +333,6 @@ module.exports = (grunt) ->
 
       # Copy the freedom output file to sample apps
       # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
-      libsForCopypasteFreedomChat:
-        Rule.copyLibs
-          npmLibNames: ['freedom']
-          pathsFromDevBuild: ['loggingprovider']
-          localDestPath: 'samples/copypaste-freedom-chat/'
-
       libsForEchoServerChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -450,6 +441,14 @@ module.exports = (grunt) ->
             'freedom-port-control'
           ]
           localDestPath: 'samples/copypaste-chat-chromeapp/'
+      libsForCopypasteChatWebApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/copypaste-chat-webapp/'
 
       libsForAdventureChromeApp:
         Rule.copyLibs
@@ -632,8 +631,6 @@ module.exports = (grunt) ->
       queueSpec: Rule.browserifySpec 'queue/queue'
       queueCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'queue/queue')
       # Browserify sample apps main freedom module and core environments
-      copypasteFreedomChatFreedomModule: Rule.browserify 'samples/copypaste-freedom-chat/freedom-module'
-      copypasteFreedomChatMain: Rule.browserify 'samples/copypaste-freedom-chat/main.core-env'
       simpleChatMain: Rule.browserify 'simple-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
       copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
