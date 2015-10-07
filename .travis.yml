@@ -6,4 +6,6 @@ before_install:
  - npm install -g bower
 install:
  - ./setup.sh install
+script:
+  - grunt unit_test
 sudo: false
