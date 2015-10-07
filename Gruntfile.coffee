@@ -80,6 +80,11 @@ taskManager.add 'copypasteChatChromeApp', [
   'copy:libsForCopypasteChatChromeApp'
 ]
 
+taskManager.add 'copypasteChatFirefoxApp', [
+  'copypasteChatBase'
+  'copy:libsForCopypasteChatFirefoxApp'
+]
+
 taskManager.add 'copypasteChatWebApp', [
   'copypasteChatBase'
   'copy:libsForCopypasteChatWebApp'
@@ -87,6 +92,7 @@ taskManager.add 'copypasteChatWebApp', [
 
 taskManager.add 'copypasteChat', [
   'copypasteChatChromeApp'
+  'copypasteChatFirefoxApp'
   'copypasteChatWebApp'
 ]
 
@@ -441,6 +447,14 @@ module.exports = (grunt) ->
             'freedom-port-control'
           ]
           localDestPath: 'samples/copypaste-chat-chromeapp/'
+      libsForCopypasteChatFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/copypaste-chat-firefoxapp/data'
       libsForCopypasteChatWebApp:
         Rule.copyLibs
           npmLibNames: ['freedom']
