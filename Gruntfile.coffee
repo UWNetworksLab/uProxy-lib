@@ -5,29 +5,23 @@ TaskManager = require './build/tools/taskmanager'
 # of specific grunt rules below and given to grunt.initConfig
 taskManager = new TaskManager.Manager();
 
-# Makes the base development build, excludes sample apps.
+# Builds everything except sample apps.
 taskManager.add 'base', [
   'copy:src'
   'ts:srcInModuleEnv'
   'ts:srcInCoreEnv'
   'browserify:loggingProvider'
-  'browserify:echoFreedomModule'
-  'browserify:simpleSocksFreedomModule'
   'browserify:churnPipeFreedomModule'
 ]
 
-# Makes all sample apps.
 taskManager.add 'samples', [
-  'base'
-  'echoServerChromeApp'
-  'echoServerFirefoxApp'
-  'simpleSocksChromeApp'
-  'simpleSocksFirefoxApp'
-  'copypasteSocks'
-  'simpleTurn'
-  'simpleChat'
-  'copypasteChat'
   'adventure'
+  'echoServer'
+  'copypasteChat'
+  'copypasteSocks'
+  'simpleChat'
+  'simpleSocks'
+  'simpleTurn'
   'uprobe'
 ]
 
@@ -40,80 +34,30 @@ taskManager.add 'dist', [
   'copy:dist'
 ]
 
-# Simple chat app.
-taskManager.add 'simpleChatBase', [
+###
+# Samples.
+###
+taskManager.add 'adventure', [
   'base'
-  'browserify:simpleChatFreedomModule'
-  'browserify:simpleChatMain'
+  'browserify:adventureFreedomModule'
+  'copy:libsForAdventureChromeApp'
+  'copy:libsForAdventureFirefoxApp'
 ]
 
-taskManager.add 'simpleChatChromeApp', [
-  'simpleChatBase'
-  'copy:libsForSimpleChatChromeApp'
-]
-
-taskManager.add 'simpleChatFirefoxApp', [
-  'simpleChatBase'
-  'copy:libsForSimpleChatFirefoxApp'
-]
-
-taskManager.add 'simpleChatWebApp', [
-  'simpleChatBase'
-  'copy:libsForSimpleChatWebApp'
-]
-
-taskManager.add 'simpleChat', [
-  'simpleChatChromeApp'
-  'simpleChatFirefoxApp'
-  'simpleChatWebApp'
-]
-
-# Copy/paste chat app.
-taskManager.add 'copypasteChatBase', [
+taskManager.add 'echoServer', [
   'base'
-  'browserify:copypasteChatFreedomModule'
-  'browserify:copypasteChatMain'
-]
-
-taskManager.add 'copypasteChatChromeApp', [
-  'copypasteChatBase'
-  'copy:libsForCopypasteChatChromeApp'
-]
-
-taskManager.add 'copypasteChatFirefoxApp', [
-  'copypasteChatBase'
-  'copy:libsForCopypasteChatFirefoxApp'
-]
-
-taskManager.add 'copypasteChatWebApp', [
-  'copypasteChatBase'
-  'copy:libsForCopypasteChatWebApp'
-]
-
-taskManager.add 'copypasteChat', [
-  'copypasteChatChromeApp'
-  'copypasteChatFirefoxApp'
-  'copypasteChatWebApp'
-]
-
-taskManager.add 'echoServerChromeApp', [
-  'base'
+  'browserify:echoServerFreedomModule'
   'copy:libsForEchoServerChromeApp'
-]
-
-taskManager.add 'echoServerFirefoxApp', [
-  'base'
   'copy:libsForEchoServerFirefoxApp'
 ]
 
-taskManager.add 'simpleSocksChromeApp', [
+taskManager.add 'copypasteChat', [
   'base'
-  'copy:libsForSimpleSocksChromeApp'
-]
-
-taskManager.add 'simpleSocksFirefoxApp', [
-  'base'
-  'copy:libsForSimpleSocksFirefoxApp'
+  'browserify:copypasteChatFreedomModule'
+  'browserify:copypasteChatMain'
+  'copy:libsForCopypasteChatChromeApp'
+  'copy:libsForCopypasteChatFirefoxApp'
+  'copy:libsForCopypasteChatWebApp'
 ]
 
 taskManager.add 'copypasteSocks', [
@@ -125,6 +69,22 @@ taskManager.add 'copypasteSocks', [
   'copy:libsForCopyPasteSocksFirefoxApp'
 ]
 
+taskManager.add 'simpleChat', [
+  'base'
+  'browserify:simpleChatFreedomModule'
+  'browserify:simpleChatMain'
+  'copy:libsForSimpleChatChromeApp'
+  'copy:libsForSimpleChatFirefoxApp'
+  'copy:libsForSimpleChatWebApp'
+]
+
+taskManager.add 'simpleSocks', [
+  'base'
+  'browserify:simpleSocksFreedomModule'
+  'copy:libsForSimpleSocksChromeApp'
+  'copy:libsForSimpleSocksFirefoxApp'
+]
+
 taskManager.add 'simpleTurn', [
   'base'
   'browserify:simpleTurnFreedomModule'
@@ -132,44 +92,11 @@ taskManager.add 'simpleTurn', [
   'copy:libsForSimpleTurnFirefoxApp'
 ]
 
-taskManager.add 'adventureBase', [
-  'base'
-  'browserify:adventureFreedomModule'
-]
-
-taskManager.add 'adventureChromeApp', [
-  'adventureBase'
-  'copy:libsForAdventureChromeApp'
-]
-
-taskManager.add 'adventureFirefoxApp', [
-  'adventureBase'
-  'copy:libsForAdventureFirefoxApp'
-]
-
-taskManager.add 'adventure', [
-  'adventureChromeApp'
-  'adventureFirefoxApp'
-]
-
-taskManager.add 'uprobeBase', [
+taskManager.add 'uprobe', [
   'base'
   'browserify:uprobeFreedomModule'
-]
-
-taskManager.add 'uprobeChromeApp', [
-  'uprobeBase'
   'copy:libsForUprobeChromeApp'
-]
-
-taskManager.add 'uprobeFirefoxApp', [
-  'uprobeBase'
   'copy:libsForUprobeFirefoxApp'
-]
-
-taskManager.add 'uprobe', [
-  'uprobeChromeApp'
-  'uprobeFirefoxApp'
 ]
 
 # Create unit test code
@@ -337,8 +264,28 @@ module.exports = (grunt) ->
           }
         ]
 
-      # Copy the freedom output file to sample apps
-      # Rule.copyLibs [npmModules], [localDirectories], [thirdPartyDirectories]
+      ###
+      # Samples.
+      ###
+      libsForAdventureChromeApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-chrome']
+          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators',
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/adventure-chromeapp/'
+      libsForAdventureFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox']
+          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators',
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/adventure-firefoxapp/data/'
+
       libsForEchoServerChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -350,24 +297,30 @@ module.exports = (grunt) ->
           pathsFromDevBuild: ['echo', 'loggingprovider']
           localDestPath: 'samples/echo-server-firefoxapp/data/'
 
-      libsForSimpleSocksChromeApp:
+      libsForCopypasteChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
             'freedom-port-control'
           ]
-          localDestPath: 'samples/simple-socks-chromeapp/'
-      libsForSimpleSocksFirefoxApp:
+          localDestPath: 'samples/copypaste-chat-chromeapp/'
+      libsForCopypasteChatFirefoxApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
           pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators'
             'freedom-port-control'
           ]
-          localDestPath: 'samples/simple-socks-firefoxapp/data/'
+          localDestPath: 'samples/copypaste-chat-firefoxapp/data'
+      libsForCopypasteChatWebApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom']
+          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/copypaste-chat-webapp/'
 
       libsForCopyPasteSocksChromeApp:
         Rule.copyLibs
@@ -398,18 +351,25 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/copypaste-socks-firefoxapp/data'
 
-      libsForSimpleTurnChromeApp:
+      libsForSimpleSocksChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
-          localDestPath: 'samples/simple-turn-chromeapp/'
-      libsForSimpleTurnFirefoxApp:
+          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/simple-socks-chromeapp/'
+      libsForSimpleSocksFirefoxApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
-          localDestPath: 'samples/simple-turn-firefoxapp/data'
+          pathsFromDevBuild: ['simple-socks', 'churn-pipe', 'loggingprovider']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators'
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/simple-socks-firefoxapp/data/'
 
-      # Simple chat.
       libsForSimpleChatChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -438,50 +398,16 @@ module.exports = (grunt) ->
           ]
           localDestPath: 'samples/simple-chat-webapp/'
 
-      # Copy/paste chat.
-      libsForCopypasteChatChromeApp:
+      libsForSimpleTurnChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
-          pathsFromThirdPartyBuild: [
-            'freedom-port-control'
-          ]
-          localDestPath: 'samples/copypaste-chat-chromeapp/'
-      libsForCopypasteChatFirefoxApp:
+          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
+          localDestPath: 'samples/simple-turn-chromeapp/'
+      libsForSimpleTurnFirefoxApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
-          pathsFromThirdPartyBuild: [
-            'freedom-port-control'
-          ]
-          localDestPath: 'samples/copypaste-chat-firefoxapp/data'
-      libsForCopypasteChatWebApp:
-        Rule.copyLibs
-          npmLibNames: ['freedom']
-          pathsFromDevBuild: ['copypaste-chat', 'churn-pipe', 'loggingprovider']
-          pathsFromThirdPartyBuild: [
-            'freedom-port-control'
-          ]
-          localDestPath: 'samples/copypaste-chat-webapp/'
-
-      libsForAdventureChromeApp:
-        Rule.copyLibs
-          npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
-          pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators',
-            'freedom-port-control'
-          ]
-          localDestPath: 'samples/adventure-chromeapp/'
-      libsForAdventureFirefoxApp:
-        Rule.copyLibs
-          npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
-          pathsFromThirdPartyBuild: [
-            'uproxy-obfuscators',
-            'freedom-port-control'
-          ]
-          localDestPath: 'samples/adventure-firefoxapp/data/'
+          pathsFromDevBuild: ['simple-turn', 'loggingprovider']
+          localDestPath: 'samples/simple-turn-firefoxapp/data'
 
       libsForUprobeChromeApp:
         Rule.copyLibs
@@ -595,13 +521,19 @@ module.exports = (grunt) ->
             ignore: ['ws', 'path']
             browserifyOptions: { standalone: 'browserified_exports' }
           })
-      simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
-      copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
-      simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
-      simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
-      copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
+      # Sample app freedom modules.
       adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
+      copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
+      copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
+      echoServerFreedomModule: Rule.browserify 'echo/freedom-module'
+      simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
+      simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
+      simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
+      # Sample app main environments (samples with UI).
+      copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
+      copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
+      simpleChatMain: Rule.browserify 'simple-chat/main.core-env'
       # Browserify specs
       aesSpec: Rule.browserifySpec 'crypto/aes'
       arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
@@ -644,10 +576,6 @@ module.exports = (grunt) ->
       datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
       queueSpec: Rule.browserifySpec 'queue/queue'
       queueCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'queue/queue')
-      # Browserify sample apps main freedom module and core environments
-      simpleChatMain: Rule.browserify 'simple-chat/main.core-env'
-      copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
-      copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
       # Integration tests.
       integrationTcpFreedomModule:
         Rule.browserify 'integration-tests/tcp/freedom-module'
