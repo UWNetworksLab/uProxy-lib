@@ -96,6 +96,21 @@ export class Rule {
     }
   }
 
+  public jasmineSingleSpec(file :string) :JasmineRule {
+    return {
+      src: [
+        require.resolve('arraybuffer-slice'),
+        require.resolve('es6-promise'),
+        path.join(this.config.thirdPartyBuildPath, 'promise-polyfill.js'),
+      ],
+      options: {
+        specs: [ path.join(this.config.devBuildPath, file + '.spec.static.js') ],
+        outfile: path.join(this.config.devBuildPath, file, '/SpecRunner.html'),
+        keepRunner: true
+      }
+    }
+  }
+
   // Grunt browserify target creator
   public browserify(filepath:string, options = {
         browserifyOptions: { standalone: 'browserified_exports' }
@@ -216,90 +231,73 @@ export class Rule {
     return { files: allFilesForlibPaths.concat(copyInfo.files) };
   }
 
+  public buildAndRunTest(test :string, gruntConfig :{[c :string] :{[t :string] :Object}},
+                         coverage?:boolean) :string[] {
+    var browserifyName = test + 'Spec';
+    var jasmineName = test;
+    var browserifyRule = this.browserifySpec(test);
+    var jasmineRule = this.jasmineSingleSpec(test);
+
+    if (coverage) {
+      browserifyName += 'Cov';
+      jasmineName += 'Cov';
+      browserifyRule = this.addCoverageToBrowserify(browserifyRule);
+      jasmineRule = this.addCoverageToSpec(jasmineRule);
+    }
+
+    gruntConfig['browserify'][browserifyName] = browserifyRule;
+    gruntConfig['jasmine'][jasmineName] = jasmineRule;
+
+    return [
+      'browserify:' + browserifyName,
+      'jasmine:' + jasmineName,
+    ];
+  }
+
   /*
-   * Returns a list of tasks that should be run in order to build each spec.ts
-   * file under a given directory.
+   * Returns a list of tests that exist within the directory structure of a
+   * project.
    *
    * rootDir is the directory under which the layout will match what this file
-   * expects for paths being passed in (i.e. under devBuildPath).
+   * expects for paths being passed in (i.e. under devBuildPath)
    *
-   * getTests('src', gruntConfig);
-   *   This adds tests for all the directories under src/ and browserifies all
-   *   spec files within those directories.
-   * getTests('src', gruntConfig, 'generic_ui/scripts');
-   *   This adds tests for all the directories under src/generic_ui/scripts and
-   *   browserifies spec files within those directories.  All paths will be
-   *   relative to src/.
-   * getTests('src', gruntConfig, undefined, ['integration-tests']);
-   *   This adds tests for all the directories under src/ and browserifies all
-   *   spec files within those directories.  Any directories named
-   *   "integration-tests" will not be examined.
+   * getTests('src');
+   *   Lists all tests under the src/ directory
+   * getTests('src', 'generic_ui/scripts');
+   *   Lists all tests under the generic_ui/scripts directory, all paths
+   *   relative to src/
+   * getTests('src', undefined, ['integration-tests']);
+   *   Lists all the tests under src/ ignoring anything named integration-tests
    */
-  public getTests = (rootDir :string, gruntConfig :{[c :string] :{[t :string] :Object}},
-                     current?:string, ignore?:string[], coverage?:boolean) => {
-    if (typeof ignore === 'undefined') {
-      ignore = [];
-    }
-
-    if (typeof coverage === 'undefined') {
-      coverage = false;
-    }
-
+  public getTests(rootDir :string, current?:string, ignore?:string[]) {
+    var tests :string[] = [];
     if (typeof current === 'undefined') {
       current = '';
     }
 
-    var dir = path.join(rootDir, current);
+    if (typeof ignore === 'undefined') {
+      ignore = [];
+    }
 
-    var tasks :string[] = [];
-    var childTasks :string[] = [];
-
-    var files = fs.readdirSync(dir);
+    var files = fs.readdirSync(path.join(rootDir, current));
     for (var f in files) {
-      var file = files[f];
-      if (ignore.indexOf(file) !== -1) {
+      if (ignore.indexOf(files[f]) !== -1) {
         continue;
       }
 
-      var stats = fs.statSync(path.join(dir, file));
+      var file = path.join(current, files[f]);
+
+      var stats = fs.statSync(path.join(rootDir, file));
       if (stats.isDirectory()) {
-        childTasks = childTasks.concat(
-            this.getTests(rootDir, gruntConfig, path.join(current, file), ignore, coverage));
-        continue;
+        tests = tests.concat(this.getTests(rootDir, file, ignore));
+      } else {
+        var match = /(.+)\.spec\.ts/.exec(file);
+        if (match) {
+          tests.push(match[1]);
+        }
       }
-
-      var match = /(.+)\.spec\.ts/.exec(file);
-      if (!match) {
-        continue;
-      }
-
-      var loc = path.join(current, match[1]);
-      var browserifyName = loc + 'Spec';
-      var browserifyRule = this.browserifySpec(loc);
-
-      if (coverage) {
-        browserifyName += 'Cov';
-        browserifyRule = this.addCoverageToBrowserify(browserifyRule);
-      }
-
-      gruntConfig['browserify'][browserifyName] = browserifyRule;
-      tasks.push('browserify:' + browserifyName);
     }
 
-    if (tasks.length) {
-      var testName = current;
-      var testRule = this.jasmineSpec(current);
-
-      if (coverage) {
-        testName += 'Cov';
-        testRule = this.addCoverageToSpec(testRule);
-      }
-
-      gruntConfig['jasmine'][testName] = testRule;
-      tasks.push('jasmine:' + testName);
-    }
-
-    return childTasks.concat(tasks);
+    return tests;
   }
-
 }  // class Rule

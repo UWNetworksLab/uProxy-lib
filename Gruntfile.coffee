@@ -1,4 +1,5 @@
 fs = require('fs')
+_ = require('lodash')
 path = require 'path'
 rules = require './build/tools/common-grunt-rules'
 TaskManager = require './build/tools/taskmanager'
@@ -508,10 +509,19 @@ taskManager.add 'uprobe', [
   'uprobeFirefoxApp'
 ]
 
+# get the list of specs, used for unit and coverage tests
+specList = Rule.getTests('src', undefined, ['integration-tests'])
+
 # Run unit tests
 taskManager.add 'unit_test', [
   'base'
-].concat Rule.getTests('src', gruntConfig, undefined, ['integration-tests'])
+].concat _.flatten(Rule.buildAndRunTest(spec, gruntConfig) for spec in specList)
+
+# Run unit tests to produce coverage; these are separate from unit_tests because
+# they make tests hard to debug and fix.
+taskManager.add 'coverage', [
+  'base'
+].concat _.flatten(Rule.buildAndRunTest(spec, gruntConfig, true) for spec in specList)
 
 taskManager.add 'tcpIntegrationTestModule', [
   'base'
@@ -544,12 +554,6 @@ taskManager.add 'integration_test', [
   'socksEchoIntegrationTest'
   'jasmine_firefoxaddon'  # Currently only TCP test
 ]
-
-# Run unit tests to produce coverage; these are separate from unit_tests because
-# they make tests hard to debug and fix.
-taskManager.add 'coverage', [
-  'base'
-].concat Rule.getTests('src', gruntConfig, undefined, ['integration-tests'], true)
 
 taskManager.add 'test', ['unit_test', 'integration_test']
 
