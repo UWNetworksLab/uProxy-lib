@@ -55,8 +55,8 @@
     "jasmine-core": "^2.3.4",
     "request": "^2.53.0",
     "socks5-http-client": "^0.1.6",
-    "tsd": "^0.6.3",
-    "typescript": "~1.5.3",
+    "tsd": "^0.6.5",
+    "typescript": "^1.6.2",
     "yargs": "^3.0.4"
   },
   "scripts": {
