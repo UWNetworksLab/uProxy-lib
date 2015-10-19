@@ -85,7 +85,7 @@ to set Chrome's proxy settings and then just browse stuff.
 
 To see debugging output, open the background page.
 
-### Adventure
+### Zork
 
 Distributed SOCKS proxy with a telnet-based signalling channel.
 
