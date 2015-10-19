@@ -15,7 +15,6 @@ taskManager.add 'base', [
 ]
 
 taskManager.add 'samples', [
-  'adventure'
   'echoServer'
   'copypasteChat'
   'copypasteSocks'
@@ -23,6 +22,7 @@ taskManager.add 'samples', [
   'simpleSocks'
   'simpleTurn'
   'uprobe'
+  'zork'
 ]
 
 # Makes the distribution build.
@@ -37,13 +37,6 @@ taskManager.add 'dist', [
 ###
 # Samples.
 ###
-taskManager.add 'adventure', [
-  'base'
-  'browserify:adventureFreedomModule'
-  'copy:libsForAdventureChromeApp'
-  'copy:libsForAdventureFirefoxApp'
-]
-
 taskManager.add 'echoServer', [
   'base'
   'browserify:echoServerFreedomModule'
@@ -97,6 +90,13 @@ taskManager.add 'uprobe', [
   'browserify:uprobeFreedomModule'
   'copy:libsForUprobeChromeApp'
   'copy:libsForUprobeFirefoxApp'
+]
+
+taskManager.add 'zork', [
+  'base'
+  'browserify:zorkFreedomModule'
+  'copy:libsForZorkChromeApp'
+  'copy:libsForZorkFirefoxApp'
 ]
 
 # Create unit test code
@@ -267,24 +267,24 @@ module.exports = (grunt) ->
       ###
       # Samples.
       ###
-      libsForAdventureChromeApp:
+      libsForZorkChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
-          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider', 'zork']
           pathsFromThirdPartyBuild: [
             'uproxy-obfuscators',
             'freedom-port-control'
           ]
-          localDestPath: 'samples/adventure-chromeapp/'
-      libsForAdventureFirefoxApp:
+          localDestPath: 'samples/zork-chromeapp/'
+      libsForZorkFirefoxApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-firefox']
-          pathsFromDevBuild: ['adventure', 'churn-pipe', 'loggingprovider']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider', 'zork']
           pathsFromThirdPartyBuild: [
             'uproxy-obfuscators',
             'freedom-port-control'
           ]
-          localDestPath: 'samples/adventure-firefoxapp/data/'
+          localDestPath: 'samples/zork-firefoxapp/data/'
 
       libsForEchoServerChromeApp:
         Rule.copyLibs
@@ -522,7 +522,6 @@ module.exports = (grunt) ->
             browserifyOptions: { standalone: 'browserified_exports' }
           })
       # Sample app freedom modules.
-      adventureFreedomModule: Rule.browserify 'adventure/freedom-module'
       copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
       copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
       echoServerFreedomModule: Rule.browserify 'echo/freedom-module'
@@ -530,6 +529,7 @@ module.exports = (grunt) ->
       simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
+      zorkFreedomModule: Rule.browserify 'zork/freedom-module'
       # Sample app main environments (samples with UI).
       copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
