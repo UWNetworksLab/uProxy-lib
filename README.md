@@ -184,4 +184,3 @@ We call this system "churn", and its code can be found in `src/churn/`.
    * `npm install -g wup`
  * Run wup: `(cd data ; wup) &`
  * Then, run the benchmark with `npm run benchmark`.
- 
