@@ -97,6 +97,7 @@ taskManager.add 'zork', [
   'browserify:zorkFreedomModule'
   'copy:libsForZorkChromeApp'
   'copy:libsForZorkFirefoxApp'
+  'copy:libsForZorkNode'
 ]
 
 # Create unit test code
@@ -285,6 +286,15 @@ module.exports = (grunt) ->
             'freedom-port-control'
           ]
           localDestPath: 'samples/zork-firefoxapp/data/'
+      libsForZorkNode:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-node']
+          pathsFromDevBuild: ['churn-pipe', 'loggingprovider', 'zork']
+          pathsFromThirdPartyBuild: [
+            'uproxy-obfuscators',
+            'freedom-port-control'
+          ]
+          localDestPath: 'samples/zork-node/'
 
       libsForEchoServerChromeApp:
         Rule.copyLibs

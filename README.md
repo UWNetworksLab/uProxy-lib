@@ -47,6 +47,11 @@ To run Firefox add-ons:
 
 - install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
 
+To run Node.js apps:
+
+ - Directly run `node` with the entry point, e.g. `node build/dev/uproxy-lib/samples/zork-node/index.js`
+ - Note: Until freedom-for-node supports core.rtcpeerconnection, this sample will not work
+
 ### simple-freedom-chat
 
 WebRTC-powered chat client, with both peers on the same page.
@@ -179,4 +184,3 @@ We call this system "churn", and its code can be found in `src/churn/`.
    * `npm install -g wup`
  * Run wup: `(cd data ; wup) &`
  * Then, run the benchmark with `npm run benchmark`.
- 
