@@ -31,6 +31,9 @@
     },
     "freedom/freedom-module-env.d.ts": {
       "commit": "af76bf46025371c760d8fe8c03cf874428da6124"
+    },
+    "ssh2/ssh2.d.ts": {
+      "commit": "14ab703f435375194360cdba3abab61afc879c18"
     }
   }
 }
