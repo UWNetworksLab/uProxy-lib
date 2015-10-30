@@ -29,6 +29,9 @@ taskManager.add 'samples', [
 # Makes the distribution build.
 taskManager.add 'dist', [
   'base'
+  'samples'
+  'test'
+  'coverage'
   'copy:dist'
 ]
 
