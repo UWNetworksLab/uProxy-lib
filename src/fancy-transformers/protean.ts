@@ -12,10 +12,10 @@ const log :logging.Log = new logging.Log('protean');
 
 // Accepted in serialised form by configure().
 export interface ProteanConfig {
-  decompression :decompression.DecompressionConfig;
-  encryption :encryption.EncryptionConfig;
-  fragmentation :fragmentation.FragmentationConfig;
-  injection :sequence.SequenceConfig
+  decompression ?:decompression.DecompressionConfig;
+  encryption ?:encryption.EncryptionConfig;
+  fragmentation ?:fragmentation.FragmentationConfig;
+  injection ?:sequence.SequenceConfig
 }
 
 // Creates a sample (non-random) config, suitable for testing.
@@ -66,29 +66,22 @@ export class Protean implements Transformer {
   public configure = (json :string) :void => {
     let config = JSON.parse(json);
 
-    // Required parameters:
-    // - decompression
-    // - encryption
-    // - fragmentation
-    // - injection
-    if ('decompression' in config &&
-        'encryption' in config &&
-        'fragmentation' in config &&
-        'injection' in config) {
+    let proteanConfig = <ProteanConfig>config;
+    if ('decompression' in config) {
       this.decompresser_ = new decompression.DecompressionShaper();
-      this.encrypter_ = new encryption.EncryptionShaper();
-      this.injecter_ = new sequence.ByteSequenceShaper();
-      this.fragmenter_ = new fragmentation.FragmentationShaper();
-
-      let proteanConfig = <ProteanConfig>config;
       this.decompresser_.configure(JSON.stringify(proteanConfig.decompression));
+    }
+    if ('encryption' in config) {
+      this.encrypter_ = new encryption.EncryptionShaper();
       this.encrypter_.configure(JSON.stringify(proteanConfig.encryption));
-      this.injecter_.configure(JSON.stringify(proteanConfig.injection));
+    }
+    if ('fragmentation' in config) {
+      this.fragmenter_ = new fragmentation.FragmentationShaper();
       this.fragmenter_.configure(JSON.stringify(proteanConfig.fragmentation));
-    } else {
-      throw new Error(
-        "Protean requires fragmentation, encryption, and injection parameters."
-      );
+    }
+    if ('injection' in config) {
+      this.injecter_ = new sequence.ByteSequenceShaper();
+      this.injecter_.configure(JSON.stringify(proteanConfig.injection));
     }
   }
 
@@ -99,11 +92,19 @@ export class Protean implements Transformer {
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
-    let fragmented = flatMap(source, this.fragmenter_.transform);
-    let encrypted = flatMap(fragmented, this.encrypter_.transform);
-    let decompressed = flatMap(encrypted, this.decompresser_.transform);
-    let injected = flatMap(decompressed, this.injecter_.transform);
-    return injected;
+    if (this.fragmenter_) {
+      source = flatMap(source, this.fragmenter_.transform);
+    }
+    if (this.encrypter_) {
+      source = flatMap(source, this.encrypter_.transform);
+    }
+    if (this.decompresser_) {
+      source = flatMap(source, this.decompresser_.transform);
+    }
+    if (this.injecter_) {
+      source = flatMap(source, this.injecter_.transform);
+    }
+    return source;
   }
 
   // Apply the following transformations:
@@ -113,11 +114,19 @@ export class Protean implements Transformer {
   // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
-    let extracted = flatMap(source, this.injecter_.restore);
-    let decompressed = flatMap(extracted, this.decompresser_.restore);
-    let decrypted = flatMap(decompressed, this.encrypter_.restore);
-    let defragmented = flatMap(decrypted, this.fragmenter_.restore);
-    return defragmented;
+    if (this.injecter_) {
+      source = flatMap(source, this.injecter_.restore);
+    }
+    if (this.decompresser_) {
+      source = flatMap(source, this.decompresser_.restore);
+    }
+    if (this.encrypter_) {
+      source = flatMap(source, this.encrypter_.restore);
+    }
+    if (this.fragmenter_) {
+      source = flatMap(source, this.fragmenter_.restore);
+    }
+    return source;
   }
 
   // No-op (we have no state or any resources to dispose).
