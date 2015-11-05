@@ -7,6 +7,7 @@ import encryption = require('../fancy-transformers/encryptionShaper');
 import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import logging = require('../logging/logging');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
+import header = require('../fancy-transformers/headerShaper');
 
 const log :logging.Log = new logging.Log('protean');
 
@@ -15,7 +16,8 @@ export interface ProteanConfig {
   decompression ?:decompression.DecompressionConfig;
   encryption ?:encryption.EncryptionConfig;
   fragmentation ?:fragmentation.FragmentationConfig;
-  injection ?:sequence.SequenceConfig
+  injection?: sequence.SequenceConfig;
+  headerInjection?: header.HeaderConfig;
 }
 
 // Creates a sample (non-random) config, suitable for testing.
@@ -24,7 +26,8 @@ export function sampleConfig() :ProteanConfig {
     decompression: decompression.sampleConfig(),
     encryption: encryption.sampleConfig(),
     fragmentation: fragmentation.sampleConfig(),
-    injection: sequence.sampleConfig()
+    injection: sequence.sampleConfig(),
+    headerInjection: header.sampleConfig()
   };
 }
 
@@ -52,6 +55,9 @@ export class Protean implements Transformer {
 
   // Byte sequence injecter transformer
   private injecter_ :sequence.ByteSequenceShaper;
+
+  // Byte sequence injecter transformer
+  private headerInjecter_ :header.HeaderShaper;
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
@@ -91,12 +97,19 @@ export class Protean implements Transformer {
     } else {
       this.injecter_ = undefined;
     }
+    if ('headerInjection' in config) {
+      this.headerInjecter_ = new header.HeaderShaper();
+      this.headerInjecter_.configure(JSON.stringify(proteanConfig.headerInjection));
+    } else {
+      this.headerInjecter_ = undefined;
+    }
   }
 
   // Apply the following transformations:
   // - Fragment based on MTU and chunk size
   // - Encrypt using AES
   // - Decompress using arithmetic coding
+  // - Inject headers into packets
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
@@ -112,16 +125,23 @@ export class Protean implements Transformer {
     if (this.injecter_) {
       source = flatMap(source, this.injecter_.transform);
     }
+    if (this.headerInjecter_) {
+      source = flatMap(source, this.headerInjecter_.transform);
+    }
     return source;
   }
 
   // Apply the following transformations:
   // - Discard injected packets
+  // - Discard injected headers
   // - Decrypt with AES
   // - Compress with arithmetic coding
   // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
+    if (this.headerInjecter_) {
+      source = flatMap(source, this.headerInjecter_.restore);
+    }
     if (this.injecter_) {
       source = flatMap(source, this.injecter_.restore);
     }
