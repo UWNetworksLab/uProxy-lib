@@ -70,18 +70,26 @@ export class Protean implements Transformer {
     if ('decompression' in config) {
       this.decompresser_ = new decompression.DecompressionShaper();
       this.decompresser_.configure(JSON.stringify(proteanConfig.decompression));
+    } else {
+      this.decompresser_ = undefined;
     }
     if ('encryption' in config) {
       this.encrypter_ = new encryption.EncryptionShaper();
       this.encrypter_.configure(JSON.stringify(proteanConfig.encryption));
+    } else {
+      this.encrypter_ = undefined;
     }
     if ('fragmentation' in config) {
       this.fragmenter_ = new fragmentation.FragmentationShaper();
       this.fragmenter_.configure(JSON.stringify(proteanConfig.fragmentation));
+    } else {
+      this.fragmenter_ = undefined;
     }
     if ('injection' in config) {
       this.injecter_ = new sequence.ByteSequenceShaper();
       this.injecter_.configure(JSON.stringify(proteanConfig.injection));
+    } else {
+      this.injecter_ = undefined;
     }
   }
 
