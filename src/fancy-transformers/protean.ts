@@ -7,6 +7,7 @@ import encryption = require('../fancy-transformers/encryptionShaper');
 import fragmentation = require('../fancy-transformers/fragmentationShaper');
 import logging = require('../logging/logging');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
+import header = require('../fancy-transformers/headerShaper');
 
 const log :logging.Log = new logging.Log('protean');
 
@@ -15,7 +16,8 @@ export interface ProteanConfig {
   decompression :decompression.DecompressionConfig;
   encryption :encryption.EncryptionConfig;
   fragmentation :fragmentation.FragmentationConfig;
-  injection :sequence.SequenceConfig
+  injection :sequence.SequenceConfig;
+  headerInjection :header.HeaderConfig
 }
 
 // Creates a sample (non-random) config, suitable for testing.
@@ -24,7 +26,8 @@ export function sampleConfig() :ProteanConfig {
     decompression: decompression.sampleConfig(),
     encryption: encryption.sampleConfig(),
     fragmentation: fragmentation.sampleConfig(),
-    injection: sequence.sampleConfig()
+    injection: sequence.sampleConfig(),
+    headerInjection: header.sampleConfig()
   };
 }
 
@@ -53,6 +56,9 @@ export class Protean implements Transformer {
   // Byte sequence injecter transformer
   private injecter_ :sequence.ByteSequenceShaper;
 
+  // Byte sequence injecter transformer
+  private headerInjecter_ :header.HeaderShaper;
+
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
   }
@@ -71,19 +77,23 @@ export class Protean implements Transformer {
     // - encryption
     // - fragmentation
     // - injection
+    // - headerInjection
     if ('decompression' in config &&
         'encryption' in config &&
         'fragmentation' in config &&
-        'injection' in config) {
+        'injection' in config &&
+        'headerInjection' in config) {
       this.decompresser_ = new decompression.DecompressionShaper();
       this.encrypter_ = new encryption.EncryptionShaper();
       this.injecter_ = new sequence.ByteSequenceShaper();
+      this.headerInjecter_ = new header.HeaderShaper();
       this.fragmenter_ = new fragmentation.FragmentationShaper();
 
       let proteanConfig = <ProteanConfig>config;
       this.decompresser_.configure(JSON.stringify(proteanConfig.decompression));
       this.encrypter_.configure(JSON.stringify(proteanConfig.encryption));
       this.injecter_.configure(JSON.stringify(proteanConfig.injection));
+      this.headerInjecter_.configure(JSON.stringify(proteanConfig.headerInjection));
       this.fragmenter_.configure(JSON.stringify(proteanConfig.fragmentation));
     } else {
       throw new Error(
@@ -96,25 +106,29 @@ export class Protean implements Transformer {
   // - Fragment based on MTU and chunk size
   // - Encrypt using AES
   // - Decompress using arithmetic coding
+  // - Inject headers into packets
   // - Inject packets with byte sequences
   public transform = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
     let fragmented = flatMap(source, this.fragmenter_.transform);
     let encrypted = flatMap(fragmented, this.encrypter_.transform);
     let decompressed = flatMap(encrypted, this.decompresser_.transform);
-    let injected = flatMap(decompressed, this.injecter_.transform);
+    let headerInjected = flatMap(decompressed, this.headerInjecter_.transform);
+    let injected = flatMap(headerInjected, this.injecter_.transform);
     return injected;
   }
 
   // Apply the following transformations:
   // - Discard injected packets
+  // - Discard injected headers
   // - Decrypt with AES
   // - Compress with arithmetic coding
   // - Attempt defragmentation
   public restore = (buffer :ArrayBuffer) :ArrayBuffer[] => {
     let source = [buffer];
     let extracted = flatMap(source, this.injecter_.restore);
-    let decompressed = flatMap(extracted, this.decompresser_.restore);
+    let headerExtracted = flatMap(extracted, this.headerInjecter_.restore);
+    let decompressed = flatMap(headerExtracted, this.decompresser_.restore);
     let decrypted = flatMap(decompressed, this.encrypter_.restore);
     let defragmented = flatMap(decrypted, this.fragmenter_.restore);
     return defragmented;
