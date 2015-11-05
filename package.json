@@ -34,6 +34,7 @@
     "crypto": "^0.0.3",
     "do-wrapper": "^3.0.1",
     "es6-promise": "^2.0.0",
+    "forge-min": "^0.6.20",
     "freedom": "^0.6.25",
     "freedom-for-chrome": "^0.4.19",
     "freedom-for-firefox": "^0.6.18",

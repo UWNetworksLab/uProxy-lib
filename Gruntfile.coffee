@@ -278,7 +278,7 @@ module.exports = (grunt) ->
       ###
       libsForProvisionChromeApp:
         Rule.copyLibs
-          npmLibNames: ['freedom-for-chrome']
+          npmLibNames: ['freedom-for-chrome', 'forge-min']
           pathsFromDevBuild: ['loggingprovider', 'provision']
           pathsFromThirdPartyBuild: [
           ]
