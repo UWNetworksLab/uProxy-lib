@@ -14,6 +14,7 @@ import net = require('../net/net.types');
 import PassThrough = require('../simple-transformers/passthrough');
 import protean = require('../fancy-transformers/protean');
 import sequence = require('../fancy-transformers/byteSequenceShaper');
+import header = require('../fancy-transformers/headerShaper');
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -44,7 +45,8 @@ var transformers :{[name:string] : new() => Transformer} = {
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,
   'protean': protean.Protean,
-  'sequenceShaper': sequence.ByteSequenceShaper
+  'sequenceShaper': sequence.ByteSequenceShaper,
+  'header': header.HeaderShaper
 };
 
 interface MirrorSet {
