@@ -279,7 +279,7 @@ module.exports = (grunt) ->
       libsForProvisionChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome', 'forge-min']
-          pathsFromDevBuild: ['loggingprovider', 'provision']
+          pathsFromDevBuild: ['loggingprovider', 'cloud/provision']
           pathsFromThirdPartyBuild: [
           ]
           localDestPath: 'samples/provision-chromeapp/'
@@ -566,7 +566,7 @@ module.exports = (grunt) ->
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       zorkFreedomModule: Rule.browserify 'zork/freedom-module'
-      provisionFreedomModule: Rule.browserify 'provision/freedom-module'
+      provisionFreedomModule: Rule.browserify 'cloud/provision/freedom-module'
       # Sample app main environments (samples with UI).
       copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
