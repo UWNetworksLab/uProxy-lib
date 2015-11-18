@@ -51,7 +51,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-jasmine-firefoxaddon": "^0.3.2",
-    "grunt-template-jasmine-istanbul": "^0.3.0",
+    "grunt-template-jasmine-istanbul": "^0.4.0",
     "grunt-ts": "^5.1.1",
     "grunt-vulcanize": "^0.6.0",
     "ipaddr.js": "^0.1.3",
