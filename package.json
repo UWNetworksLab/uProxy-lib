@@ -20,7 +20,7 @@
     "freedom-port-control": "^0.9.0"
   },
   "peerDependencies": {
-    "circular-json": "^0.1.6",
+    "circular-json": "^0.3.0",
     "freedom": "^0.6.25"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "bower": "^1.4.1",
     "browserify-istanbul": "^0.2.0",
     "browserify-zlib": "^0.1.4",
-    "circular-json": "^0.1.6",
+    "circular-json": "^0.3.0",
     "crypto": "^0.0.3",
     "es6-promise": "^2.0.0",
     "forge-min": "^0.6.20",
