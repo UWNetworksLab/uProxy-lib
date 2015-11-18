@@ -38,7 +38,7 @@
     "freedom-for-chrome": "^0.4.19",
     "freedom-for-firefox": "^0.6.18",
     "freedom-for-node": "^0.2.18",
-    "freedom-pgp-e2e": "^0.5.2",
+    "freedom-pgp-e2e": "^0.6.1",
     "freedom-xhr": "0.0.5",
     "grunt": "^0.4.5",
     "grunt-browserify": "^4.0.0",
