@@ -57,7 +57,7 @@
     "ipaddr.js": "^1.0.4",
     "jasmine-core": "^2.3.4",
     "request": "^2.53.0",
-    "socks5-http-client": "^0.1.6",
+    "socks5-http-client": "^1.0.2",
     "ssh2": "0.4.12",
     "ssh2-streams": "0.0.18",
     "tsd": "^0.6.5",
