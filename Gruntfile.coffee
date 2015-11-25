@@ -559,6 +559,8 @@ module.exports = (grunt) ->
           # Subset of ssh2-streams (all except SFTP) which works well in
           # the browser.
           './src/cloud/social/alias/ssh2-streams.js:ssh2-streams'
+          # Fallback for crypto-browserify's randombytes, for Firefox.
+          './src/cloud/social/alias/randombytes.js:randombytes'
         ]
       })
       simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
