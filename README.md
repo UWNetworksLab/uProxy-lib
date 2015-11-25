@@ -30,6 +30,23 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 ./setup.sh clean
 ```
 
+## Developing
+
+Sublime Text 3 provides a good development experience:
+
+ * Install [Sublime Text 3](http://www.sublimetext.com/3).
+ * Install [Package Control](https://packagecontrol.io/).
+ * Install the TypeScript package [home page](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
+
+Now, TypeScript files will have syntax highlighting and include support for "jump to definition" and refactoring (renaming).
+
+Several compile errors will remain, namely imports from `../../../third_party`. To workaround, Unix (and OSX) users can create a symlink:
+
+ * `cd` to the directory containing the repo
+ * `ln -s uproxy-lib/build/third_party ../third_party`
+
+Re-compile, with F7 (and perhaps restart Sublime, just to be sure) to resolve these errors.
+
 ## Demo apps
 
 After building, the apps can be found at `build/dev/uproxy-lib/samples/`. They
