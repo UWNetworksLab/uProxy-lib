@@ -18,6 +18,8 @@ First, to install required NPMs and configure the `build/` directory for TypeScr
 ./setup.sh install
 ```
 
+On Windows, replace `./setup.sh` with `.\setup.cmd`.
+
 Then, to compile the TypeScript code and build the demo apps, execute:
 ```bash
 grunt samples
