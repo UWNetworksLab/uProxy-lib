@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import handler = require('../handler/queue');
@@ -210,7 +209,9 @@ module SocksToRtc {
       }, (e:Error) => {
         log.error('failed to open channel for new SOCKS client: %1 ',
             e.message);
-        // TODO: return bytes to the client!
+        tcpConnection.send(socks.composeResponseBuffer({
+          reply: socks.Reply.FAILURE
+        }));
       });
     }
 

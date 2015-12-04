@@ -35,8 +35,7 @@ Having problems? To clean up from a partial, broken, or extremely out-dated buil
 ## Demo apps
 
 After building, the apps can be found at `build/dev/uproxy-lib/samples/`. They
-are a mix of web apps and browser extensions (Chrome and Firefox, although
-[not every demo is currently packaged for Firefox](https://github.com/uProxy/uproxy/issues/419)).
+are a mix of web apps and browser extensions (Chrome and Firefox).
 
 To run web apps:
  * start a webserver, e.g. `python -m SimpleHTTPServer`
@@ -48,7 +47,12 @@ To run Chrome apps:
 
 To run Firefox add-ons:
 
-- download the [Add-on SDK](https://developer.mozilla.org/en-US/Add-ons/SDK/Tutorials/Installation), `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute `cfx run`.
+- install [jpm](https://developer.mozilla.org/en-US/Add-ons/SDK/Tools/jpm) via NPM, e.g. `npm install jpm -g`, `cd` to the relevant directory, e.g. `build/dev/uproxy-lib/samples/simple-socks-firefoxapp/`, and execute ``jpm run -b `which firefox` ``.
+
+To run Node.js apps:
+
+ - Directly run `node` with the entry point, e.g. `node build/dev/uproxy-lib/samples/zork-node/index.js`
+ - Note: Until freedom-for-node supports core.rtcpeerconnection, this sample will not work
 
 ### simple-freedom-chat
 
@@ -88,7 +92,7 @@ to set Chrome's proxy settings and then just browse stuff.
 
 To see debugging output, open the background page.
 
-### Adventure
+### Zork
 
 Distributed SOCKS proxy with a telnet-based signalling channel.
 
@@ -119,15 +123,10 @@ As copypaste-fredom-chat, except WebRTC traffic between the two peers is obfusca
 
 ### Simple TURN
 
-Simplest possible use of the TURN server (`turn-frontend` and `turn-backend`
-directories).
+Simplest possible demo of the TURN server.
 
-*Note: this currently does not work on Firefox, due to these issues:*
-
- * https://github.com/freedomjs/freedom-for-firefox/issues/67
- * https://github.com/freedomjs/freedom-for-firefox/issues/62
-
-`turn-frontend` is the module with which TURN clients directly interact:
+The TURN "frontend" interacts directly with TURN clients, the "backend" manages
+relay sockets:
 
 ```
                                                     +-------------+
@@ -139,10 +138,10 @@ TURN client +-----> | oo          | <-------------> |          ++ +------->
                     | oo          |      webrtc     |          ++ |
                     |             |                 |             |
                     +---+---------+                 |          ++ +------->
-                    turn-frontend                   |          ++ |
+                    TURN frontend                   |          ++ |
                                                     |             |
                                                     +---+---------+
-                                                    turn-backend
+                                                    TURN backend
 
                       oo                              ++
                       oo server socket                ++ relay socket
@@ -187,4 +186,3 @@ We call this system "churn", and its code can be found in `src/churn/`.
    * `npm install -g wup`
  * Run wup: `(cd data ; wup) &`
  * Then, run the benchmark with `npm run benchmark`.
- 

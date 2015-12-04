@@ -1,6 +1,5 @@
 /// <reference path='../../../third_party/typings/es6-promise/es6-promise.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/rtcpeerconnection.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom.d.ts' />
 
 import djb2 = require('../crypto/djb2hash');
 import handler = require('../handler/queue');
@@ -39,7 +38,7 @@ export interface PeerConnection<TSignallingMessage> {
   // A peer connection can either open a data channel to the peer (will
   // change from |WAITING| state to |CONNECTING|)
   openDataChannel :(channelLabel: string,
-      options?: freedom_RTCPeerConnection.RTCDataChannelInit) =>
+      options?: freedom.RTCPeerConnection.RTCDataChannelInit) =>
       Promise<DataChannel>;
   // Or handle data channels opened by the peer (these events will )
   peerOpenedChannelQueue :handler.QueueHandler<DataChannel, void>;
@@ -64,7 +63,7 @@ var CONTROL_CHANNEL_LABEL = '';
 
 // Interval, in milliseconds, after which the peerconnection will
 // terminate if no heartbeat is received from the peer.
-var HEARTBEAT_TIMEOUT_MS_ = 30000;
+var HEARTBEAT_TIMEOUT_MS_ = 15000;
 
 // Interval, in milliseconds, at which heartbeats are sent to the peer.
 var HEARTBEAT_INTERVAL_MS_ = 5000;
@@ -108,6 +107,54 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Count of instances created to date.
   private static numCreations_ :number = 0;
 
+  // Extracts the maximum number of supported channels from an SDP.
+  //
+  // The number of channels is taken from the sctpmap line, e.g.:
+  //   a=sctpmap:5000 webrtc-datachannel 1024
+  //
+  // sctpmap is described in older revisions of the "SCTP-Based Media\
+  // Transport in the SDP" draft RFC; though it has disappeared from
+  // recent drafts, both Chrome and Firefox still include it in offers
+  // and answers:
+  //   https://datatracker.ietf.org/doc/draft-ietf-mmusic-sctp-sdp/06
+  //
+  // This is intended to help us pro-actively prevent peerconnection
+  // weirdness when large number of channels are created, in the
+  // absence of an explicit error from the browser:
+  //   https://github.com/uProxy/uproxy/issues/1815
+  //
+  // Throws an error no sctpmap line is found or is not in the exact
+  // same format as the example above.
+  // Public for testing.
+  public static extractMaxChannelsFromSdp_ = (sdp:string) : number => {
+    // Search for the a=sctpmap line.
+    var lines = sdp.split('\n');
+    var i = 0;
+    for (i = 0; i < lines.length; i++) {
+      if (lines[i].indexOf('a=sctpmap') === 0) {
+        break;
+      }
+    }
+    if (i === lines.length) {
+      throw new Error('no sctpmap line found');
+    }
+    var sctpMap = lines[i].trim();
+
+    // Verify the line is in a format we can understand.
+    var fields = sctpMap.split(' ');
+    if (fields.length !== 3) {
+      throw new Error('sctpmap line has wrong number of fields: ' + fields.join(' '));
+    }
+    if (fields[1] !== 'webrtc-datachannel') {
+      throw new Error('sctpmap has wrong protocol: ' + fields[1]);
+    }
+    var numChannels = parseInt(fields[2]);
+    if (isNaN(numChannels)) {
+      throw new Error('could not parse number of channels: ' + fields[2]);
+    }
+    return numChannels;
+  }
+
   // All open data channels associated with this peerconnection.
   private channels_ :{[channelLabel:string]:DataChannel} = {};
 
@@ -138,8 +185,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   public signalForPeerQueue = new handler.Queue<signals.Message,void>();
 
+  // Maximum number of channels.
+  private maxChannels_ = 65536;
+
   constructor(
-      private pc_:freedom_RTCPeerConnection.RTCPeerConnection,
+      private pc_:freedom.RTCPeerConnection.RTCPeerConnection,
       private peerName_ = ('unnamed-' + PeerConnectionClass.numCreations_)) {
     PeerConnectionClass.numCreations_++;
 
@@ -247,7 +297,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // data channels (without it, we would have to re-negotiate SDP after the
     // PC is established), we start negotaition by openning a data channel to
     // the peer, this triggers the negotiation needed event.
-    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, undefined).then(
+    return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, {id: 0}).then(
         this.addRtcDataChannel_).then(
         this.registerControlChannel_).then(() => {
           return this.onceConnected;
@@ -264,7 +314,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     if (this.state_ === State.WAITING || this.state_ === State.CONNECTED) {
       this.state_ = State.CONNECTING;
       this.pc_.createOffer().then(
-          (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+          (d:freedom.RTCPeerConnection.RTCSessionDescription) => {
         log.debug('%1: created offer: %2', this.peerName_, d);
 
         // Emit the offer signal before calling setLocalDescription, which
@@ -280,6 +330,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           }
         });
         this.pc_.setLocalDescription(d);
+        this.updateMaxChannels_(d.sdp);
       }).catch((e:Error) => {
         this.closeWithError_('failed to set local description: ' + e.message);
       });
@@ -295,12 +346,12 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Fulfills if it is OK to proceed with setting this remote offer, or
   // rejects if there is a local offer with higher hash-precedence.
-  private breakOfferTie_ = (remoteOffer:freedom_RTCPeerConnection.RTCSessionDescription)
+  private breakOfferTie_ = (remoteOffer:freedom.RTCPeerConnection.RTCSessionDescription)
       : Promise<void> => {
     return this.pc_.getSignalingState().then((state:string) => {
       if (state === 'have-local-offer') {
         return this.pc_.getLocalDescription().then(
-            (localOffer:freedom_RTCPeerConnection.RTCSessionDescription) => {
+            (localOffer:freedom.RTCPeerConnection.RTCSessionDescription) => {
           if (djb2.stringHash(JSON.stringify(remoteOffer.sdp)) <
               djb2.stringHash(JSON.stringify(localOffer.sdp))) {
             // TODO: implement reset and use their offer.
@@ -315,7 +366,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     });
   }
 
-  private onIceCandidate_ = (candidate?:freedom_RTCPeerConnection.OnIceCandidateEvent) => {
+  private onIceCandidate_ = (candidate?:freedom.RTCPeerConnection.OnIceCandidateEvent) => {
     if(candidate.candidate) {
       log.debug('%1: local ice candidate: %2',
           this.peerName_, candidate.candidate);
@@ -332,14 +383,15 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   private handleOfferSignalMessage_ = (
-      description:freedom_RTCPeerConnection.RTCSessionDescription)
+      description:freedom.RTCPeerConnection.RTCSessionDescription)
       : Promise<void> => {
     return this.breakOfferTie_(description).then(() => {
       this.state_ = State.CONNECTING;
+      this.updateMaxChannels_(description.sdp);
       // initial offer from peer
       return this.pc_.setRemoteDescription(description)
     }).then(this.pc_.createAnswer).then(
-        (d:freedom_RTCPeerConnection.RTCSessionDescription) => {
+        (d:freedom.RTCPeerConnection.RTCSessionDescription) => {
       log.debug('%1: created answer: %2', this.peerName_, d);
 
       // As with the offer, we must emit the signal before
@@ -352,6 +404,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           sdp: d.sdp
         }
       });
+      this.updateMaxChannels_(d.sdp);
       return this.pc_.setLocalDescription(d);
     }).catch((e) => {
       this.closeWithError_('Failed to connect to offer:' +
@@ -360,8 +413,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   private handleAnswerSignalMessage_ = (
-      description:freedom_RTCPeerConnection.RTCSessionDescription)
+      description:freedom.RTCPeerConnection.RTCSessionDescription)
       : Promise<void> => {
+    this.updateMaxChannels_(description.sdp);
     return this.pc_.setRemoteDescription(description).catch((e) => {
       this.closeWithError_('Failed to set remote description: ' +
         JSON.stringify(description) + '; Error: ' + e.toString());
@@ -369,7 +423,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   }
 
   private handleCandidateSignalMessage_ = (
-      candidate:freedom_RTCPeerConnection.RTCIceCandidate)
+      candidate:freedom.RTCPeerConnection.RTCIceCandidate)
       : Promise<void> => {
     // CONSIDER: Should we be passing/getting the SDP line index?
     // e.g. https://code.google.com/p/webrtc/source/browse/stable/samples/js/apprtc/js/main.js#331
@@ -423,10 +477,20 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Open a new data channel with the peer.
   public openDataChannel = (channelLabel:string,
-      options?:freedom_RTCPeerConnection.RTCDataChannelInit)
+      options?:freedom.RTCPeerConnection.RTCDataChannelInit)
       : Promise<DataChannel> => {
     if (channelLabel === '') {
       throw new Error('label cannot be an empty string');
+    }
+
+    if (Object.keys(this.channels_).length >= this.maxChannels_) {
+      return Promise.reject(new Error('maximum number of channels reached (' +
+          this.maxChannels_ + ')'));
+    }
+
+    if (options && options.id && options.id >= this.maxChannels_) {
+      return Promise.reject(new Error('requested channel id higher than ' +
+          'maximum (' + this.maxChannels_ + ')'));
     }
 
     log.debug('%1: creating channel %2 with options: %3',
@@ -530,6 +594,21 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     }, HEARTBEAT_INTERVAL_MS_);
   }
 
+  // Sets maxChannels_ to Math.min(maxChannels_, the SDP's maximum
+  // number of channels). Does nothing if the SDP cannot be parsed.
+  private updateMaxChannels_ = (sdp:string) : void => {
+    try {
+      var max = PeerConnectionClass.extractMaxChannelsFromSdp_(sdp);
+      if (max < this.maxChannels_) {
+        log.info('%1: maximum number of channels now %2', this.peerName_, max);
+        this.maxChannels_ = max;
+      }
+    } catch (e) {
+      log.warn('%1: cannot extract max channels from SDP: %2 (%3)',
+          this.peerName_, sdp, e.message);
+    }
+  }
+
   // For debugging: prints the state of the peer connection including all
   // associated data channels.
   public toString = () : string => {
@@ -545,7 +624,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 }  // class PeerConnectionClass
 
 export function createPeerConnection(
-    config:freedom_RTCPeerConnection.RTCConfiguration, debugPcName?:string)
+    config:freedom.RTCPeerConnection.RTCConfiguration, debugPcName?:string)
     : PeerConnection<signals.Message> {
   var freedomRtcPc = freedom['core.rtcpeerconnection'](config);
   // Note: |peerConnection| will take responsibility for freeing memory and

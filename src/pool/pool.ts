@@ -53,6 +53,7 @@ class Pool {
 // Manages a pool of data channels opened by this peer.  The only public method
 // is openDataChannel.
 class LocalPool {
+  private nextChannelId_ = 0;
   private numChannels_ = 0;
 
   // Channels which have been closed, and may be re-opened.
@@ -79,23 +80,29 @@ class LocalPool {
     // TODO: limit the number of channels (probably should be <=256).
     if (this.pool_.length > 0) {
       var channel = this.pool_.shift();
-      log.debug('%1: channel requested, pulled %2 from pool (%3 remaining)',
-          this.name_, channel.getLabel(), this.pool_.length);
+      log.debug('%1: re-using channel %2 (%3/%4)',
+          this.name_, channel.getLabel(), this.pool_.length, this.numChannels_);
       return Promise.resolve(channel);
     } else {
-      log.debug('%1: channel requested, creating new', this.name_);
       return this.openNewChannel_();
     }
   }
 
   // Creates and returns a new channel, wrapping it.
   private openNewChannel_ = () : Promise<PoolChannel> => {
-    return this.pc_.openDataChannel('p' + this.numChannels_++).
-        then((dc:datachannel.DataChannel) => {
-          return dc.onceOpened.then(() => {
-            return new PoolChannel(dc);
-          });
-        });
+    var newChannelId = ++this.nextChannelId_;
+    log.info('%1: opening channel (id %2)', this.name_, newChannelId);
+    return this.pc_.openDataChannel('p' + newChannelId, {
+      id: newChannelId
+    }).then((dc:datachannel.DataChannel) => {
+      this.numChannels_++;
+      return dc.onceOpened.then(() => {
+        return new PoolChannel(dc);
+      });
+    }, (e:Error) => {
+      this.nextChannelId_--;
+      throw e;
+    });
   }
 
   // Resets the channel, making it ready for use again, and adds it
@@ -105,8 +112,8 @@ class LocalPool {
       return;
     }
     this.pool_.push(poolChannel);
-    log.debug('%1: returned channel %2 to the pool (new size: %3)',
-        this.name_, poolChannel.getLabel(), this.pool_.length);
+    log.debug('%1: returned channel %2 to the pool (%3/%4)',
+        this.name_, poolChannel.getLabel(), this.pool_.length, this.numChannels_);
   }
 }
 
@@ -208,7 +215,7 @@ class PoolChannel implements datachannel.DataChannel {
   }
 
   private changeState_ = (state:State) : void => {
-    log.debug('%1: Changing state from %2 to %3',
+    log.debug('%1: %2 -> %3',
         this.getLabel(), State[this.state_], State[state]);
     this.state_ = state;
   }

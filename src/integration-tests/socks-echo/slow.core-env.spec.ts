@@ -1,4 +1,4 @@
-/// <reference path='../../../../third_party/freedom-typings/freedom-core-env.d.ts' />
+/// <reference path='../../../../third_party/typings/freedom/freedom-core-env.d.ts' />
 /// <reference path='../../../../third_party/typings/jasmine/jasmine.d.ts' />
 
 import socks = require('../../socks-common/socks-headers');
@@ -9,11 +9,9 @@ import ReceivedDataEvent = proxyintegrationtesttypes.ReceivedDataEvent;
 
 import arraybuffers = require('../../arraybuffers/arraybuffers');
 
-import freedom_types = require('freedom.types');
-
 function slowTestDescription(useChurn:boolean) {
   var testerFactoryManager
-        :freedom_types.FreedomModuleFactoryManager<ProxyIntegrationTester>;
+        :freedom.FreedomModuleFactoryManager<ProxyIntegrationTester>;
   var createTestModule = function(denyLocalhost?:boolean)
       :ProxyIntegrationTester {
     return testerFactoryManager(denyLocalhost, useChurn);
