@@ -1,5 +1,4 @@
-/// <reference path='../../../third_party/freedom-typings/freedom-common.d.ts' />
-/// <reference path='../../../third_party/freedom-typings/freedom-module-env.d.ts' />
+/// <reference path='../../../third_party/typings/freedom/freedom-module-env.d.ts' />
 
 export import logging_provider = require('./loggingprovider');
 export var moduleName = 'loggingprovider'
@@ -9,3 +8,4 @@ export var moduleName = 'loggingprovider'
 // |freedom-module.json| freedom manifest.
 freedom().provideSynchronous(logging_provider.Log);
 freedom['loggingcontroller']().provideSynchronous(logging_provider.LoggingController);
+freedom['logginglistener']().provideSynchronous(logging_provider.LoggingListener);

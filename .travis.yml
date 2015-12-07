@@ -3,7 +3,9 @@ node_js:
  - "0.10"
 before_install:
  - npm install -g grunt-cli
+ - npm install -g bower
 install:
  - ./setup.sh install
 script:
- - grunt unit_test
+  - grunt unit_test
+sudo: false

@@ -1,10 +1,21 @@
+build_image: freedomjs/freedom
 language: node_js
-build_image: shippable/minv2
 node_js:
- - "0.10"
+- '0.10'
+notifications:
+  email:
+    recipients:
+      - uproxy-eng@googlegroups.com
+    on_success: change
+    on_failure: always
 before_install:
- - npm install -g grunt-cli
+  - "export DISPLAY=:10.0"
+  - "Xvfb :10 -screen 0 1280x1024x24 &"
+  - npm install -g grunt-cli
+  - npm install -g bower
 install:
- - ./setup.sh install
+  - "google-chrome --version"
+  - "firefox -v || echo 'No firefox installed.'"
+  - "shippable_retry ./setup.sh install"
 script:
- - grunt dist
+  - "grunt test --firefox-bin /usr/bin/firefox"

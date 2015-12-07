@@ -1,4 +1,4 @@
-import ArrayBuffers = require('./arraybuffers');
+import arraybuffers = require('./arraybuffers');
 
 // Small internal utility class for accumulating array buffers into a
 // single buffer (until that buffer is big enough).
@@ -44,7 +44,7 @@ export class Accumulator {
     var accumulatedSize :number = this.currentSize_;
     this.clear();
     this.onBigEnoughBuffer(
-        ArrayBuffers.concat(buffers, accumulatedSize));
+        arraybuffers.concat(buffers, accumulatedSize));
     return accumulatedSize;
   }
 
