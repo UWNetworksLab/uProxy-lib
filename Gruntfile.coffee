@@ -125,6 +125,7 @@ taskManager.add 'browserifySpecs', [
   'browserify:datachannelSpec'
   'browserify:poolSpec'
   'browserify:tcpSpec'
+  'browserify:linefeederSpec'
   'browserify:queueSpec'
   'browserify:turnFrontEndMessagesSpec'
   'browserify:turnFrontEndSpec'
@@ -589,6 +590,7 @@ module.exports = (grunt) ->
       churnCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/churn')
       handlerSpec: Rule.browserifySpec 'handler/queue'
       handlerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'handler/queue')
+      linefeederSpec: Rule.browserifySpec 'net/linefeeder'
       loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
       loggingProviderCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'loggingprovider/loggingprovider')
       loggingSpec: Rule.browserifySpec 'logging/logging'
