@@ -7,6 +7,8 @@ import churn_types = require('../churn/churn.types');
 import logging = require('../logging/logging');
 import loggingTypes = require('../loggingprovider/loggingprovider.types');
 import net = require('../net/net.types');
+import linefeeder = require('../net/linefeeder');
+import queue = require('../handler/queue');
 import rtc_to_net = require('../rtc-to-net/rtc-to-net');
 import socks_to_rtc = require('../socks-to-rtc/socks-to-rtc');
 import tcp = require('../net/tcp');
@@ -61,6 +63,7 @@ function bind(i:number = 0) : Promise<tcp.Server> {
 
 // Sends a reply to the client, appending a newline.
 var sendReply = (message:string, connection:tcp.Connection) : void => {
+  log.debug('%1: sending reply: %2', connection.connectionId, message);
   connection.send(arraybuffers.stringToArrayBuffer(message + '\n'));
 }
 
@@ -68,108 +71,90 @@ var sendReply = (message:string, connection:tcp.Connection) : void => {
 // "get" or "give" is received, at which point the connection is handed off
 // to a SocksTotc or RtcToNet instance (and further input is treated as
 // signalling channel messages).
-function serveConnection(connection :tcp.Connection) :void {
-  var transformerName:string;
-  var transformerConfig:string;
-  let recvBuffer :ArrayBuffer = new ArrayBuffer(0);
+function serveConnection(connection: tcp.Connection): void {
+  var transformerName: string;
+  var transformerConfig: string;
 
-  let processCommands = (buffer :ArrayBuffer) :void => {
-    recvBuffer = arraybuffers.concat([recvBuffer, buffer]);
-    let index = arraybuffers.indexOf(recvBuffer, arraybuffers.decodeByte(
-      arraybuffers.stringToArrayBuffer('\n')
-    ));
-    if (index == -1) {
-      // A whole command has not been received yet. Continue receiving data.
-      connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
-    } else {
-      // At least one whole command has been received. Attempt to parse it.
-      let parts = arraybuffers.split(recvBuffer, index);
-      let line = parts[0];
-      recvBuffer = parts[1].slice(1);
+  const lineFeeder = new linefeeder.LineFeeder(connection.dataFromSocketQueue);
+  var processCommand = (command: string) => {
+    log.debug('%1: received command: %2', connection.connectionId, command);
 
-      // ''.split(' ') == ['']
-      var sentence = arraybuffers.arrayBufferToString(line);
-      var words = sentence.split(' ');
-      var verb = words[0].trim().toLowerCase();
-
-      let keepParsing = false;
-      switch (verb) {
-        case 'get':
-          get(connection, (transformerName || transformerConfig) ? {
-            name: transformerName,
-            config: transformerConfig
-          } : undefined);
-          break;
-        case 'give':
-          give(connection);
-          break;
-        case 'ping':
-          sendReply('ping', connection);
-          keepParsing = true;
-          break;
-        case 'transform':
-          // Sample commands:
-          //  * transform with caesar
-          //    Uses Caesar cipher, with default/example settings.
-          //  * transform config {"key": 5}
-          //    Overrides the default transformer config. Everything
-          //    following 'transform config' is treated as JSON and
-          //    forwarded to the obfuscator's configure() method.
-          if (words.length > 2) {
-            var preposition = words[1].trim().toLowerCase();
-            switch (preposition) {
-              case 'with':
-                transformerName = words[2].trim();
-                break;
-              case 'config':
-                // Treat everything to the right of this marker as JSON.
-                // Cheapo approach but it requires no escaping from the user.
-                const marker = ' config ';
-                transformerConfig = sentence.substring(
-                    sentence.toLowerCase().indexOf(marker) + marker.length);
-                break;
-              default:
-                sendReply('usage: transform (with name|config json)', connection);
-            }
-          } else {
-            sendReply('usage: transform (with name|config json)', connection);
+    let keepParsing = false;
+    var words = command.split(' ');
+    var verb = words[0].trim().toLowerCase();
+    switch (verb) {
+      case 'get':
+        get(lineFeeder, connection, (transformerName || transformerConfig) ? {
+          name: transformerName,
+          config: transformerConfig
+        } : undefined);
+        break;
+      case 'give':
+        give(lineFeeder, connection);
+        break;
+      case 'ping':
+        sendReply('ping', connection);
+        keepParsing = true;
+        break;
+      case 'transform':
+        // Sample commands:
+        //  * transform with caesar
+        //    Uses Caesar cipher, with default/example settings.
+        //  * transform config {"key": 5}
+        //    Overrides the default transformer config. Everything
+        //    following 'transform config' is treated as JSON and
+        //    forwarded to the obfuscator's configure() method.
+        if (words.length > 2) {
+          var preposition = words[1].trim().toLowerCase();
+          switch (preposition) {
+            case 'with':
+              transformerName = words[2].trim();
+              break;
+            case 'config':
+              // Treat everything to the right of this marker as JSON.
+              // Cheapo approach but it requires no escaping from the user.
+              const marker = ' config ';
+              transformerConfig = command.substring(
+                  command.toLowerCase().indexOf(marker) + marker.length);
+              break;
+            default:
+              sendReply('usage: transform (with name|config json)', connection);
           }
-          keepParsing = true;
-          break;
-        case 'xyzzy':
-          sendReply('Nothing happens.', connection);
-          keepParsing = true;
-          break;
-        case 'quit':
-          connection.close();
-          break;
-        default:
-          if (verb.length > 0) {
-            sendReply('I don\'t understand that command. (' + verb + ')', connection);
-          }
-          keepParsing = true;
-      }
-
-      if (keepParsing) {
-        if (recvBuffer.byteLength > 0) {
-          // There might be another command in the buffer.
-          // Retry command parsing to flush the buffer.
-          // The next parsing determines whether to continue parsing or not.
-          processCommands(new ArrayBuffer(0));
         } else {
-          // Nothing is left in the buffer. Wait for the next command.
-          connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+          sendReply('usage: transform (with name|config json)', connection);
         }
-      }
+        keepParsing = true;
+        break;
+      case 'xyzzy':
+        sendReply('Nothing happens.', connection);
+        keepParsing = true;
+        break;
+      case 'quit':
+        connection.close();
+        break;
+      default:
+        if (verb.length > 0) {
+          sendReply('I don\'t understand that command. (' + verb + ')', connection);
+        }
+        keepParsing = true;
     }
-  }
 
-  connection.dataFromSocketQueue.setSyncNextHandler(processCommands);
+    if (keepParsing) {
+      lineFeeder.setSyncNextHandler(processCommand);
+    }
+  };
+  lineFeeder.setSyncNextHandler(processCommand);
+
+  connection.onceClosed.then((kind:tcp.SocketCloseKind) => {
+    log.info('%1: closed (%2)',
+      connection.connectionId, tcp.SocketCloseKind[kind]);
+  });
 }
 
 // Creates a SocksToRtc instance and forwards signals between it and the
 // connection.
 function get(
+    lines:queue.QueueHandler<string, void>,
     connection:tcp.Connection,
     transformerConfig:churn_types.TransformerConfig)
     :void {
@@ -182,32 +167,33 @@ function get(
 
   socksToRtc.start(new tcp.Server(socksEndpoint), bridge.best('sockstortc',
       pcConfig, undefined, transformerConfig)).then((endpoint:net.Endpoint) => {
-    log.info('SocksToRtc listening on %1', endpoint);
-    log.info('curl -x socks5h://%1:%2 www.example.com',
-        endpoint.address, endpoint.port);
+    log.info('%1: SOCKS server listening on %2 (curl -x socks5h://%3:%4 www.example.com)',
+        connection.connectionId, endpoint,endpoint.address, endpoint.port);
     connection.close();
   }, (e:Error) => {
-    log.error('failed to start SocksToRtc: %1', e.message);
+    log.error('%1: failed to start SOCKS server: %2',
+        connection.connectionId, e.message);
     connection.close();
   });
 
-  connection.dataFromSocketQueue.setSyncHandler((buffer:ArrayBuffer): void => {
-    var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
-    for (var i = 0; i < signals.length; i++) {
-      var signal = signals[i];
-      try {
-        // log.debug('signal for sockstortc: %1', signal);
-        socksToRtc.handleSignalFromPeer(JSON.parse(signal));
-      } catch (e) {
-        log.warn('could not parse signal: %1', signal);
-      }
+  lines.setSyncHandler((signal:string): void => {
+    log.debug('%1: received signalling message: %2',
+      connection.connectionId, signal);
+    try {
+      socksToRtc.handleSignalFromPeer(JSON.parse(signal));
+    } catch (e) {
+      log.warn('%1: could not parse signal (%2): %3',
+          connection.connectionId, signal, e.message);
     }
   });
 }
 
 // Creates an RtcToNet instance and forwards signals between it and the
 // connection.
-function give(connection:tcp.Connection) : void {
+function give(
+    lines: queue.QueueHandler<string, void>,
+    connection: tcp.Connection)
+    :void {
   var rtcToNet = new rtc_to_net.RtcToNet();
 
   rtcToNet.start({
@@ -216,7 +202,8 @@ function give(connection:tcp.Connection) : void {
     log.info('RtcToNet connected');
     connection.close();
   }, (e: Error) => {
-    log.error('failed to start rtcToNet: %1', e.message);
+    log.error('%1: failed to start rtcToNet: %1',
+        connection.connectionId, e.message);
     connection.close();
   });
 
@@ -225,15 +212,14 @@ function give(connection:tcp.Connection) : void {
     sendReply(JSON.stringify(signal), connection);
   });
 
-  connection.dataFromSocketQueue.setSyncHandler((buffer:ArrayBuffer): void => {
-    var signals = arraybuffers.arrayBufferToString(buffer).split('\n');
-    for (var i = 0; i < signals.length; i++) {
-      var signal = signals[i];
-      try {
-        rtcToNet.handleSignalFromPeer(JSON.parse(signal));
-      } catch (e) {
-        log.warn('could not parse signal: .%1.', signal);
-      }
+  lines.setSyncHandler((signal: string): void => {
+    log.debug('%1: received signalling message: %2',
+      connection.connectionId, signal);
+    try {
+      rtcToNet.handleSignalFromPeer(JSON.parse(signal));
+    } catch (e) {
+      log.warn('%1: could not parse signal (%2): %3',
+          connection.connectionId, signal, e.message);
     }
   });
 }
@@ -243,7 +229,8 @@ function give(connection:tcp.Connection) : void {
 bind().then((server:tcp.Server) => {
   server.connectionsQueue.setSyncHandler((connection: tcp.Connection) => {
     connection.onceConnected.then((endpoint: tcp.ConnectionInfo) => {
-      log.info('now serving client at %1', endpoint.remote);
+      log.info('%1: new client from %2',
+          connection.connectionId, endpoint.remote);
       serveConnection(connection);
     });
   });
