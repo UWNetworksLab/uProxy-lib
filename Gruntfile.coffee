@@ -13,6 +13,7 @@ taskManager.add 'base', [
   'browserify:loggingProvider'
   'browserify:churnPipeFreedomModule'
   'browserify:cloudSocialProviderFreedomModule'
+  'browserify:digitalOceanFreedomModule'
 ]
 
 taskManager.add 'samples', [
@@ -104,7 +105,6 @@ taskManager.add 'zork', [
 
 taskManager.add 'provision', [
   'base'
-  'browserify:provisionFreedomModule'
   'copy:libsForProvisionChromeApp'
 ]
 
@@ -280,7 +280,7 @@ module.exports = (grunt) ->
       libsForProvisionChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome', 'forge-min']
-          pathsFromDevBuild: ['loggingprovider', 'cloud/provision']
+          pathsFromDevBuild: ['loggingprovider', 'cloud/digitalocean']
           pathsFromThirdPartyBuild: [
           ]
           localDestPath: 'samples/provision-chromeapp/'
@@ -547,6 +547,7 @@ module.exports = (grunt) ->
             ignore: ['ws', 'path']
             browserifyOptions: { standalone: 'browserified_exports' }
           })
+      digitalOceanFreedomModule: Rule.browserify 'cloud/digitalocean/freedom-module'
       # Sample app freedom modules.
       copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
       copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
@@ -569,7 +570,6 @@ module.exports = (grunt) ->
       simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
       uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
       zorkFreedomModule: Rule.browserify 'zork/freedom-module'
-      provisionFreedomModule: Rule.browserify 'cloud/provision/freedom-module'
       # Sample app main environments (samples with UI).
       copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
       copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
