@@ -20,12 +20,12 @@ taskManager.add 'samples', [
   'echoServer'
   'copypasteChat'
   'copypasteSocks'
+  'deployer'
   'simpleChat'
   'simpleSocks'
   'simpleTurn'
   'uprobe'
   'zork'
-  'provision'
 ]
 
 # Makes the distribution build.
@@ -65,6 +65,12 @@ taskManager.add 'copypasteSocks', [
   'copy:libsForCopyPasteSocksFirefoxApp'
 ]
 
+taskManager.add 'deployer', [
+  'base'
+  'browserify:deployerFreedomModule'
+  'copy:libsForDeployerChromeApp'
+]
+
 taskManager.add 'simpleChat', [
   'base'
   'browserify:simpleChatFreedomModule'
@@ -101,11 +107,6 @@ taskManager.add 'zork', [
   'copy:libsForZorkChromeApp'
   'copy:libsForZorkFirefoxApp'
   'copy:libsForZorkNode'
-]
-
-taskManager.add 'provision', [
-  'base'
-  'copy:libsForProvisionChromeApp'
 ]
 
 # Create unit test code
@@ -277,13 +278,12 @@ module.exports = (grunt) ->
       ###
       # Samples.
       ###
-      libsForProvisionChromeApp:
+      libsForDeployerChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome', 'forge-min']
-          pathsFromDevBuild: ['loggingprovider', 'cloud/digitalocean']
-          pathsFromThirdPartyBuild: [
-          ]
-          localDestPath: 'samples/provision-chromeapp/'
+          pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+          localDestPath: 'samples/deployer-chromeapp/'
+
       libsForZorkChromeApp:
         Rule.copyLibs
           npmLibNames: ['freedom-for-chrome']
@@ -551,6 +551,7 @@ module.exports = (grunt) ->
       # Sample app freedom modules.
       copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
       copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
+      deployerFreedomModule: Rule.browserify 'cloud/deployer/freedom-module'
       echoServerFreedomModule: Rule.browserify 'echo/freedom-module'
       cloudSocialProviderFreedomModule: Rule.browserify('cloud/social/freedom-module', {
         alias : [
