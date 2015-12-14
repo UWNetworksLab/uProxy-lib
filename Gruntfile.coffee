@@ -69,6 +69,7 @@ taskManager.add 'deployer', [
   'base'
   'browserify:deployerFreedomModule'
   'copy:libsForDeployerChromeApp'
+  'copy:libsForDeployerFirefoxApp'
 ]
 
 taskManager.add 'simpleChat', [
@@ -283,6 +284,11 @@ module.exports = (grunt) ->
           npmLibNames: ['freedom-for-chrome', 'forge-min']
           pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
           localDestPath: 'samples/deployer-chromeapp/'
+      libsForDeployerFirefoxApp:
+        Rule.copyLibs
+          npmLibNames: ['freedom-for-firefox', 'forge-min']
+          pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+          localDestPath: 'samples/deployer-firefoxapp/data'
 
       libsForZorkChromeApp:
         Rule.copyLibs
