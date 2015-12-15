@@ -38,7 +38,7 @@ Sublime Text 3 provides a good development experience:
 
  * Install [Sublime Text 3](http://www.sublimetext.com/3).
  * Install [Package Control](https://packagecontrol.io/).
- * Install the TypeScript package [home page](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
+ * Install the [TypeScript Sublime plugin](https://github.com/Microsoft/TypeScript-Sublime-Plugin).
 
 Now, TypeScript files will have syntax highlighting and include support for "jump to definition" and refactoring (renaming).
 
