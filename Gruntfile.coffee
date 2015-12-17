@@ -1,4 +1,5 @@
 fs = require('fs')
+_ = require('lodash')
 path = require('path')
 rules = require('./build/tools/common-grunt-rules')
 TaskManager = require './build/tools/taskmanager'
@@ -279,44 +280,7 @@ config =
         sourceMap: false
         target: 'es5'
 
-  jasmine:
-    arraybuffers: Rule.jasmineSpec 'arraybuffers'
-    arraybuffersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'arraybuffers')
-    bridge: Rule.jasmineSpec 'bridge'
-    bridgeCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'bridge')
-    buildTools: Rule.jasmineSpec 'build-tools'
-    buildToolsCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'build-tools')
-    churn: Rule.jasmineSpec 'churn'
-    churnCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'churn')
-    crypto: Rule.jasmineSpec 'crypto'
-    handler: Rule.jasmineSpec 'handler'
-    handlerCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'handler')
-    logging: Rule.jasmineSpec 'logging'
-    loggingCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'logging')
-    loggingProvider: Rule.jasmineSpec 'loggingprovider'
-    loggingProviderCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'loggingprovider')
-    net: Rule.jasmineSpec 'net'
-    netCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'net')
-    pool: Rule.jasmineSpec 'pool'
-    poolCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'pool')
-    rtcToNet: Rule.jasmineSpec 'rtc-to-net'
-    rtcToNetCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'rtc-to-net')
-    simpleTransformers: Rule.jasmineSpec 'simple-transformers'
-    simpleTransformersCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'simple-transformers')
-    turnFrontEndMessagesSpec: Rule.browserifySpec 'turn-frontend/messages'
-    turnFrontEndSpec: Rule.browserifySpec 'turn-frontend/turn-frontend'
-
-    socksCommon: Rule.jasmineSpec('socks-common',
-        [path.join(thirdPartyBuildPath, 'ipaddr/ipaddr.js')]);
-    socksCommonCov: Rule.addCoverageToSpec(Rule.jasmineSpec('socks-common',
-        [path.join(thirdPartyBuildPath, 'ipaddr/ipaddr.js')]));
-
-    socksToRtc: Rule.jasmineSpec 'socks-to-rtc'
-    socksToRtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'socks-to-rtc')
-    webrtc: Rule.jasmineSpec 'webrtc'
-    webrtcCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'webrtc')
-    queue: Rule.jasmineSpec 'queue'
-    queueCov: Rule.addCoverageToSpec(Rule.jasmineSpec 'queue')
+  jasmine: {}
 
   browserify:
     # Browserify freedom-modules in the library
@@ -358,49 +322,6 @@ config =
     copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
     copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
     simpleChatMain: Rule.browserify 'simple-chat/main.core-env'
-    # Browserify specs
-    aesSpec: Rule.browserifySpec 'crypto/aes'
-    arraybuffersSpec: Rule.browserifySpec 'arraybuffers/arraybuffers'
-    arraybuffersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'arraybuffers/arraybuffers')
-    bridgeSpec: Rule.browserifySpec 'bridge/bridge'
-    bridgeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/bridge')
-    onetimeSpec: Rule.browserifySpec 'bridge/onetime'
-    onetimeCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'bridge/onetime')
-    buildToolsTaskmanagerSpec: Rule.browserifySpec 'build-tools/taskmanager'
-    buildToolsTaskmanagerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'build-tools/taskmanager')
-    candidateSpec: Rule.browserifySpec 'churn/candidate'
-    candidateCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/candidate')
-    churnSpec: Rule.browserifySpec 'churn/churn'
-    churnCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'churn/churn')
-    handlerSpec: Rule.browserifySpec 'handler/queue'
-    handlerCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'handler/queue')
-    linefeederSpec: Rule.browserifySpec 'net/linefeeder'
-    loggingProviderSpec: Rule.browserifySpec 'loggingprovider/loggingprovider'
-    loggingProviderCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'loggingprovider/loggingprovider')
-    loggingSpec: Rule.browserifySpec 'logging/logging'
-    loggingCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'logging/logging')
-    peerconnectionSpec: Rule.browserifySpec 'webrtc/peerconnection'
-    peerconnectionCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/peerconnection')
-    poolSpec: Rule.browserifySpec 'pool/pool'
-    poolCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'pool/pool')
-    rtcToNetSpec: Rule.browserifySpec 'rtc-to-net/rtc-to-net'
-    rtcToNetCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'rtc-to-net/rtc-to-net')
-    simpleTransformersCaesarSpec: Rule.browserifySpec 'simple-transformers/caesar'
-    simpleTransformersCaesarCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'simple-transformers/caesar')
-    socksCommonHeadersSpec: Rule.browserifySpec 'socks-common/socks-headers'
-    socksCommonHeadersCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-common/socks-headers')
-    socksToRtcSpec: Rule.browserifySpec 'socks-to-rtc/socks-to-rtc'
-    socksToRtcCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'socks-to-rtc/socks-to-rtc')
-    tcpSpec: Rule.browserifySpec 'net/tcp'
-    tcpCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'net/tcp')
-    turnFrontEndMessagesSpec: Rule.browserifySpec 'turn-frontend/messages'
-    turnFrontEndMessagesCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'turn-frontend/messages')
-    turnFrontEndSpec: Rule.browserifySpec 'turn-frontend/turn-frontend'
-    turnFrontEndCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'turn-frontend/turn-frontend')
-    datachannelSpec: Rule.browserifySpec 'webrtc/datachannel'
-    datachannelCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'webrtc/datachannel')
-    queueSpec: Rule.browserifySpec 'queue/queue'
-    queueCovSpec: Rule.addCoverageToBrowserify(Rule.browserifySpec 'queue/queue')
     # Integration tests.
     integrationTcpFreedomModule:
       Rule.browserify 'integration-tests/tcp/freedom-module'
@@ -602,61 +523,16 @@ taskManager.add 'provision', [
   'copy:libsForProvisionChromeApp'
 ]
 
-# Create unit test code
-taskManager.add 'browserifySpecs', [
-  'base'
-  'browserify:aesSpec'
-  'browserify:arraybuffersSpec'
-  'browserify:bridgeSpec'
-  'browserify:onetimeSpec'
-  'browserify:candidateSpec'
-  'browserify:churnSpec'
-  'browserify:handlerSpec'
-  'browserify:buildToolsTaskmanagerSpec'
-  'browserify:loggingSpec'
-  'browserify:loggingProviderSpec'
-  'browserify:peerconnectionSpec'
-  'browserify:datachannelSpec'
-  'browserify:poolSpec'
-  'browserify:tcpSpec'
-  'browserify:linefeederSpec'
-  'browserify:queueSpec'
-  'browserify:turnFrontEndMessagesSpec'
-  'browserify:turnFrontEndSpec'
-]
-
-# Create unit test code
-taskManager.add 'browserifyCovSpecs', [
-  'base'
-  'browserify:arraybuffersCovSpec'
-  'browserify:bridgeCovSpec'
-  'browserify:handlerCovSpec'
-  'browserify:buildToolsTaskmanagerCovSpec'
-  'browserify:loggingCovSpec'
-  'browserify:loggingProviderCovSpec'
-  'browserify:peerconnectionCovSpec'
-  'browserify:datachannelCovSpec'
-  'browserify:queueCovSpec'
-  'browserify:turnFrontEndMessagesCovSpec'
-  'browserify:turnFrontEndCovSpec'
-]
+specList = Rule.getTests('src', undefined, ['integration-tests'])
 
 # Run unit tests
 taskManager.add 'unit_test', [
-  'browserifySpecs',
-  'jasmine:arraybuffers'
-  'jasmine:bridge'
-  'jasmine:churn'
-  'jasmine:handler'
-  'jasmine:buildTools'
-  'jasmine:crypto'
-  'jasmine:logging'
-  'jasmine:loggingProvider'
-  'jasmine:net'
-  'jasmine:pool'
-  'jasmine:webrtc'
-  'jasmine:queue'
-]
+  'base',
+].concat _.flatten(Rule.buildAndRunTest(spec, gruntConfig) for spec in specList)
+
+taskManager.add 'coverage', [
+  'base',
+].concat _.flatten(Rule.buildAndRunTest(spec, gruntConfig, true) for spec in specList)
 
 taskManager.add 'tcpIntegrationTestModule', [
   'base'
@@ -688,22 +564,6 @@ taskManager.add 'integration_test', [
   'tcpIntegrationTest'
   'socksEchoIntegrationTest'
   'jasmine_firefoxaddon'  # Currently only TCP test
-]
-
-# Run unit tests to produce coverage; these are separate from unit_tests because
-# they make tests hard to debug and fix.
-taskManager.add 'coverage', [
-  'browserifyCovSpecs'
-  'jasmine:arraybuffersCov'
-  'jasmine:bridgeCov'
-  'jasmine:handlerCov'
-  'jasmine:buildToolsCov'
-  'jasmine:loggingCov'
-  'jasmine:loggingProviderCov'
-  'jasmine:netCov'
-  'jasmine:poolCov'
-  'jasmine:webrtcCov'
-  'jasmine:queueCov'
 ]
 
 taskManager.add 'test', ['unit_test', 'integration_test']
