@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "35.1.0",
+  "version": "35.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -56,6 +56,7 @@
     "grunt-vulcanize": "^0.6.0",
     "ipaddr.js": "^1.0.4",
     "jasmine-core": "^2.3.4",
+    "lodash": "^3.10.1",
     "request": "^2.53.0",
     "socks5-http-client": "^1.0.2",
     "ssh2": "0.4.12",
