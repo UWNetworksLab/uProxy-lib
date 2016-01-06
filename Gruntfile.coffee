@@ -62,13 +62,17 @@ config =
     ###
     # Samples.
     ###
-    libsForProvisionChromeApp:
+    libsForDeployerChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome', 'forge-min']
-        pathsFromDevBuild: ['loggingprovider', 'cloud/provision']
-        pathsFromThirdPartyBuild: [
-        ]
-        localDestPath: 'samples/provision-chromeapp/'
+        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+        localDestPath: 'samples/deployer-chromeapp/'
+    libsForDeployerFirefoxApp:
+      Rule.copyLibs
+        npmLibNames: ['freedom-for-firefox', 'forge-min']
+        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+        localDestPath: 'samples/deployer-firefoxapp/data'
+
     libsForZorkChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome']
@@ -295,6 +299,7 @@ config =
           ignore: ['ws', 'path']
           browserifyOptions: { standalone: 'browserified_exports' }
         })
+    digitalOceanFreedomModule: Rule.browserify 'cloud/digitalocean/freedom-module'
     # Sample app freedom modules.
     copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
     copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
@@ -312,12 +317,12 @@ config =
         './src/cloud/social/alias/randombytes.js:randombytes'
       ]
     })
+    deployerFreedomModule: Rule.browserify 'cloud/deployer/freedom-module'
     simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
     simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
     simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
     uprobeFreedomModule: Rule.browserify 'uprobe/freedom-module'
     zorkFreedomModule: Rule.browserify 'zork/freedom-module'
-    provisionFreedomModule: Rule.browserify 'cloud/provision/freedom-module'
     # Sample app main environments (samples with UI).
     copypasteChatMain: Rule.browserify 'copypaste-chat/main.core-env'
     copypasteSocksMain: Rule.browserify 'copypaste-socks/main.core-env'
@@ -428,18 +433,19 @@ taskManager.add 'base', [
   'browserify:loggingProvider'
   'browserify:churnPipeFreedomModule'
   'browserify:cloudSocialProviderFreedomModule'
+  'browserify:digitalOceanFreedomModule'
 ]
 
 taskManager.add 'samples', [
   'echoServer'
   'copypasteChat'
   'copypasteSocks'
+  'deployer'
   'simpleChat'
   'simpleSocks'
   'simpleTurn'
   'uprobe'
   'zork'
-  'provision'
 ]
 
 # Makes the distribution build.
@@ -479,6 +485,13 @@ taskManager.add 'copypasteSocks', [
   'copy:libsForCopyPasteSocksFirefoxApp'
 ]
 
+taskManager.add 'deployer', [
+  'base'
+  'browserify:deployerFreedomModule'
+  'copy:libsForDeployerChromeApp'
+  'copy:libsForDeployerFirefoxApp'
+]
+
 taskManager.add 'simpleChat', [
   'base'
   'browserify:simpleChatFreedomModule'
@@ -515,12 +528,6 @@ taskManager.add 'zork', [
   'copy:libsForZorkChromeApp'
   'copy:libsForZorkFirefoxApp'
   'copy:libsForZorkNode'
-]
-
-taskManager.add 'provision', [
-  'base'
-  'browserify:provisionFreedomModule'
-  'copy:libsForProvisionChromeApp'
 ]
 
 specList = Rule.getTests('src', undefined, ['integration-tests'])
