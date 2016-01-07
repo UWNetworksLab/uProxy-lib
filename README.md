@@ -1,3 +1,4 @@
+[![NPM version](https://img.shields.io/npm/v/uproxy-lib.svg)](https://www.npmjs.com/package/uproxy-lib)
 [![Build Status](https://travis-ci.org/uProxy/uproxy-lib.svg?branch=master)](https://travis-ci.org/uProxy/uproxy-lib)
 [![Build Status](https://api.shippable.com/projects/54c823bf5ab6cc135289fbd8/badge?branchName=dev)](https://app.shippable.com/projects/54c823bf5ab6cc135289fbd8/builds/latest)
 [![devDependency Status](https://david-dm.org/uProxy/uproxy-lib/dev-status.svg)](https://david-dm.org/uProxy/uproxy-lib#info=devDependencies)
