@@ -63,7 +63,7 @@ function bind(i:number = 0) : Promise<tcp.Server> {
 
 // Sends a reply to the client, appending a newline.
 var sendReply = (message:string, connection:tcp.Connection) : void => {
-  log.debug('%1: sending reply: %2', connection.connectionId, message);
+  log.info('%1: sending reply: %2', connection.connectionId, message);
   connection.send(arraybuffers.stringToArrayBuffer(message + '\n'));
 }
 
@@ -77,7 +77,7 @@ function serveConnection(connection: tcp.Connection): void {
 
   const lineFeeder = new linefeeder.LineFeeder(connection.dataFromSocketQueue);
   var processCommand = (command: string) => {
-    log.debug('%1: received command: %2', connection.connectionId, command);
+    log.info('%1: received command: %2', connection.connectionId, command);
 
     let keepParsing = false;
     var words = command.split(' ');
@@ -177,7 +177,7 @@ function get(
   });
 
   lines.setSyncHandler((signal:string): void => {
-    log.debug('%1: received signalling message: %2',
+    log.info('%1: received signalling message: %2',
       connection.connectionId, signal);
     try {
       socksToRtc.handleSignalFromPeer(JSON.parse(signal));
@@ -199,10 +199,10 @@ function give(
   rtcToNet.start({
     allowNonUnicast: true
   }, bridge.best('rtctonet', pcConfig)).then(() => {
-    log.info('RtcToNet connected');
+    log.info('%1: RtcToNet connected', connection.connectionId);
     connection.close();
   }, (e: Error) => {
-    log.error('%1: failed to start rtcToNet: %1',
+    log.error('%1: failed to start rtcToNet: %2',
         connection.connectionId, e.message);
     connection.close();
   });
@@ -213,7 +213,7 @@ function give(
   });
 
   lines.setSyncHandler((signal: string): void => {
-    log.debug('%1: received signalling message: %2',
+    log.info('%1: received signalling message: %2',
       connection.connectionId, signal);
     try {
       rtcToNet.handleSignalFromPeer(JSON.parse(signal));
