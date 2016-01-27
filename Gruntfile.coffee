@@ -65,12 +65,12 @@ config =
     libsForDeployerChromeApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-chrome', 'forge-min']
-        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean', 'cloud/install']
         localDestPath: 'samples/deployer-chromeapp/'
     libsForDeployerFirefoxApp:
       Rule.copyLibs
         npmLibNames: ['freedom-for-firefox', 'forge-min']
-        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean']
+        pathsFromDevBuild: ['loggingprovider', 'cloud/deployer', 'cloud/digitalocean', 'cloud/install']
         localDestPath: 'samples/deployer-firefoxapp/data'
 
     libsForZorkChromeApp:
@@ -299,11 +299,20 @@ config =
           ignore: ['ws', 'path']
           browserifyOptions: { standalone: 'browserified_exports' }
         })
-    digitalOceanFreedomModule: Rule.browserify 'cloud/digitalocean/freedom-module'
-    # Sample app freedom modules.
-    copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
-    copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
-    echoServerFreedomModule: Rule.browserify 'echo/freedom-module'
+    # TODO: Make the browserified SSH stuff re-useable, e.g. freedomjs module.
+    cloudInstallerFreedomModule: Rule.browserify('cloud/install/freedom-module', {
+      alias : [
+        # Shims for node's dns and net modules from freedom-social-xmpp,
+        # with a couple of fixes.
+        './src/cloud/social/shim/net.js:net'
+        './src/cloud/social/shim/dns.js:dns'
+        # Subset of ssh2-streams (all except SFTP) which works well in
+        # the browser.
+        './src/cloud/social/alias/ssh2-streams.js:ssh2-streams'
+        # Fallback for crypto-browserify's randombytes, for Firefox.
+        './src/cloud/social/alias/randombytes.js:randombytes'
+      ]
+    })
     cloudSocialProviderFreedomModule: Rule.browserify('cloud/social/freedom-module', {
       alias : [
         # Shims for node's dns and net modules from freedom-social-xmpp,
@@ -317,7 +326,12 @@ config =
         './src/cloud/social/alias/randombytes.js:randombytes'
       ]
     })
+    digitalOceanFreedomModule: Rule.browserify 'cloud/digitalocean/freedom-module'
+    # Sample app freedom modules.
+    copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
+    copypasteSocksFreedomModule: Rule.browserify 'copypaste-socks/freedom-module'
     deployerFreedomModule: Rule.browserify 'cloud/deployer/freedom-module'
+    echoServerFreedomModule: Rule.browserify 'echo/freedom-module'
     simpleChatFreedomModule: Rule.browserify 'simple-chat/freedom-module'
     simpleSocksFreedomModule: Rule.browserify 'simple-socks/freedom-module'
     simpleTurnFreedomModule: Rule.browserify 'simple-turn/freedom-module'
@@ -432,6 +446,7 @@ taskManager.add 'base', [
   'ts:srcInCoreEnv'
   'browserify:loggingProvider'
   'browserify:churnPipeFreedomModule'
+  'browserify:cloudInstallerFreedomModule'
   'browserify:cloudSocialProviderFreedomModule'
   'browserify:digitalOceanFreedomModule'
 ]
