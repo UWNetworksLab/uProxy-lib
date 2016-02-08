@@ -284,6 +284,14 @@ config =
         sourceMap: false
         target: 'es5'
 
+  tslint:
+    options:
+      configuration: 'src/tslint.json'
+    files:
+      src: [
+        'src/**/*.ts'
+      ]
+
   jasmine: {}
 
   browserify:
@@ -467,6 +475,7 @@ taskManager.add 'samples', [
 taskManager.add 'dist', [
   'base'
   'samples'
+  'lint'
   'test'
   'coverage'
   'copy:dist'
@@ -588,6 +597,8 @@ taskManager.add 'integration_test', [
   'jasmine_firefoxaddon'  # Currently only TCP test
 ]
 
+taskManager.add 'lint', ['tslint']
+
 taskManager.add 'test', ['unit_test', 'integration_test']
 
 # Default task, build dev, run tests, make the distribution build.
@@ -608,6 +619,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-jasmine-chromeapp'
   grunt.loadNpmTasks 'grunt-jasmine-firefoxaddon'
   grunt.loadNpmTasks 'grunt-ts'
+  grunt.loadNpmTasks 'grunt-tslint'
   grunt.loadNpmTasks 'grunt-vulcanize'
 
   #-------------------------------------------------------------------------

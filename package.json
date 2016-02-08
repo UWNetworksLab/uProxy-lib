@@ -53,6 +53,7 @@
     "grunt-jasmine-firefoxaddon": "^0.3.2",
     "grunt-template-jasmine-istanbul": "^0.4.0",
     "grunt-ts": "^5.1.1",
+    "grunt-tslint": "^3.0.1",
     "grunt-vulcanize": "^0.6.0",
     "ipaddr.js": "^1.0.4",
     "jasmine-core": "^2.3.4",
@@ -62,6 +63,7 @@
     "ssh2": "0.4.12",
     "ssh2-streams": "0.0.18",
     "tsd": "^0.6.5",
+    "tslint": "^3.3.0",
     "typescript": "^1.6.2",
     "yargs": "^3.0.4"
   },
