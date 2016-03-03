@@ -52,7 +52,7 @@
     "grunt-jasmine-chromeapp": "git://github.com/uproxy/grunt-jasmine-chromeapp",
     "grunt-jasmine-firefoxaddon": "^0.3.2",
     "grunt-template-jasmine-istanbul": "^0.4.0",
-    "grunt-ts": "^5.1.1",
+    "grunt-ts": "^5.3.2",
     "grunt-tslint": "^3.0.1",
     "grunt-vulcanize": "^0.6.0",
     "ipaddr.js": "^1.0.4",
@@ -64,7 +64,7 @@
     "ssh2-streams": "0.0.18",
     "tsd": "^0.6.5",
     "tslint": "^3.3.0",
-    "typescript": "^1.6.2",
+    "typescript": "~1.8.2",
     "yargs": "^3.0.4"
   },
   "scripts": {
