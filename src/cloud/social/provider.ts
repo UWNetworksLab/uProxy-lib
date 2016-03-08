@@ -564,10 +564,31 @@ class Connection {
     return this.exec_('cat /banner');
   }
 
-  // Returns a base64-decoded, deserialised invite code.
+  // Returns an object to be used as the networkData field in an invitation URL.
   public issueInvite = (): Promise<Object> => {
-    return this.exec_('sudo /issue_invite.sh').then((inviteCode: string) => {
-      return JSON.parse(new Buffer(inviteCode, 'base64').toString());
+    return this.exec_('sudo /issue_invite.sh').then((output: string) => {
+      // Newer cloud servers output this JSON blob:
+      //   {
+      //     "host": "<IP or hostname>",
+      //     "user": "<giver or getter>",
+      //     "key": "<base64-encoded SSH private key"
+      //   }
+      //
+      // Originally, cloud servers output this base64-encoded JSON blob:
+      //   {
+      //     "networkName": "Cloud"
+      //     "networkData": "<the above JSON blob>"
+      //   }
+      //
+      // Yes, that was weird. To support those older servers we first try to
+      // base64-decode the output. If we discover base64, we return the decoded
+      // object's "networkData" field - otherwise, return the output verbatim.
+      try {
+        const decodedOutput = JSON.parse(new Buffer(output, 'base64').toString());
+        return decodedOutput.networkData;
+      } catch (e) {
+        return output;
+      }
     });
   }
 
