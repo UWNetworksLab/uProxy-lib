@@ -22,27 +22,22 @@ const ZORK_PORT = 9000;
 // Key under which our contacts are saved in storage.
 const STORAGE_KEY = 'cloud-social-contacts';
 
-// Admin users can issue invites.
-const ADMIN_USERNAME = 'giver';
-const REGULAR_USERNAME = 'getter';
-
 // Timeout for establishing an SSH connection.
 const CONNECT_TIMEOUT_MS = 10000;
 
 // Credentials for accessing a cloud instance.
 // The serialised, base64 form is distributed amongst users.
-// TODO: add (private) keys, for key-based auth
 interface Invite {
   // Hostname or IP of the cloud instance.
   // This is the host on which sshd is running, so it should
   // be directly accessible from the client.
-  host?: string;
+  host: string;
   // Username.
-  user?: string;
-  // Password.
-  pass?: string;
+  user: string;
   // Private key, base64-encoded.
-  key?: string;
+  key: string;
+  // True iff uProxy has root access on the server, i.e. uProxy deployed it.
+  isAdmin?: boolean;
 }
 
 // Type of the object placed, in serialised form, in storage
@@ -130,11 +125,9 @@ function makeClientState(address: string): freedom.Social.ClientState {
 // the status field since remote-user.ts#update will use FRIEND as a default.
 function makeUserProfile(
     address: string,
-    username :string): freedom.Social.UserProfile {
-  var status = UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
-  if (username === ADMIN_USERNAME) {
-    status = UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL;
-  }
+    isAdmin ?:boolean): freedom.Social.UserProfile {
+  var status = isAdmin ? UserStatus.CLOUD_INSTANCE_CREATED_BY_LOCAL :
+      UserStatus.CLOUD_INSTANCE_SHARED_WITH_LOCAL;
   return {
     userId: address,
     name: address,
@@ -146,8 +139,7 @@ function makeUserProfile(
 //
 // Intended for use with the run_cloud.sh script in the uproxy-docker
 // repo, which will spin up the expected configuration:
-//  - an SSH server running on port 5000, with an account named
-//    "giver" having the password "giver"
+//  - an SSH server running on port 5000, with an account named "giver"
 //  - a Zork instance, accessible from the SSH server at the
 //    hostname "zork"
 //
@@ -180,7 +172,7 @@ export class CloudSocialProvider {
   // in the contacts list.
   private notifyOfUser_ = (invite: Invite, description?: string) => {
     this.dispatchEvent_('onUserProfile',
-        makeUserProfile(invite.host, invite.user));
+        makeUserProfile(invite.host, invite.isAdmin));
 
     var clientState = makeClientState(invite.host);
     this.dispatchEvent_('onClientState', clientState);
@@ -363,26 +355,19 @@ export class CloudSocialProvider {
   // social2
   ////
 
-  // Returns a new invite code for the specified server.
-  // Rejects if the user is not logged in as an admin or there
-  // is any error executing the command.
-  // TODO: typings for invite codes
-  public inviteUser = (clientId: string): Promise<Object> => {
+  // Returns the invite code for the specified server.
+  public inviteUser = (host: string): Promise<Object> => {
     log.debug('inviteUser');
-    if (!(clientId in this.savedContacts_)) {
+    if (!(host in this.savedContacts_)) {
       return Promise.reject({
-        message: 'unknown cloud instance ' + clientId
+        message: 'unknown cloud instance ' + host
       });
     }
-    if (this.savedContacts_[clientId].invite.user !== ADMIN_USERNAME) {
-      return Promise.reject({
-        message: 'user is logged in as non-admin user ' +
-            this.savedContacts_[clientId].invite.user
-      });
-    }
-    return this.reconnect_(this.savedContacts_[clientId].invite).then(
-        (connection: Connection) => {
-      return connection.issueInvite();
+    const invite = this.savedContacts_[host].invite;
+    return Promise.resolve(<Invite>{
+      host: invite.host,
+      user: invite.user,
+      key: invite.key
     });
   }
 
@@ -461,9 +446,6 @@ class Connection {
 
     if (this.invite_.key) {
       connectConfig['privateKey'] = new Buffer(this.invite_.key, 'base64');
-    } else {
-      log.warn('using password-based auth, support will be removed soon!');
-      connectConfig['password'] = this.invite_.pass;
     }
 
     return new Promise<void>((F, R) => {
@@ -527,7 +509,7 @@ class Connection {
           });
       }).on('error', (e: Error) => {
         // This occurs when:
-        //  - user supplies the wrong username or password
+        //  - user supplies the wrong credentials
         //  - host cannot be reached, e.g. non-existant hostname
         log.warn('%1: connection error: %2', this.name_, e);
         this.setState_(ConnectionState.TERMINATED);
@@ -562,13 +544,6 @@ class Connection {
   // Fetches the server's description, i.e. /banner.
   public getBanner = (): Promise<string> => {
     return this.exec_('cat /banner');
-  }
-
-  // Returns a base64-decoded, deserialised invite code.
-  public issueInvite = (): Promise<Object> => {
-    return this.exec_('sudo /issue_invite.sh').then((inviteCode: string) => {
-      return JSON.parse(new Buffer(inviteCode, 'base64').toString());
-    });
   }
 
   // Executes a command, fulfilling with the first line of the command's
