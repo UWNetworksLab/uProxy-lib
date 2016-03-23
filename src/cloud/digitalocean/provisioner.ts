@@ -19,6 +19,7 @@ const DEFAULT_SIZE: string = '1gb';
 
 const STATUS_CODES: { [k: string]: string; } = {
   'START': 'Starting provisioner',
+  'STOP': 'Stopping cloud server',
   'OAUTH_INIT': 'Initializing oauth flow',
   'OAUTH_ERROR': 'Error getting oauth token',
   'OAUTH_COMPLETE': 'Got oauth token',
@@ -99,13 +100,28 @@ class Provisioner {
 
   /**
    * One-click destruction of a VM
-   * See freedom-module.json for return and error types
-   * @todo currently doesnt wait for destroy to complete before resolving
    * @param {String} name of VM to create
-   * @return {Promise.<Object>}
+   * @return {Promise.<void>}
    */
-  public stop = (name: string) : Promise<Object> => {
+  public stop = (name: string): Promise<void> => {
+    this.sendStatus_('STOP');
+    return this.doOAuth_().then((oauthObj: any) => {
+      this.state_.oauth = oauthObj;
+    }).then(() => {
+      return this.destroyServer_(name);
+    });
+  }
+
+  /**
+   * Destroys cloud server; assumes OAuth has already been completed
+   * @todo DELETE request does not return a response body so we
+   * need to check that the response header indicates success (204)
+   * @param {String} droplet name, as a string
+   * @return {Promise.<void>}
+   */
+  private destroyServer_ = (name: string): Promise<void> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
+      // Find and delete the server with the same name
       for (var i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
           return Promise.resolve({
@@ -115,10 +131,11 @@ class Provisioner {
       }
       return Promise.reject({
         'errcode': 'VM_DNE',
-        'message': 'Droplet with name,' + name + ', doesnt exist'
+        'message': 'Droplet ' + name + ' doesnt exist'
       });
     }).then((resp: any) => {
-      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+      this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+      return Promise.resolve<void>();
     });
   }
 
