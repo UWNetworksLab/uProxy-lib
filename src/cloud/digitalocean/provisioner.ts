@@ -36,6 +36,7 @@ const STATUS_CODES: { [k: string]: string; } = {
 };
 
 const ERR_CODES: { [k: string]: string; } = {
+  'VM_AE': 'VM already exists.',
   'VM_DNE': 'VM does not exist',
   'CLOUD_ERR': 'Error from cloud provider'
 };
@@ -67,14 +68,23 @@ class Provisioner {
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
       return this.getSshKey_(name);
-      // Get SSH keys
     }).then((keys: KeyPair) => {
+       // Get SSH keys
       this.state_.ssh = keys;
-      return this.setupDigitalOcean_(name, region, image, size);
-      // Setup Digital Ocean (SSH key + droplet)
+      return this.getDroplet_(name).then((unused :any) => {
+        // Droplet exists so raise error
+        return Promise.reject({
+          'errcode': 'VM_AE',
+          'message': 'Droplet ' + name + ' already exists'
+        });
+      }, (e: Error) => {
+        // Droplet does not exist so continue creating new server
+        // Setup Digital Ocean (SSH key + droplet)
+        return this.setupDigitalOcean_(name, region, image, size);
+      });
     }).then(() => {
-      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
       // Get the droplet's configuration
+      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
     }).then((resp: any) => {
       this.sendStatus_('CLOUD_DONE_VM');
       this.state_.cloud.vm = resp.droplet;
@@ -114,10 +124,36 @@ class Provisioner {
 
   /**
    * Destroys cloud server; assumes OAuth has already been completed
+   * This method will use this.waitDigitalOceanActions_() to wait until the server is deleted
    * @param {String} droplet name, as a string
    * @return {Promise.<void>}
    */
   private destroyServer_ = (name: string): Promise<void> => {
+    return this.doRequest_('GET', 'droplets').then((resp: any) => {
+      // Find and delete the server with the same name
+      return this.getDroplet_(name);
+    }).then((resp :any) => {
+      this.state_.cloud = {};
+      this.state_.cloud.vm = resp.droplet;
+      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
+    }).then((resp: any) => {
+      if (resp.status.startsWith('204')) {
+        // Wait until server is deleted
+        this.sendStatus_('CLOUD_WAITING_VM');
+        return this.waitDigitalOceanActions_();
+      } else {
+        return Promise.reject(new Error('error deleting droplet'));
+      }
+    });
+  }
+
+  /**
+   * Finds a droplet with this name
+   * @param {String} droplet name, as a string
+   * @return {Promise.<Object>}, resolves with {droplet: droplet_with_name}
+   * or rejects if droplet doesn't exist
+   */
+  private getDroplet_ = (name: string) : Promise<Object> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
       // Find and delete the server with the same name
       for (var i = 0; i < resp.droplets.length; i++) {
@@ -131,13 +167,6 @@ class Provisioner {
         'errcode': 'VM_DNE',
         'message': 'Droplet ' + name + ' doesnt exist'
       });
-    }).then((resp: any) => {
-      return this.doRequest_('DELETE', 'droplets/' + resp.droplet.id);
-    }).then((resp: any) => {
-      if (resp.status.startsWith('204')) {
-        return Promise.resolve<void>();
-      }
-      return Promise.reject(new Error('error deleting droplet'));
     });
   }
 
