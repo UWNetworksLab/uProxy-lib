@@ -43,7 +43,7 @@ if "%1" NEQ "third_party" if "%1" NEQ "clean" (
 	%~1
 goto:eof
 
-:: On Windows, npm, bower, tsd, and grunt are batch files
+:: On Windows, npm, bower, typings, and grunt are batch files
 :: So we have to explicitly call then with "call"
 :: These also happen to be the commands that we want to assert, 
 :: or exit on failure for, so there is an additional "exit /b"
@@ -72,13 +72,10 @@ goto:eof
 	call :runCmd "copy build\dev\uproxy-lib\build-tools\*.js build\tools\"
 goto:eof
 
-:: Note: The "tsd reinstall" command seems to create a third_party/third_party folder 
-:: on Windows, so we manually delete this after
 :thirdParty
 	call :runAndAssertCmdArgs "%NPM_BIN_DIR%bower" install --allow-root
 	call :runCmd "mkdir build\third_party"
-	call :runAndAssertCmdArgs "%NPM_BIN_DIR%tsd" reinstall --config .\third_party\tsd.json
-	call :runCmd "rmdir third_party\third_party /s /q"
+	call :runAndAssertCmdArgs cd third_party; "%NPM_BIN_DIR%tsd" reinstall --config .\third_party\tsd.json; cd ..
 	call :runCmd "robocopy third_party\ build\third_party\ /s /e > nul 2>&1"
 	call :runCmd "mkdir build\third_party\freedom-pgp-e2e"
 	call :runCmd "copy node_modules\freedom-pgp-e2e\dist build\third_party\freedom-pgp-e2e\"

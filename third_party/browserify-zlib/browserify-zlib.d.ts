@@ -1,4 +1,4 @@
-/// <reference path='../typings/node/node.d.ts' />
+/// <reference path='../typings/browser.d.ts' />
 
 // TypeScript definitions for browserify-zlib:
 //   https://github.com/devongovett/browserify-zlib
