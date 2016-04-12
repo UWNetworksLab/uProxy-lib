@@ -62,9 +62,9 @@
     "socks5-http-client": "^1.0.2",
     "ssh2": "0.4.12",
     "ssh2-streams": "0.0.18",
-    "tsd": "^0.6.5",
     "tslint": "^3.3.0",
     "typescript": "~1.8.2",
+    "typings": "^0.7.12",
     "yargs": "^3.0.4"
   },
   "scripts": {
