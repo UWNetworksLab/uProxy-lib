@@ -314,9 +314,8 @@ config =
         # with a couple of fixes.
         './src/cloud/social/shim/net.js:net'
         './src/cloud/social/shim/dns.js:dns'
-        # Subset of ssh2-streams (all except SFTP) which works well in
-        # the browser.
-        './src/cloud/social/alias/ssh2-streams.js:ssh2-streams'
+        # Alternative that works for freedomjs modules.
+        './src/cloud/social/alias/brorand.js:brorand'
         # Fallback for crypto-browserify's randombytes, for Firefox.
         './src/cloud/social/alias/randombytes.js:randombytes'
       ]
@@ -327,9 +326,8 @@ config =
         # with a couple of fixes.
         './src/cloud/social/shim/net.js:net'
         './src/cloud/social/shim/dns.js:dns'
-        # Subset of ssh2-streams (all except SFTP) which works well in
-        # the browser.
-        './src/cloud/social/alias/ssh2-streams.js:ssh2-streams'
+        # Alternative that works for freedomjs modules.
+        './src/cloud/social/alias/brorand.js:brorand'
         # Fallback for crypto-browserify's randombytes, for Firefox.
         './src/cloud/social/alias/randombytes.js:randombytes'
       ]
