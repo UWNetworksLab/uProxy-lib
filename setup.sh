@@ -39,7 +39,7 @@ function thirdParty ()
 {
   runAndAssertCmd "$NPM_BIN_DIR/bower install --allow-root --config.interactive=false"
   runAndAssertCmd "mkdir -p build/third_party"
-  runAndAssertCmd "$NPM_BIN_DIR/tsd reinstall --config ./third_party/tsd.json"
+  runAndAssertCmd "pushd third_party && $NPM_BIN_DIR/typings install && popd"
   runAndAssertCmd "cp -r third_party/* build/third_party/"
   runAndAssertCmd "mkdir -p build/third_party/freedom-pgp-e2e"
   runAndAssertCmd "cp -r node_modules/freedom-pgp-e2e/dist build/third_party/freedom-pgp-e2e/"

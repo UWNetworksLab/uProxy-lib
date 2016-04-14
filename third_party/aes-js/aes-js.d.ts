@@ -1,4 +1,4 @@
-/// <reference path='../typings/node/node.d.ts' />
+/// <reference path='../typings/browser.d.ts' />
 
 // TypeScript definitions for aes-js:
 //   https://github.com/ricmoo/aes-js
