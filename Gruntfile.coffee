@@ -424,6 +424,7 @@ config =
         outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp_slow/'
         keepRunner: true
 
+  # Not currently included in any target due to flakiness.
   jasmine_firefoxaddon:
     tests: [
       devBuildPath + '/integration-tests/tcp/tcp.core-env.spec.static.js'
@@ -592,7 +593,6 @@ taskManager.add 'socksEchoIntegrationTest', [
 taskManager.add 'integration_test', [
   'tcpIntegrationTest'
   'socksEchoIntegrationTest'
-  'jasmine_firefoxaddon'  # Currently only TCP test
 ]
 
 taskManager.add 'lint', ['tslint']
