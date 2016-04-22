@@ -1,4 +1,5 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
+/// <reference path='../../../../third_party/sha1/sha1.d.ts' />
 
 require('../social/monkey/process');
 
@@ -7,6 +8,8 @@ import linefeeder = require('../../net/linefeeder');
 import logging = require('../../logging/logging');
 import promises = require('../../promises/promises');
 import queue = require('../../handler/queue');
+
+import sha1 = require('crypto/sha1');
 
 // https://github.com/borisyankov/DefinitelyTyped/blob/master/ssh2/ssh2-tests.ts
 import * as ssh2 from 'ssh2';
@@ -44,6 +47,8 @@ interface Invite {
   key: string;
   // True iff uProxy has root access on the server, i.e. uProxy deployed it.
   isAdmin?: boolean;
+  // (optional) host key that should be used to verify the server
+  hostKey?: string;
 }
 
 // Type of the object placed, in serialised form, in storage
@@ -472,6 +477,15 @@ class Connection {
 
     if (this.invite_.key) {
       connectConfig['privateKey'] = new Buffer(this.invite_.key, 'base64');
+    }
+
+    if (this.invite_.hostKey) {
+      connectConfig.hostHash = 'sha1';
+      let key_buffer = new Buffer(this.invite_.hostKey, 'base64');
+      let expectedHash = sha1.hex_sha1(key_buffer.toString('binary'));
+      connectConfig.hostVerifier = (keyHash :string) => {
+        return keyHash === expectedHash;
+      };
     }
 
     return new Promise<void>((F, R) => {
