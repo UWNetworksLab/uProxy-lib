@@ -298,15 +298,7 @@ config =
     # Browserify freedom-modules in the library
     loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
     echoFreedomModule: Rule.browserify 'echo/freedom-module'
-    churnPipeFreedomModule: Rule.browserify(
-        'churn-pipe/freedom-module',
-        {
-          # Emscripten, used to compile FTE and Rabbit to JS has unused
-          # require statements for `ws` and for `path` that need to be
-          # ignored.
-          ignore: ['ws', 'path']
-          browserifyOptions: { standalone: 'browserified_exports' }
-        })
+    churnPipeFreedomModule: Rule.browserify 'churn-pipe/freedom-module'
     # TODO: Make the browserified SSH stuff re-useable, e.g. freedomjs module.
     cloudInstallerFreedomModule: Rule.browserify('cloud/install/freedom-module', {
       alias : [
@@ -424,6 +416,7 @@ config =
         outDir: devBuildPath + '/integration-tests/socks-echo/jasmine_chromeapp_slow/'
         keepRunner: true
 
+  # Not currently included in any target due to flakiness.
   jasmine_firefoxaddon:
     tests: [
       devBuildPath + '/integration-tests/tcp/tcp.core-env.spec.static.js'
@@ -592,7 +585,6 @@ taskManager.add 'socksEchoIntegrationTest', [
 taskManager.add 'integration_test', [
   'tcpIntegrationTest'
   'socksEchoIntegrationTest'
-  'jasmine_firefoxaddon'  # Currently only TCP test
 ]
 
 taskManager.add 'lint', ['tslint']
