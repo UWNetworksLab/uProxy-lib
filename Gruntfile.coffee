@@ -298,15 +298,7 @@ config =
     # Browserify freedom-modules in the library
     loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
     echoFreedomModule: Rule.browserify 'echo/freedom-module'
-    churnPipeFreedomModule: Rule.browserify(
-        'churn-pipe/freedom-module',
-        {
-          # Emscripten, used to compile FTE and Rabbit to JS has unused
-          # require statements for `ws` and for `path` that need to be
-          # ignored.
-          ignore: ['ws', 'path']
-          browserifyOptions: { standalone: 'browserified_exports' }
-        })
+    churnPipeFreedomModule: Rule.browserify 'churn-pipe/freedom-module'
     # TODO: Make the browserified SSH stuff re-useable, e.g. freedomjs module.
     cloudInstallerFreedomModule: Rule.browserify('cloud/install/freedom-module', {
       alias : [
