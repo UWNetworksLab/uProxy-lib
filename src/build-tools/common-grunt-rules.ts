@@ -118,8 +118,8 @@ export class Rule {
     },
     alias: {
       // From freedom-social-xmpp, with a couple of fixes.
-      'net': './src/build-tools/alias/shim/net.js',
-      'dns': './src/build-tools/alias/shim/dns.js',
+      'net': './src/build-tools/alias/net.js',
+      'dns': './src/build-tools/alias/dns.js',
       // For ssh2.
       'brorand': './src/build-tools/alias/brorand.js',
       // Delegates to crypto.getRandomValues, for calls to crypto.randomBytes.
