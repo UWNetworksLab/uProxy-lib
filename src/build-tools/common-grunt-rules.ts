@@ -112,11 +112,24 @@ export class Rule {
   }
 
   // Grunt browserify target creator
-  public browserify(filepath:string, options = {
-        browserifyOptions: { standalone: 'browserified_exports' }
-      }) :BrowserifyRule {
+  public browserify(filepath: string, options = {
+    browserifyOptions: {
+      standalone: 'browserified_exports'
+    },
+    alias: {
+      // From freedom-social-xmpp, with a couple of fixes.
+      'net': './src/build-tools/alias/shim/net.js',
+      'dns': './src/build-tools/alias/shim/dns.js',
+      // For ssh2.
+      'brorand': './src/build-tools/alias/brorand.js',
+      // Delegates to crypto.getRandomValues, for calls to crypto.randomBytes.
+      // Falls back to Math.random when crypto.getRandomValues is unavailable,
+      // for web workers in Firefox add-ons.
+      'randombytes': './src/build-tools/alias/randombytes.js'
+    }
+  }): BrowserifyRule {
     return {
-      src: [ path.join(this.config.devBuildPath, filepath + '.js') ],
+      src: [path.join(this.config.devBuildPath, filepath + '.js')],
       dest: path.join(this.config.devBuildPath, filepath + '.static.js'),
       options: options
     };
