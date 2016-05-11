@@ -519,6 +519,18 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
     }
   }
 
+  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
+    this.obfuscatedConnection_.registerMessageHandler(name, fn);
+  }
+
+  // Send a message to the peer.
+  public sendMessage = (name:string, msg:any) :Promise<void> => {
+    return this.obfuscatedConnection_.onceConnected.then( () => {
+      this.obfuscatedConnection_.sendMessage(name, msg);
+    });
+  }
+
+
   public openDataChannel = (channelLabel:string,
       options?:freedom.RTCPeerConnection.RTCDataChannelInit)
       : Promise<peerconnection.DataChannel> => {

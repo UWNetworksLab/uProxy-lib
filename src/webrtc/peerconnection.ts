@@ -45,6 +45,13 @@ export interface PeerConnection<TSignallingMessage> {
   // Returns onceConnected.
   negotiateConnection :() => Promise<void>;
 
+  // Special messaging API.  These can go over a short-life data
+  // channel, a special messaging channel, orhatever.
+  // Register for messages matching a name:
+  registerMessageHandler :(name:string, fn:(name:string, msg:any) => void) => void;
+  // Send a message to the peer.
+  sendMessage :(name:string, msg:any) => Promise<void>
+
   // A peer connection can either open a data channel to the peer (will
   // change from |WAITING| state to |CONNECTING|)
   openDataChannel :(channelLabel: string,
@@ -80,6 +87,9 @@ var HEARTBEAT_INTERVAL_MS_ = 5000;
 
 // Message which is sent for heartbeats.
 var HEARTBEAT_MESSAGE_ = 'heartbeat';
+
+// Custom message.
+var CUSTOM_MESSAGE_ = 'custom';
 
 // A wrapper for peer-connection and it's associated data channels.
 // The most important diagram is this one:
@@ -183,6 +193,8 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.fulfillClosed_ = F;
   });
 
+  private messageHandlers_ :{[name:string]:(name:string, msg:any) => void} = {};
+
   // Fulfills once the remote description has been set.
   // Used to delay setting of remote ICE candidates until the call to
   // setRemoteDescription has resolved, which can cause timing issues.
@@ -241,6 +253,16 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         this.pc_.close();
       }
     });
+  }
+
+  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
+    this.messageHandlers_[name] = fn;
+  }
+
+  // Send a message to the peer.
+  public sendMessage = (name:string, msg:any) :Promise<void> => {
+    return this.channels_[CONTROL_CHANNEL_LABEL].send(
+      { 'str': JSON.stringify({ CUSTOM_MESSAGE_ : name, 'value': msg })});
   }
 
   // The RTCPeerConnection signalingState has changed. This state change is
@@ -577,8 +599,30 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       if (data.str === HEARTBEAT_MESSAGE_) {
         lastPingTimestamp = Date.now();
       } else {
-        log.warn('%1: unexpected data on control channel: %2',
-            this.peerName_, data);
+        var shouldWarn = true;
+        try {
+          var payload:any = JSON.parse(data.str);
+          if (payload[CUSTOM_MESSAGE_] !== undefined) {
+            // This JSON structure is implicitly definedin sendMessage().
+            var name:string = payload[CUSTOM_MESSAGE_].toString();
+            if (this.messageHandlers_[name] !== undefined) {
+              this.messageHandlers_[name](name, payload.value);
+              shouldWarn = false;
+            }
+          }
+        } catch (e) {
+          // if the JSON parse fails, or if the message handler
+          // throws, log a more substantial error here.
+          log.error('%1: caught exception from message on control channel: ' +
+                    '%2 (payload=%3)', this.peerName_, e.toString(), data);
+          // We've already complained enough about the data.  Disable
+          // the log warning.
+          shouldWarn = false;
+        }
+        if (!shouldWarn) {
+          log.warn('%1: unexpected data on control channel: %2',
+                   this.peerName_, data);
+        };
       }
     });
 
@@ -637,4 +681,16 @@ export function createPeerConnection(
   // closing down of |freedomRtcPc| once the underlying peer connection is
   // closed.
   return new PeerConnectionClass(freedomRtcPc, debugPcName);
+}
+
+// Given a PeerConnection and way for it to send messages, start
+// negotiating a PeerConnection.  Note that the caller is still
+// responsible for sending signals to the PeerConnection (e.g.,
+// invoking handleSignalMessage).
+export function setupPeerConnection(
+  pc:PeerConnection<signals.Message>,
+  signalForPeer:(x:signals.Message) => void) :Promise<void> {
+  pc.signalForPeerQueue.setSyncHandler(signalForPeer);
+  pc.negotiateConnection();
+  return pc.onceConnected;
 }

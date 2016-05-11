@@ -345,4 +345,18 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     }
     return this.onceClosed;
   }
+
+  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
+    this.provider_.registerMessageHandler(name, fn);
+  }
+
+  // Send a message to the peer.
+  public sendMessage = (name:string, msg:any) :Promise<void> => {
+    return this.provider_.onceConnected.then( () => {
+      this.provider_.sendMessage(name, msg);
+    });
+  }
+
+
+
 }
