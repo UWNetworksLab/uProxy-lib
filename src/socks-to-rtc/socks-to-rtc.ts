@@ -86,8 +86,10 @@ module SocksToRtc {
       }
     }
 
-    // Starts the SOCKS server with the supplied TCP server and peerconnection.
-    // Returns a promise that resolves when the server is ready to use.
+    // Starts the SOCKS server with the supplied TCP server and
+    // peerconnection.  Peerconnection should already be negotiated,
+    // or in the process thereof.  Returns a promise that resolves
+    // when the server is ready to use.
     public start = (
         tcpServer:tcp.Server,
         peerconnection:peerconnection.PeerConnection<Object>)
@@ -101,8 +103,9 @@ module SocksToRtc {
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(this.peerConnection_, 'SocksToRtc');
 
+          /*
       this.peerConnection_.signalForPeerQueue.setSyncHandler(
-          this.dispatchEvent_.bind(this, 'signalForPeer'));
+          this.dispatchEvent_.bind(this, 'signalForPeer')); */
 
       this.bytesSentToPeer_.setSyncHandler(
           this.dispatchEvent_.bind(this, 'bytesSentToPeer'));
@@ -110,7 +113,7 @@ module SocksToRtc {
           this.dispatchEvent_.bind(this, 'bytesReceivedFromPeer'));
 
       // Start and listen for notifications.
-      peerconnection.negotiateConnection();
+      // peerconnection.negotiateConnection();
       var onceReady :Promise<net.Endpoint> =
         Promise.all<any>([
           tcpServer.listen(),
