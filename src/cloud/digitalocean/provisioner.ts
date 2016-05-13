@@ -1,5 +1,7 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import promises = require('../../promises/promises');
+
 declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
@@ -70,10 +72,10 @@ class Provisioner {
       this.state_.oauth = oauthObj;
       return this.getSshKey_(name);
     }).then((keys: KeyPair) => {
-       // Get SSH keys
+      // Get SSH keys
       this.state_.ssh = keys;
 
-      return this.getDropletByName_(name).then((unused :any) => {
+      return this.getDropletByName_(name).then((unused: any) => {
         // Droplet exists so raise error
         return Promise.reject({
           'errcode': 'VM_AE',
@@ -87,7 +89,7 @@ class Provisioner {
     }).then(() => {
       // Get the droplet's configuration
       return this.getDropletByName_(name);
-    }).then((droplet:any) => {
+    }).then((droplet: any) => {
       this.sendStatus_('CLOUD_DONE_VM');
       this.state_.cloud.vm = droplet;
       this.state_.network = {
@@ -107,8 +109,32 @@ class Provisioner {
           break;
         }
       }
-      console.log(this.state_);
-      return this.state_;
+
+      // Spin until the server is truly up.
+      // Give it one minute before declaring bankruptcy.
+      console.log('waiting for activity on port 22');
+      return promises.retry(() => {
+        const socket = freedom['core.tcpsocket']();
+
+        const destructor = () => {
+          try {
+            freedom['core.tcpsocket'].close(socket);
+          } catch (e) {
+            console.warn('error destroying socket: ' + e.message);
+          }
+        };
+
+        // TODO: Worth thinking about timeouts here but because this times
+        //       out almost immediately if nothing is listening on the port,
+        //       it works well for our purposes.
+        return socket.connect(this.state_.network['ipv4'], 22).then((unused: any) => {
+          destructor();
+          return this.state_;
+        }, (e: Error) => {
+          destructor();
+          throw e;
+        });
+      }, 60, 1000);
     });
   }
 
