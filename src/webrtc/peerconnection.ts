@@ -261,8 +261,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Send a message to the peer.
   public sendMessage = (name:string, msg:any) :Promise<void> => {
+    var payload :any = {};
+    payload[CUSTOM_MESSAGE_] = name;
+    payload['value'] = msg;
     return this.channels_[CONTROL_CHANNEL_LABEL].send(
-      { 'str': JSON.stringify({ CUSTOM_MESSAGE_ : name, 'value': msg })});
+      { 'str': JSON.stringify(payload) });
   }
 
   // The RTCPeerConnection signalingState has changed. This state change is
@@ -418,6 +421,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       description:freedom.RTCPeerConnection.RTCSessionDescription)
       : Promise<void> => {
     return this.breakOfferTie_(description).then(() => {
+      log.debug('%1: handleOfferSignalMessage_: breakOfferTie_(%2).then()', this.peerName_, description);
       this.state_ = State.CONNECTING;
       this.updateMaxChannels_(description.sdp);
       // initial offer from peer
@@ -602,6 +606,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         var shouldWarn = true;
         try {
           var payload:any = JSON.parse(data.str);
+          console.log('got payload from peer: ', payload);
           if (payload[CUSTOM_MESSAGE_] !== undefined) {
             // This JSON structure is implicitly definedin sendMessage().
             var name:string = payload[CUSTOM_MESSAGE_].toString();
