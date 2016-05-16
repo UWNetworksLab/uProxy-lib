@@ -640,12 +640,12 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
             this.peerName_, e.message);
       });
 
-      if (Date.now() - lastPingTimestamp > HEARTBEAT_TIMEOUT_MS_) {
+      /*if (Date.now() - lastPingTimestamp > HEARTBEAT_TIMEOUT_MS_) {
         log.debug('%1: heartbeat timeout, terminating', this.peerName_);
         this.closeWithError_('no heartbeat received for >' +
             HEARTBEAT_TIMEOUT_MS_ + 'ms');
         clearInterval(loop);
-      }
+      } */
     }, HEARTBEAT_INTERVAL_MS_);
   }
 
