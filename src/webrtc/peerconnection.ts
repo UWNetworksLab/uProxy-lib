@@ -334,9 +334,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     // the peer, this triggers the negotiation needed event.
     return this.pc_.createDataChannel(CONTROL_CHANNEL_LABEL, {id: 0}).then(
         this.addRtcDataChannel_).then(
-        this.registerControlChannel_).then(() => {
-          return this.onceConnected;
-        });
+          this.registerControlChannel_).then(() => {
+            log.debug('%1: negotiateConnection.createDC.then().addRtcDC.then().registerControlChannel_.then()', this.peerName_);
+            return this.onceConnected;
+          });
   }
 
   // Called when an on onnegotiationneeded event is received.
@@ -471,6 +472,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
   // Adds a signalling message to this.signalForPeerQueue.
   private emitSignalForPeer_ = (message:signals.Message) : void => {
+    log.debug('emitSignalForPeer_(%1)', message);
     this.signalForPeerQueue.handle(message);
   }
 
@@ -556,8 +558,10 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // Add a rtc data channel and return the it wrapped as a DataChannel
   private addRtcDataChannel_ = (id:string)
       : Promise<DataChannel> => {
+    log.debug('%1: addRtcDataChannel_', this.peerName_);
     return datachannel.createFromFreedomId(id)
         .then((dataChannel:DataChannel) => {
+      log.debug('%1: addRtcDataChannel_: datachannel.createFromFreedomId(%2)', this.peerName_, id);
       var label = dataChannel.getLabel();
       this.channels_[label] = dataChannel;
       dataChannel.onceClosed.then(() => {
@@ -577,7 +581,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // connection. The appropriate callbacks for opening, closing, and
   // initiating a heartbeat are registered here.
   private registerControlChannel_ = (channel:DataChannel) : void => {
+    log.debug('%1: registerControlChannel_(%2)', this.peerName_, channel);
     channel.onceOpened.then(() => {
+      log.debug('%1: registerControlChannel_.then()(%2) WE ARE CONNECTED.', this.peerName_, channel);
       this.initiateHeartbeat_(channel);
       this.state_ = State.CONNECTED;
       this.fulfillConnected_();
