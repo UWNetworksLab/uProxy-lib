@@ -103,9 +103,8 @@ module SocksToRtc {
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(this.peerConnection_, 'SocksToRtc');
 
-          /*
-      this.peerConnection_.signalForPeerQueue.setSyncHandler(
-          this.dispatchEvent_.bind(this, 'signalForPeer')); */
+//      this.peerConnection_.signalForPeerQueue.setSyncHandler(
+//          this.dispatchEvent_.bind(this, 'signalForPeer')); 
 
       this.bytesSentToPeer_.setSyncHandler(
           this.dispatchEvent_.bind(this, 'bytesSentToPeer'));
@@ -157,6 +156,7 @@ module SocksToRtc {
     // (i.e. when this class is not being used as a freedom    // module).
     // For simplicity, only one listener per message type is supported.
     private fallbackDispatchEvent_ = (t:string, msg:any) : void => {
+      log.debug('fallbackDispatchEvent_(%1,%2)', t, msg);
       var listener = this.listeners_[t];
       if (listener) {
         listener(msg);
@@ -165,6 +165,7 @@ module SocksToRtc {
 
     // Fallback implementation of |on|.
     private fallbackOn_ = (t:string, f:(m:any) => void) : void => {
+      log.debug('fallbackOn_(%1,fn)', t);
       this.listeners_[t] = f;
     }
 
