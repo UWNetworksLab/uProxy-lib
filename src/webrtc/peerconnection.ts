@@ -616,10 +616,16 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
           if (payload[CUSTOM_MESSAGE_] !== undefined) {
             // This JSON structure is implicitly definedin sendMessage().
             var name:string = payload[CUSTOM_MESSAGE_].toString();
-            if (this.messageHandlers_[name] !== undefined) {
-              this.messageHandlers_[name](name, payload.value);
-              shouldWarn = false;
-            }
+            this.onceConnected.then( () => {
+              // These may not be registered until we're properly
+              // connected.  There's a bit of a nasty race here
+              // between remote-connection's handler that sets the
+              // handlers and this use of them.  Ugh.
+              if (this.messageHandlers_[name] !== undefined) {
+                this.messageHandlers_[name](name, payload.value);
+                shouldWarn = false;
+              }
+            });
           }
         } catch (e) {
           // if the JSON parse fails, or if the message handler
