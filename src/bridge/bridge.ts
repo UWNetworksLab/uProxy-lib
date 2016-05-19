@@ -197,7 +197,7 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
   // Negotiated, actual, provider type.
   private providerType_: ProviderType;
-
+  private queuedHandlers_ :{[name:string]:(name:string, msg:any)=>void} = {};
   private provider_ :peerconnection.PeerConnection<any>;
 
   // True until a signalling message has been sent.
@@ -284,6 +284,9 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
     this.providerType_ = providerType;
     this.provider_ = provider;
+    for (var n in this.queuedHandlers_) {
+      this.provider_.registerMessageHandler(n, this.queuedHandlers_[n]);
+    }
 
     log.debug('%1: now bridging with %2 provider',
         this.name_, ProviderType[this.providerType_]);
@@ -347,7 +350,10 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
   }
 
   public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
-    this.provider_.registerMessageHandler(name, fn);
+    this.queuedHandlers_[name] = fn;
+    if (this.provider_) {
+      this.provider_.registerMessageHandler(name, fn);
+    }
   }
 
   // Send a message to the peer.
