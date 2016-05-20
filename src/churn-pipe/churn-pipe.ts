@@ -12,7 +12,9 @@ import net = require('../net/net.types');
 import PassThrough = require('../transformers/passthrough');
 import promises = require('../promises/promises');
 import protean = require('../transformers/protean');
+import rc4 = require('../transformers/rc4');
 import sequence = require('../transformers/byteSequenceShaper');
+import transformer = require('../transformers/transformer');
 
 import Socket = freedom.UdpSocket.Socket;
 
@@ -21,13 +23,14 @@ declare const freedom: freedom.FreedomInModuleEnv;
 var log :logging.Log = new logging.Log('churn-pipe');
 
 // Maps transformer names to class constructors.
-var transformers :{[name:string] : new() => Transformer} = {
+var transformers :{[name:string] : new() => transformer.Transformer} = {
   'caesar': caesar.CaesarCipher,
   'decompressionShaper': decompression.DecompressionShaper,
   'encryptionShaper': encryption.EncryptionShaper,
   'fragmentationShaper': fragmentation.FragmentationShaper,
   'none': PassThrough,
   'protean': protean.Protean,
+  'rc4': rc4.Rc4Transformer,
   'sequenceShaper': sequence.ByteSequenceShaper
 };
 
@@ -88,7 +91,7 @@ class Pipe {
       {};
 
   // Obfuscates and deobfuscates messages.
-  private transformer_ :Transformer;
+  private transformer_ :transformer.Transformer;
 
   // Endpoint to which incoming obfuscated messages are forwarded on each
   // interface.  The key is the interface, and the value is the port.

@@ -1,9 +1,14 @@
 /// <reference path='../../../../third_party/typings/browser.d.ts' />
 
+import logging = require('../../logging/logging');
+import Pinger = require('../../net/pinger');
+
 declare const freedom: freedom.FreedomInModuleEnv;
 
 // TODO: https://github.com/uProxy/uproxy/issues/2051
 declare var forge: any;
+
+const log = new logging.Log('digitalocean');
 
 const POLL_TIMEOUT: number = 5000; //milliseconds
 
@@ -17,24 +22,6 @@ const DEFAULT_REGION: string = 'nyc1';
 const DEFAULT_IMAGE: string = 'docker';
 const DEFAULT_SIZE: string = '1gb';
 
-const STATUS_CODES: { [k: string]: string; } = {
-  'START': 'Starting provisioner',
-  'STOP': 'Stopping cloud server',
-  'OAUTH_INIT': 'Initializing oauth flow',
-  'OAUTH_ERROR': 'Error getting oauth token',
-  'OAUTH_COMPLETE': 'Got oauth token',
-  'SSHKEY_RETRIEVED': 'Retrieved SSH keys from storage',
-  'GENERATING_SSHKEY': 'Generating new SSH keys',
-  'SSHKEY_GENERATED': 'Generated new SSH keys',
-  'SSHKEY_SAVED': 'Saved SSH keys to storage',
-  'CLOUD_FAILED': 'Failed to complete cloud operation',
-  'CLOUD_INIT_ADDKEY': 'Starting to add SSH key to cloud account',
-  'CLOUD_DONE_ADDKEY': 'Done adding SSH key to cloud account',
-  'CLOUD_INIT_VM': 'Starting to provision VM',
-  'CLOUD_DONE_VM': 'Done provisioning VMs',
-  'CLOUD_WAITING_VM': 'Waiting on VM',
-};
-
 const ERR_CODES: { [k: string]: string; } = {
   'VM_AE': 'VM already exists.',
   'VM_DNE': 'VM does not exist',
@@ -42,7 +29,7 @@ const ERR_CODES: { [k: string]: string; } = {
 };
 
 const REDIRECT_URIS: [string] = [
-  'https://pjpcdnccaekokkkeheolmpkfifcbibnj.chromiumapp.org'
+  'https://fmdppkkepalnkeommjadgbhiohihdhii.chromiumapp.org',
   //  'http://localhost:10101'
 ];
 
@@ -52,7 +39,6 @@ interface KeyPair {
 }
 
 class Provisioner {
-
   constructor(private dispatch_: Function, private state_: any = {}) {}
 
   /**
@@ -63,16 +49,15 @@ class Provisioner {
    * @return {Promise.<Object>}
    */
   public start = (name: string, region = DEFAULT_REGION, image = DEFAULT_IMAGE, size = DEFAULT_SIZE): Promise<Object> => {
-    this.sendStatus_('START');
-    // Do oAuth
+    log.debug('start %1', name);
+
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
       return this.getSshKey_(name);
     }).then((keys: KeyPair) => {
-       // Get SSH keys
       this.state_.ssh = keys;
-      return this.getDroplet_(name).then((unused :any) => {
-        // Droplet exists so raise error
+
+      return this.getDropletByName_(name).then((unused :any) => {
         return Promise.reject({
           'errcode': 'VM_AE',
           'message': 'Droplet ' + name + ' already exists'
@@ -84,27 +69,33 @@ class Provisioner {
       });
     }).then(() => {
       // Get the droplet's configuration
-      return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id);
-    }).then((resp: any) => {
-      this.sendStatus_('CLOUD_DONE_VM');
-      this.state_.cloud.vm = resp.droplet;
+      return this.getDropletByName_(name);
+    }).then((droplet:any) => {
+      this.state_.cloud.vm = droplet;
       this.state_.network = {
         'ssh_port': 22
       };
       // Retrieve public IPv4 address
-      for (var i = 0; i < resp.droplet.networks.v4.length; i++) {
-        if (resp.droplet.networks.v4[i].type === 'public') {
-          this.state_.network['ipv4'] = resp.droplet.networks.v4[i].ip_address;
+      for (var i = 0; i < droplet.networks.v4.length; i++) {
+        if (droplet.networks.v4[i].type === 'public') {
+          this.state_.network['ipv4'] = droplet.networks.v4[i].ip_address;
+          break;
         }
       }
       // Retrieve public IPv6 address
-      for (var i = 0; i < resp.droplet.networks.v6.length; i++) {
-        if (resp.droplet.networks.v6[i].type === 'public') {
-          this.state_.network['ipv6'] = resp.droplet.networks.v6[i].ip_address;
+      for (var i = 0; i < droplet.networks.v6.length; i++) {
+        if (droplet.networks.v6[i].type === 'public') {
+          this.state_.network['ipv6'] = droplet.networks.v6[i].ip_address;
+          break;
         }
       }
-      console.log(this.state_);
-      return this.state_;
+
+      // It usually takes several seconds after the API reports success for
+      // SSH on a new droplet to become responsive.
+      log.debug('waiting for SSH port to become active');
+      return new Pinger(this.state_.network['ipv4'], 22, 60).ping().then(() => {
+        return this.state_;
+      });
     });
   }
 
@@ -114,7 +105,7 @@ class Provisioner {
    * @return {Promise.<void>}
    */
   public stop = (name: string): Promise<void> => {
-    this.sendStatus_('STOP');
+    log.debug('stop %1', name);
     return this.doOAuth_().then((oauthObj: any) => {
       this.state_.oauth = oauthObj;
     }).then(() => {
@@ -131,19 +122,17 @@ class Provisioner {
   private destroyServer_ = (name: string): Promise<void> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
       // Find and delete the server with the same name
-      return this.getDroplet_(name);
-    }).then((resp: any) => {
+      return this.getDropletByName_(name);
+    }).then((droplet: any) => {
       this.state_.cloud = this.state_.cloud || {};
-      this.state_.cloud.vm = this.state_.cloud.vm || resp.droplet;
+      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
       // Make sure there are no actions in progress before deleting
-      this.sendStatus_('CLOUD_WAITING_VM');
       return this.waitDigitalOceanActions_();
     }).then(() => {
       return this.doRequest_('DELETE', 'droplets/' + this.state_.cloud.vm.id);
     }).then((resp: any) => {
       if (resp.status.startsWith('204')) {
         // Wait until server is deleted
-        this.sendStatus_('CLOUD_WAITING_VM');
         return this.waitDigitalOceanActions_();
       } else {
         return Promise.reject(new Error('error deleting droplet'));
@@ -158,19 +147,38 @@ class Provisioner {
   }
 
   /**
-   * Finds a droplet with this name
+   * Reboots a droplet with this name
    * @param {String} droplet name, as a string
-   * @return {Promise.<Object>}, resolves with {droplet: droplet_with_name}
-   * or rejects if droplet doesn't exist
+   * @return {Promise.<void>}, resolves after waiting for reboot action
+   * to complete or rejects if droplet doesn't exist
    */
-  private getDroplet_ = (name: string) : Promise<Object> => {
+  public reboot = (name: string) : Promise<void> => {
+    log.debug('reboot %1', name);
+    return this.doOAuth_().then((oauthObj: any) => {
+      this.state_.oauth = oauthObj;
+    }).then(() => {
+      return this.getDropletByName_(name);
+    }).then((droplet: any) => {
+      this.state_.cloud = this.state_.cloud || {};
+      this.state_.cloud.vm = this.state_.cloud.vm || droplet;
+      // Make sure there are no actions in progress before rebooting
+      return this.waitDigitalOceanActions_();
+    }).then(() => {
+      return this.doRequest_('POST', 'droplets/' + this.state_.cloud.vm.id + '/actions', JSON.stringify({
+        type: 'reboot',
+      }));
+    }).then((unused: any) => {
+      // Wait until reboot server is completed
+      return this.waitDigitalOceanActions_();
+    });
+  }
+
+  // Resolves with the (de-serialised) droplet, rejecting if not found.
+  private getDropletByName_ = (name: string) : Promise<Object> => {
     return this.doRequest_('GET', 'droplets').then((resp: any) => {
-      // Find and delete the server with the same name
-      for (var i = 0; i < resp.droplets.length; i++) {
+      for (let i = 0; i < resp.droplets.length; i++) {
         if (resp.droplets[i].name === name) {
-          return Promise.resolve({
-            droplet: resp.droplets[i]
-          });
+          return Promise.resolve(resp.droplets[i]);
         }
       }
       return Promise.reject({
@@ -199,18 +207,6 @@ class Provisioner {
   }
 
   /**
-   * Dispatches status events
-   * events listed in STATUS_CODES
-   * @param {String} code one of STATUS_CODES 
-   */
-  private sendStatus_ = (code: string): void => {
-    this.dispatch_('status', {
-      'code': code,
-      'message': STATUS_CODES[code]
-    });
-  }
-
-  /**
    * Initiates a Digital Ocean oAuth flow
    * @return {Promise.<Object>} oAuth response from Digital Ocean
    *  {
@@ -221,12 +217,12 @@ class Provisioner {
    *  }
    */
   private doOAuth_ = () : Promise<Object> => {
+    log.debug('doOAuth_');
     return new Promise((F, R) => {
       var oauth = freedom['core.oauth']();
-      this.sendStatus_('OAUTH_INIT');
       oauth.initiateOAuth(REDIRECT_URIS).then((obj: any) => {
         var url = 'https://cloud.digitalocean.com/v1/oauth/authorize?' +
-            'client_id=c16837b5448cd6cf2582d2c2f767cfb7d11844ec395a91b43f26ca72513416c8&' +
+            'client_id=41f77ea7aa94311a2337027eb238591db9e98c6e2c1067b3b2c7c3420901703f&' +
             'response_type=token&' +
             'redirect_uri=' + encodeURIComponent(obj.redirect) + '&' +
             'state=' + encodeURIComponent(obj.state) + '&' +
@@ -242,11 +238,8 @@ class Provisioner {
           param = keys[i].substr(0, keys[i].indexOf('='));
           params[param] = keys[i].substr(keys[i].indexOf('=') + 1);
         }
-        this.sendStatus_('OAUTH_COMPLETE');
         F(params);
       }).catch((err: Error) => {
-        console.error('oauth error: ' + JSON.stringify(err));
-        this.sendStatus_('OAUTH_ERROR');
         R(err);
       });
     });
@@ -261,6 +254,7 @@ class Provisioner {
    * storage or if a keypair cannot be generated
    */
   private getSshKey_ = (name: string) : Promise<KeyPair> => {
+    log.debug('getSshKey_ %1', name);
     const publicKeyIndex = 'DigitalOcean-' + name + '-PublicKey';
     const privateKeyIndex = 'DigitalOcean-' + name + '-PrivateKey';
     const storage = freedom['core.storage']();
@@ -269,22 +263,20 @@ class Provisioner {
         storage.get(privateKeyIndex)
     ]).then((results: string[]) => {
       if (results[0] !== null && results[1] !== null) {
-        this.sendStatus_('SSHKEY_RETRIEVED');
+        log.debug('found SSH keys for %1 in storage', name);
         return {
           public: results[0],
           private: results[1]
         };
       }
 
-      this.sendStatus_('GENERATING_SSHKEY');
       try {
+        log.debug('generating SSH keys for %1', name);
         const result = Provisioner.generateKeyPair_();
-        this.sendStatus_('SSHKEY_GENERATED');
         return Promise.all([
           storage.set(publicKeyIndex, result.public),
           storage.set(privateKeyIndex, result.private)
         ]).then((ignored: any) => {
-          this.sendStatus_('SSHKEY_SAVED');
           return result;
         }, (e: Error) => {
           return Promise.reject({
@@ -354,19 +346,19 @@ class Provisioner {
   //       to find a way to detect when the machine is *really*
   //       ready.
   private waitDigitalOceanActions_ = () : Promise<void> => {
-    console.log('Polling for Digital Ocean in-progress actions');
     return this.doRequest_('GET', 'droplets/' + this.state_.cloud.vm.id + '/actions').then((resp: any) => {
       for (var i = 0; i < resp.actions.length; i++) {
         if (resp.actions[i].status === 'in-progress') {
+          log.debug('waiting for operations to complete...');
           return new Promise<void>((F, R) => {
             setTimeout(() => {
               this.waitDigitalOceanActions_().then(F, R);
             }, POLL_TIMEOUT);
           });
         }
+        log.debug('all operations complete');
       }
     }).catch((e: Error) => {
-      console.error('Error waiting for digital ocean actions:' + JSON.stringify(e));
       throw e;
     });
   }
@@ -381,9 +373,9 @@ class Provisioner {
    * @return {Promise.<void>} resolves on success, rejects on failure
    */
   private setupDigitalOcean_ = (name: string, region: string, image: string, size: string):  Promise<void> => {
+    log.info('creating %1 droplet in %2', image, region);
     return new Promise<void>((F, R) => {
       this.state_.cloud = {};
-      this.sendStatus_('CLOUD_INIT_ADDKEY');
       // Get SSH keys in account
       this.doRequest_('GET', 'account/keys').then((resp: any) => {
         for (var i = 0; i < resp.ssh_keys.length; i++) {
@@ -401,8 +393,6 @@ class Provisioner {
         // If missing, put SSH key into account
       }).then((resp: any) => {
         this.state_.cloud.ssh = resp.ssh_key;
-        this.sendStatus_('CLOUD_DONE_ADDKEY');
-        this.sendStatus_('CLOUD_INIT_VM');
         return this.doRequest_('GET', 'droplets');
         // Get list of droplets
       }).then((resp: any) => {
@@ -436,12 +426,9 @@ class Provisioner {
         }
         // If the machine exists, but powered off, turn it on
       }).then((resp: any) => {
-        this.sendStatus_('CLOUD_WAITING_VM');
         this.waitDigitalOceanActions_().then(F, R);
         // Wait for all in-progress actions to complete
       }).catch((err: Error) => {
-        console.error('Error w/DigitalOcean: ' + err);
-        this.sendStatus_('CLOUD_FAILED');
         R({
           errcode: 'CLOUD_ERR',
           message: JSON.stringify(err)

@@ -1,7 +1,7 @@
 {
   "name": "uproxy-lib",
   "description": "Shared libraries for uProxy projects.",
-  "version": "38.0.0",
+  "version": "38.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uProxy/uproxy-lib"
@@ -31,7 +31,6 @@
     "browserify-istanbul": "^0.2.0",
     "browserify-zlib": "^0.1.4",
     "circular-json": "^0.3.0",
-    "crypto": "^0.0.3",
     "es6-promise": "^3.0.2",
     "forge-min": "^0.6.20",
     "freedom": "^0.6.25",
@@ -59,6 +58,7 @@
     "jasmine-core": "^2.3.4",
     "lodash": "^3.10.1",
     "request": "^2.53.0",
+    "simple-rc4": "0.0.1-b",
     "socks5-http-client": "^1.0.2",
     "ssh2": "0.5.0",
     "tslint": "^3.3.0",

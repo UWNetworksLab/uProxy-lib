@@ -1,8 +1,7 @@
-/// <reference path='../../../third_party/uTransformers/utransformers.d.ts' />
-
 import arraybuffers = require('../arraybuffers/arraybuffers');
 import logging = require('../logging/logging');
 import random = require('../crypto/random');
+import transformer = require('./transformer');
 
 const log :logging.Log = new logging.Log('byte sequence shaper');
 
@@ -50,7 +49,7 @@ export interface SequenceModel {
 // Creates a sample (non-random) config, suitable for testing.
 export var sampleConfig = () : SequenceConfig => {
   var buffer = arraybuffers.stringToArrayBuffer('OH HELLO');
-  var hex = arraybuffers.arrayBufferToHexString(buffer);
+  var hex = new Buffer(buffer).toString('hex');
   var sequence = {
     index: 0,
     offset: 0,
@@ -65,7 +64,7 @@ export var sampleConfig = () : SequenceConfig => {
 }
 
 // An obfuscator that injects byte sequences.
-export class ByteSequenceShaper implements Transformer {
+export class ByteSequenceShaper implements transformer.Transformer {
   // Sequences that should be added to the outgoing packet stream.
   private addSequences_ :SequenceModel[];
 
@@ -86,12 +85,6 @@ export class ByteSequenceShaper implements Transformer {
 
   public constructor() {
     this.configure(JSON.stringify(sampleConfig()));
-  }
-
-  // This method is required to implement the Transformer API.
-  // @param {ArrayBuffer} key Key to set, not used by this class.
-  public setKey = (key:ArrayBuffer) :void => {
-    throw new Error('setKey unimplemented');
   }
 
   // Configure the transformer with the byte sequences to inject and the byte
@@ -157,9 +150,6 @@ export class ByteSequenceShaper implements Transformer {
     }
   }
 
-  // No-op (we have no state or any resources to dispose).
-  public dispose = () :void => {}
-
   // Decode the byte sequences from strings in the config information
   static deserializeConfig(config :SequenceConfig)
   :[SequenceModel[], SequenceModel[]] {
@@ -180,10 +170,10 @@ export class ByteSequenceShaper implements Transformer {
   // Decode the byte sequence from a string in the sequence model
   static deserializeModel(model :SerializedSequenceModel) :SequenceModel {
     return {
-      index:model.index,
-      offset:model.offset,
-      sequence:arraybuffers.hexStringToArrayBuffer(model.sequence),
-      length:model.length
+      index: model.index,
+      offset: model.offset,
+      sequence: new Buffer(model.sequence, 'hex'),
+      length: model.length
     };
   }
 
