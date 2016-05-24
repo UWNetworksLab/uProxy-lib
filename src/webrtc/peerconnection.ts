@@ -612,7 +612,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         var shouldWarn = true;
         try {
           var payload:any = JSON.parse(data.str);
-          console.log('got payload from peer: ', payload);
           if (payload[CUSTOM_MESSAGE_] !== undefined) {
             // This JSON structure is implicitly definedin sendMessage().
             var name:string = payload[CUSTOM_MESSAGE_].toString();
