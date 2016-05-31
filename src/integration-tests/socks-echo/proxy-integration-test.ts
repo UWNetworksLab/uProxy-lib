@@ -112,15 +112,7 @@ class AbstractProxyIntegrationTest implements ProxyIntegrationTester {
       this.rtcToNet_.handleSignalFromPeer(msg);
     });
 
-/*       
-    this.socksToRtc_.on('signalForPeer', (msg:Object) => {
-      if (ipv6Only) {
-        AbstractProxyIntegrationTest.stripIPv4_(msg);
-      }
-      this.rtcToNet_.handleSignalFromPeer(msg);
-    }); */
     return this.socksToRtc_.start(new tcp.Server(socksToRtcEndpoint), pc);
-        //bridger('sockstortc', rtcPcConfig));
   }
 
   private connectThroughSocks_ = (socksEndpoint:net.Endpoint, webEndpoint:net.Endpoint) : Promise<tcp.Connection> => {
