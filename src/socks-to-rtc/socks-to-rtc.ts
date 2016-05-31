@@ -103,16 +103,12 @@ module SocksToRtc {
       this.peerConnection_ = peerconnection;
       this.pool_ = new Pool(this.peerConnection_, 'SocksToRtc');
 
-//      this.peerConnection_.signalForPeerQueue.setSyncHandler(
-//          this.dispatchEvent_.bind(this, 'signalForPeer')); 
-
       this.bytesSentToPeer_.setSyncHandler(
           this.dispatchEvent_.bind(this, 'bytesSentToPeer'));
       this.bytesReceivedFromPeer_.setSyncHandler(
           this.dispatchEvent_.bind(this, 'bytesReceivedFromPeer'));
 
       // Start and listen for notifications.
-      // peerconnection.negotiateConnection();
       var onceReady :Promise<net.Endpoint> =
         Promise.all<any>([
           tcpServer.listen(),
