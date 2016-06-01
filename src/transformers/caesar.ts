@@ -1,5 +1,5 @@
+import crypto = require('crypto');
 import logging = require('../logging/logging');
-import random = require('../crypto/random');
 import transformer = require('./transformer');
 
 var log :logging.Log = new logging.Log('caesar');
@@ -14,6 +14,13 @@ export interface Config {
 export var sampleConfig = () : Config => {
   return {
     key: 1
+  };
+}
+
+// Creates a cryptographically random config suitable for real-world use.
+export var randomConfig = (): Config => {
+  return {
+    key: crypto.randomBytes(1)[0]
   };
 }
 

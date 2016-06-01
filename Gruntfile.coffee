@@ -299,31 +299,8 @@ config =
     loggingProvider: Rule.browserify 'loggingprovider/freedom-module'
     echoFreedomModule: Rule.browserify 'echo/freedom-module'
     churnPipeFreedomModule: Rule.browserify 'churn-pipe/freedom-module'
-    # TODO: Make the browserified SSH stuff re-useable, e.g. freedomjs module.
-    cloudInstallerFreedomModule: Rule.browserify('cloud/install/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/cloud/social/shim/net.js:net'
-        './src/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
-    cloudSocialProviderFreedomModule: Rule.browserify('cloud/social/freedom-module', {
-      alias : [
-        # Shims for node's dns and net modules from freedom-social-xmpp,
-        # with a couple of fixes.
-        './src/cloud/social/shim/net.js:net'
-        './src/cloud/social/shim/dns.js:dns'
-        # Alternative that works for freedomjs modules.
-        './src/cloud/social/alias/brorand.js:brorand'
-        # Fallback for crypto-browserify's randombytes, for Firefox.
-        './src/cloud/social/alias/randombytes.js:randombytes'
-      ]
-    })
+    cloudInstallerFreedomModule: Rule.browserify 'cloud/install/freedom-module'
+    cloudSocialProviderFreedomModule: Rule.browserify 'cloud/social/freedom-module'
     digitalOceanFreedomModule: Rule.browserify 'cloud/digitalocean/freedom-module'
     # Sample app freedom modules.
     copypasteChatFreedomModule: Rule.browserify 'copypaste-chat/freedom-module'
