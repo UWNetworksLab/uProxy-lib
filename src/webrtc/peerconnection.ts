@@ -663,7 +663,6 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
   // JSON messages are { custom: name, value:{...} }
   constructor(private channel_ :datachannel.DataChannel) {
     this.channel_.onceOpened.then( () => {
-      console.log("ControlChannelWrapper setup complete");
       this.channel_.dataFromPeerQueue.setSyncHandler(
         this.handleMessage_);
     });
@@ -672,20 +671,17 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
   // Send a message to the peer.
   public sendMessage(name:string, msg?:any) :Promise<void> {
     if (msg === undefined || msg === null) {
-      console.log("sendMessage (pure): ", { 'str' :name });
       return this.channel_.send({ 'str': name });
     } else {
       var payload :any = {};
       payload[CUSTOM_MESSAGE_] = name;
       payload['value'] = msg;
-      console.log("sendMessage: ", { 'str' :JSON.stringify(payload) });
       return this.channel_.send(
         { 'str': JSON.stringify(payload) });
     }
   }
 
   public registerMessageHandler(name:string, fn:(name:string, msg:any) => void) :void {
-    console.log("ControlChannelWrapper registering function for ", name);
     this.messageHandlers_[name] = fn;
     if (this.queuedMessages_[name] !== undefined) {
       var queue :any[] = this.queuedMessages_[name];
@@ -698,7 +694,6 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
   }
 
   private handleMessage_ = (data:datachannel.Data) => {
-    console.log("handleMessage_: ", data);
     if (!data) {
       return;
     }
@@ -708,20 +703,16 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
     // (for pure messages).  If there's a match, invoke that callback.
     // Otherwise, try to parse it as JSON.
     var shouldWarn = true;
-    console.log("Got data: ", data);
     if (this.messageHandlers_[data.str] !== undefined) {
       this.messageHandlers_[data.str](data.str);
       shouldWarn = false;
     } else {
       try {
         var payload:any = JSON.parse(data.str);
-        console.log(" -- parsed payload: ", payload);
         if (payload[CUSTOM_MESSAGE_] !== undefined) {
           var name:string = payload[CUSTOM_MESSAGE_].toString();
-          console.log("-- got name: ", name);
           shouldWarn = false;
           if (this.messageHandlers_[name] !== undefined) {
-            console.log("-- MATCHED: ", name);
             this.messageHandlers_[name](name, payload.value);
           } else {
             if (this.queuedMessages_[name] === undefined) {
