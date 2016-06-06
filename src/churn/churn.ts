@@ -6,6 +6,7 @@ import caesar = require('../transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
+import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -519,17 +520,9 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
     }
   }
 
-  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
-    this.obfuscatedConnection_.registerMessageHandler(name, fn);
+  public getControlChannel = () :Promise<datachannel.ControlChannel> => {
+    return this.obfuscatedConnection_.getControlChannel();
   }
-
-  // Send a message to the peer.
-  public sendMessage = (name:string, msg:any) :Promise<void> => {
-    return this.obfuscatedConnection_.onceConnected.then( () => {
-      this.obfuscatedConnection_.sendMessage(name, msg);
-    });
-  }
-
 
   public openDataChannel = (channelLabel:string,
       options?:freedom.RTCPeerConnection.RTCDataChannelInit)

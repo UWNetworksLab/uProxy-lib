@@ -45,12 +45,8 @@ export interface PeerConnection<TSignallingMessage> {
   // Returns onceConnected.
   negotiateConnection :() => Promise<void>;
 
-  // Special messaging API.  These can go over a short-life data
-  // channel, a special messaging channel, orhatever.
-  // Register for messages matching a name:
-  registerMessageHandler :(name:string, fn:(name:string, msg:any) => void) => void;
-  // Send a message to the peer.
-  sendMessage :(name:string, msg:any) => Promise<void>
+  // Give access to the existing control channel.
+  getControlChannel :() => Promise<datachannel.ControlChannel>;
 
   // A peer connection can either open a data channel to the peer (will
   // change from |WAITING| state to |CONNECTING|)
@@ -193,7 +189,9 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     this.fulfillClosed_ = F;
   });
 
-  private messageHandlers_ :{[name:string]:(name:string, msg:any) => void} = {};
+  private controlChannel_ :datachannel.ControlChannel = null;
+  private controlChannelComplete_ :Promise<datachannel.ControlChannel>;
+  private fulfillControl_ :(v:datachannel.ControlChannel) => void;
 
   // Fulfills once the remote description has been set.
   // Used to delay setting of remote ICE candidates until the call to
@@ -215,11 +213,19 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
       private peerName_ = ('unnamed-' + PeerConnectionClass.numCreations_)) {
     PeerConnectionClass.numCreations_++;
 
+    this.controlChannelComplete_ = new Promise<datachannel.ControlChannel>(
+      (F, R) => {
+        this.fulfillControl_ = F;
+      });
     this.pc_.on('onicecandidate', this.onIceCandidate_);
     this.pc_.on('onnegotiationneeded', this.onNegotiationNeeded_);
     this.pc_.on('ondatachannel', this.onPeerStartedDataChannel_);
     this.pc_.on('onsignalingstatechange', this.onSignallingStateChange_);
     this.pc_.on('oniceconnectionstatechange', this.onIceConnectionStateChange_);
+  }
+
+  public getControlChannel(): Promise<datachannel.ControlChannel>  {
+    return this.controlChannelComplete_;
   }
 
   // Close the peer connection. This function is idempotent.
@@ -253,19 +259,6 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
         this.pc_.close();
       }
     });
-  }
-
-  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
-    this.messageHandlers_[name] = fn;
-  }
-
-  // Send a message to the peer.
-  public sendMessage = (name:string, msg:any) :Promise<void> => {
-    var payload :any = {};
-    payload[CUSTOM_MESSAGE_] = name;
-    payload['value'] = msg;
-    return this.channels_[CONTROL_CHANNEL_LABEL].send(
-      { 'str': JSON.stringify(payload) });
   }
 
   // The RTCPeerConnection signalingState has changed. This state change is
@@ -583,8 +576,11 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   private registerControlChannel_ = (channel:DataChannel) : void => {
     log.debug('%1: registerControlChannel_(%2)', this.peerName_, channel);
     channel.onceOpened.then(() => {
-      log.debug('%1: registerControlChannel_.then()(%2) WE ARE CONNECTED.', this.peerName_, channel);
-      this.initiateHeartbeat_(channel);
+      this.controlChannel_ = new ControlChannelWrapper(channel);
+      this.fulfillControl_(this.controlChannel_);
+      log.debug('%1: registerControlChannel_.then()(%2) WE ARE CONNECTED.',
+                this.peerName_, channel);
+      this.initiateHeartbeat_();
       this.state_ = State.CONNECTED;
       this.fulfillConnected_();
     }).catch((e: Error) => {
@@ -600,53 +596,22 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
   // closed with an error. The motivation for this is Firefox's poor
   // handling of sudden connection closures:
   //   https://github.com/uProxy/uproxy/issues/1358
-  private initiateHeartbeat_ = (channel:DataChannel) : void => {
+  private initiateHeartbeat_ = (): void => {
     log.debug('%1: initiating heartbeat', this.peerName_);
 
     // Listen for heartbeats from the other side.
     var lastPingTimestamp :number = Date.now();
-    channel.dataFromPeerQueue.setSyncHandler((data:Data) => {
-      if (data.str === HEARTBEAT_MESSAGE_) {
-        lastPingTimestamp = Date.now();
-      } else {
-        var shouldWarn = true;
-        try {
-          var payload:any = JSON.parse(data.str);
-          if (payload[CUSTOM_MESSAGE_] !== undefined) {
-            // This JSON structure is implicitly defined in sendMessage().
-            var name:string = payload[CUSTOM_MESSAGE_].toString();
-            this.onceConnected.then( () => {
-              // These may not be registered until we're properly
-              // connected.  There's a bit of a nasty race here
-              // between remote-connection's handler that sets the
-              // handlers and this use of them.  Ugh.
-              if (this.messageHandlers_[name] !== undefined) {
-                this.messageHandlers_[name](name, payload.value);
-                shouldWarn = false;
-              }
-            });
-          }
-        } catch (e) {
-          // if the JSON parse fails, or if the message handler
-          // throws, log a more substantial error here.
-          log.error('%1: caught exception from message on control channel: ' +
-                    '%2 (payload=%3)', this.peerName_, e.toString(), data);
-          // We've already complained enough about the data.  Disable
-          // the log warning.
-          shouldWarn = false;
+
+    this.controlChannel_.registerMessageHandler(HEARTBEAT_MESSAGE_,
+      (data:Data) => {
+        if (data.str === HEARTBEAT_MESSAGE_) {
+          lastPingTimestamp = Date.now();
         }
-        if (!shouldWarn) {
-          log.warn('%1: unexpected data on control channel: %2',
-                   this.peerName_, data);
-        };
-      }
-    });
+      });
 
     // Send and monitors heartbeats.
     var loop = setInterval(() => {
-      channel.send({
-        str: HEARTBEAT_MESSAGE_
-      }).catch((e:Error) => {
+      this.controlChannel_.sendMessage(HEARTBEAT_MESSAGE_).catch((e:Error) => {
         log.error('%1: error sending heartbeat: %2',
             this.peerName_, e.message);
       });
@@ -688,6 +653,99 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     return s;
   }
 }  // class PeerConnectionClass
+
+// Takes a DataChannel and provides a ControlChannel API atop of it.
+class ControlChannelWrapper implements datachannel.ControlChannel {
+  private messageHandlers_ :{[name:string]:(name:string, msg?:any) => void} = {};
+  private queuedMessages_ :{[name:string]:any[]} = {}
+  // MESSAGE FORMAT:
+  // pure messages are literal strings.
+  // JSON messages are { custom: name, value:{...} }
+  constructor(private channel_ :datachannel.DataChannel) {
+    this.channel_.onceOpened.then( () => {
+      console.log("ControlChannelWrapper setup complete");
+      this.channel_.dataFromPeerQueue.setSyncHandler(
+        this.handleMessage_);
+    });
+  }
+
+  // Send a message to the peer.
+  public sendMessage(name:string, msg?:any) :Promise<void> {
+    if (msg === undefined || msg === null) {
+      console.log("sendMessage (pure): ", { 'str' :name });
+      return this.channel_.send({ 'str': name });
+    } else {
+      var payload :any = {};
+      payload[CUSTOM_MESSAGE_] = name;
+      payload['value'] = msg;
+      console.log("sendMessage: ", { 'str' :JSON.stringify(payload) });
+      return this.channel_.send(
+        { 'str': JSON.stringify(payload) });
+    }
+  }
+
+  public registerMessageHandler(name:string, fn:(name:string, msg:any) => void) :void {
+    console.log("ControlChannelWrapper registering function for ", name);
+    this.messageHandlers_[name] = fn;
+    if (this.queuedMessages_[name] !== undefined) {
+      var queue :any[] = this.queuedMessages_[name];
+      for (var item of queue) {
+        fn(name, item);
+      }
+      this.queuedMessages_[name] = [];
+    }
+
+  }
+
+  private handleMessage_ = (data:datachannel.Data) => {
+    console.log("handleMessage_: ", data);
+    if (!data) {
+      return;
+    }
+
+    // Two layers to message parsing (for backwards-compat).  First,
+    // do a direct match of data.str against our registration table
+    // (for pure messages).  If there's a match, invoke that callback.
+    // Otherwise, try to parse it as JSON.
+    var shouldWarn = true;
+    console.log("Got data: ", data);
+    if (this.messageHandlers_[data.str] !== undefined) {
+      this.messageHandlers_[data.str](data.str);
+      shouldWarn = false;
+    } else {
+      try {
+        var payload:any = JSON.parse(data.str);
+        console.log(" -- parsed payload: ", payload);
+        if (payload[CUSTOM_MESSAGE_] !== undefined) {
+          var name:string = payload[CUSTOM_MESSAGE_].toString();
+          console.log("-- got name: ", name);
+          shouldWarn = false;
+          if (this.messageHandlers_[name] !== undefined) {
+            console.log("-- MATCHED: ", name);
+            this.messageHandlers_[name](name, payload.value);
+          } else {
+            if (this.queuedMessages_[name] === undefined) {
+              this.queuedMessages_[name] = [];
+            }
+            this.queuedMessages_[name].push(payload.value);
+          }
+        } else {
+          shouldWarn = false;
+          log.error('%1 ControlChannel: bad message from peer: %2',
+                    this.channel_.getLabel(), data.str);
+        }
+      } catch (e) {
+        log.error('%1 ControlChannel: caught exception from message: %2',
+                  this.channel_.getLabel(), e.toString());
+        shouldWarn = false;
+      }
+      if (shouldWarn) {
+        log.warn('%1 ControlChannel: unexpected data: %2',
+                 this.channel_.getLabel(), data);
+      }
+    }
+  }
+}
 
 export function createPeerConnection(
     config:freedom.RTCPeerConnection.RTCConfiguration, debugPcName?:string)

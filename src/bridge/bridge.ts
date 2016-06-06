@@ -2,6 +2,7 @@
 
 import churn = require('../churn/churn');
 import churn_types = require('../churn/churn.types');
+import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');
 import logging = require('../logging/logging');
 import peerconnection = require('../webrtc/peerconnection');
@@ -284,9 +285,6 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
 
     this.providerType_ = providerType;
     this.provider_ = provider;
-    for (var n in this.queuedHandlers_) {
-      this.provider_.registerMessageHandler(n, this.queuedHandlers_[n]);
-    }
 
     log.debug('%1: now bridging with %2 provider',
         this.name_, ProviderType[this.providerType_]);
@@ -349,20 +347,10 @@ export class BridgingPeerConnection implements peerconnection.PeerConnection<
     return this.onceClosed;
   }
 
-  public registerMessageHandler = (name:string, fn:(name:string, msg:any) => void) :void => {
-    this.queuedHandlers_[name] = fn;
-    if (this.provider_) {
-      this.provider_.registerMessageHandler(name, fn);
-    }
-  }
-
-  // Send a message to the peer.
-  public sendMessage = (name:string, msg:any) :Promise<void> => {
-    return this.provider_.onceConnected.then( () => {
-      this.provider_.sendMessage(name, msg);
+  public getControlChannel = () :Promise<datachannel.ControlChannel> => {
+    return this.onceConnected.then( () => {
+      return this.provider_.getControlChannel();
     });
   }
-
-
 
 }
