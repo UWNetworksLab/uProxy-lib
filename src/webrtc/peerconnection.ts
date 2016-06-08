@@ -603,14 +603,16 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
     var lastPingTimestamp :number = Date.now();
 
     this.controlChannel_.registerMessageHandler(HEARTBEAT_MESSAGE_,
-      (data:Data) => {
-        if (data.str === HEARTBEAT_MESSAGE_) {
+      (name:string, msg?:any) => {
+        log.debug("GOT heartbeat message:", name);
+        if (name === HEARTBEAT_MESSAGE_) {
           lastPingTimestamp = Date.now();
         }
       });
 
     // Send and monitors heartbeats.
     var loop = setInterval(() => {
+      log.debug("SENT heartbeat message");
       this.controlChannel_.sendMessage(HEARTBEAT_MESSAGE_).catch((e:Error) => {
         log.error('%1: error sending heartbeat: %2',
             this.peerName_, e.message);
@@ -670,20 +672,23 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
 
   // Send a message to the peer.
   public sendMessage(name:string, msg?:any) :Promise<void> {
+    var data:any;
     if (msg === undefined || msg === null) {
-      return this.channel_.send({ 'str': name });
+      data = { 'str': name };
     } else {
       var payload :any = {};
       payload[CUSTOM_MESSAGE_] = name;
       payload['value'] = msg;
-      return this.channel_.send(
-        { 'str': JSON.stringify(payload) });
+      data = { 'str': JSON.stringify(payload) };
     }
+    log.debug('ControlChannel: sendMesssage: ', data);
+    return this.channel_.send(data);
   }
 
   public registerMessageHandler(name:string, fn:(name:string, msg:any) => void) :void {
     this.messageHandlers_[name] = fn;
     if (this.queuedMessages_[name] !== undefined) {
+      log.debug('ControlChannel: registerMessageHandler_ dequeuing mesages for name: ', name);
       var queue :any[] = this.queuedMessages_[name];
       for (var item of queue) {
         fn(name, item);
@@ -694,6 +699,7 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
   }
 
   private handleMessage_ = (data:datachannel.Data) => {
+    log.debug('ControlChannel: handleMessage_: ', data);
     if (!data) {
       return;
     }
@@ -713,12 +719,14 @@ class ControlChannelWrapper implements datachannel.ControlChannel {
           var name:string = payload[CUSTOM_MESSAGE_].toString();
           shouldWarn = false;
           if (this.messageHandlers_[name] !== undefined) {
+            log.debug('ControlChannel: handleMessage_ handling: ', name, ': ', data);
             this.messageHandlers_[name](name, payload.value);
           } else {
             if (this.queuedMessages_[name] === undefined) {
               this.queuedMessages_[name] = [];
             }
             this.queuedMessages_[name].push(payload.value);
+            log.debug('ControlChannel: handleMessage_ queuing: ', data);
           }
         } else {
           shouldWarn = false;
