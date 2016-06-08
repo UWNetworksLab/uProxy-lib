@@ -111,6 +111,22 @@ export interface Data {
   // domString   ?:DOMString
 }
 
+// Typically based on a DataChannel, but a restricted API to just
+// these messages.
+export interface ControlChannel {
+  // Special messaging API.  These can go over a short-life data
+  // channel, a special messaging channel, or whatever.
+
+  // Send a message to the peer.  If the second argument is null or
+  // undefined, this is a "pure" message, otherwise it's all wrapped
+  // into JSON and called a "JSON" message.
+  sendMessage :(name:string, msg?:any) => Promise<void>
+
+  // Register for messages matching a name.  If the message was pure,
+  // then the second arg of 'msg' will be null.
+  registerMessageHandler :(name:string, fn:(name:string, msg:any) => void) => void;
+}
+
 // Wrapper for a WebRtc Data Channels:
 // http://dev.w3.org/2011/webrtc/editor/webrtc.html#rtcdatachannel
 //

@@ -6,6 +6,7 @@ import caesar = require('../transformers/caesar');
 import candidate = require('./candidate');
 import churn_pipe_types = require('../churn-pipe/freedom-module.interface');
 import churn_types = require('./churn.types');
+import datachannel = require('../webrtc/datachannel');
 import handler = require('../handler/queue');
 import ipaddr = require('ipaddr.js');
 import logging = require('../logging/logging');
@@ -517,6 +518,10 @@ export class Connection implements peerconnection.PeerConnection<ChurnSignalling
         this.addRemoteCandidate_(message.candidate);
       }
     }
+  }
+
+  public getControlChannel = () :Promise<datachannel.ControlChannel> => {
+    return this.obfuscatedConnection_.getControlChannel();
   }
 
   public openDataChannel = (channelLabel:string,
