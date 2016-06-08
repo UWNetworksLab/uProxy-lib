@@ -604,7 +604,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
     this.controlChannel_.registerMessageHandler(HEARTBEAT_MESSAGE_,
       (name:string, msg?:any) => {
-        log.debug("GOT heartbeat message:", name);
+        log.debug('GOT heartbeat message:', name);
         if (name === HEARTBEAT_MESSAGE_) {
           lastPingTimestamp = Date.now();
         }
@@ -612,7 +612,7 @@ export class PeerConnectionClass implements PeerConnection<signals.Message> {
 
     // Send and monitors heartbeats.
     var loop = setInterval(() => {
-      log.debug("SENT heartbeat message");
+      log.debug('SENT heartbeat message');
       this.controlChannel_.sendMessage(HEARTBEAT_MESSAGE_).catch((e:Error) => {
         log.error('%1: error sending heartbeat: %2',
             this.peerName_, e.message);
