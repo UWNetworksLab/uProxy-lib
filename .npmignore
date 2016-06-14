@@ -1,6 +1,0 @@
-*.sublime-workspace
-.idea
-.grunt
-.tscache
-build/dev
-
