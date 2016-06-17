@@ -1,8 +1,0 @@
-{
-  "name": "echo",
-  "title": "echo",
-  "description": "Echo server.",
-  "author": "uProxy",
-  "license": "Apache 2",
-  "version": "0.0.1"
-}
